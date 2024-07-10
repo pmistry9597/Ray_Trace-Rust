@@ -2,14 +2,14 @@ use std::sync::Arc;
 use egui::mutex::Mutex;
 use eframe::{glow, egui_glow};
 use glow::PixelUnpackData;
-use raytrace_trial::{BufferMux, ArcMux, Renderer};
+use raytrace_trial::{BufferMux, ArcMux, Renderer, RenderOut};
 
 fn main() -> Result<(), eframe::Error> {
     env_logger::init();
 
     let (region_width, region_height) = (1200 as i32, 600 as i32);
     let buffer_renderer = Renderer::new(region_width, region_height);
-    let buff_avail = buffer_renderer.get_buffer_avail();
+    let render_out = buffer_renderer.get_out();
     buffer_renderer.consume_and_do();
 
     eframe::run_native(
@@ -20,7 +20,7 @@ fn main() -> Result<(), eframe::Error> {
         },
         Box::new(move |cc| {
             egui_extras::install_image_loaders(&cc.egui_ctx); // image support
-            Box::new(MyApp::new(cc, region_width, region_height, buff_avail))
+            Box::new(MyApp::new(cc, region_width, region_height, render_out))
         })
     )
 }
@@ -28,7 +28,7 @@ fn main() -> Result<(), eframe::Error> {
 struct MyApp {
     gl_renderer: ArcMux<GLDrawer>,
     canv_width: i32, canv_height: i32,
-    buffer_avail: ArcMux<Option<BufferMux>>,
+    render_out: Arc<RenderOut>,
 }
 
 impl eframe::App for MyApp {
@@ -43,14 +43,14 @@ impl eframe::App for MyApp {
 }
 
 impl MyApp {
-    fn new(cc: &eframe::CreationContext, canv_width: i32, canv_height: i32, buffer_avail: ArcMux<Option<BufferMux>>) -> Self {
+    fn new(cc: &eframe::CreationContext, canv_width: i32, canv_height: i32, render_out: Arc<RenderOut>) -> Self {
         let gl = cc.gl.as_ref().expect("cannot get gl context!");
         let gl_renderer = Arc::new(Mutex::new(GLDrawer::new(gl, canv_width, canv_height)));
 
         Self {
             gl_renderer,
             canv_width, canv_height,
-            buffer_avail,
+            render_out,
         }
     }
     fn gl_paint(&mut self, ui: &mut egui::Ui, ctx: &egui::Context) {
@@ -59,7 +59,7 @@ impl MyApp {
         let gl_renderer = self.gl_renderer.clone();
         let _outer_rect = ctx.input(|i| i.viewport().outer_rect).unwrap();
         let new_ctx = ctx.clone();
-        let buf_avail = self.buffer_avail.clone();
+        let buf_avail = self.render_out.buffer_avail.clone();
         let callback = egui::PaintCallback {
             rect,
             callback: Arc::new(egui_glow::CallbackFn::new(move |_info, painter| {

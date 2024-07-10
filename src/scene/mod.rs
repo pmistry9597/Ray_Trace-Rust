@@ -1,18 +1,12 @@
 use nalgebra::{Vector3, vector};
-use crate::RenderTarget;
+use crate::render_target::RenderTarget;
+use crate::ray::{Intersectable, Ray, RayCompute};
 
 struct Sphere {
     c: Vector3<f32>,
     r: f32,
 }
 
-struct Ray {
-    d: Vector3<f32>, // should be unit vector
-    o: Vector3<f32>,
-}
-trait Intersectable {
-    fn intersect(&self, ray: &Ray) -> Option<()>;
-}
 impl Intersectable for Sphere {
     fn intersect(&self, ray: &Ray) -> Option<()> {        
         // solve quadratic equation for sphere-ray intersection, from https://en.wikipedia.org/wiki/Line%E2%80%93sphere_intersection
@@ -31,11 +25,11 @@ impl Intersectable for Sphere {
 
 pub struct Cam {
     pub d: Vector3<f32>, // to center of screen
-    o: Vector3<f32>,
-    up: Vector3<f32>,
+    pub o: Vector3<f32>,
+    pub up: Vector3<f32>,
     // in-scene dimensions, not view pixels
-    screen_width: f32, 
-    screen_height: f32,
+    pub screen_width: f32, 
+    pub screen_height: f32,
 }
 
 pub struct Scene {
@@ -86,42 +80,10 @@ pub fn render_to_target(render_target: &RenderTarget, scene: &Scene) {
             let dat: [u8; 4] = if scene.objs.iter().any(|sph| sph.intersect(&ray).is_some()) {
                 [100, 50, 255, 0]
             } else {
-                [100, 0, 20, 0]
+                [0, 0, 0, 0]
             };
 
             // let dat: [u8; 4] = [200, 0, 100, 0];
             pix.copy_from_slice(&dat);
         });
-}
-
-struct RayCompute {
-    x_cf: f32, y_cf: f32,
-    right: Vector3<f32>,
-    x_off: f32, y_off: f32,
-}
-impl RayCompute {
-    fn new(render_target: &RenderTarget, cam: &Cam) -> Self {
-        let canv_width = render_target.canv_width;
-        let canv_height = render_target.canv_height;
-        let x_cf = cam.screen_width / canv_width as f32;
-        let y_cf = cam.screen_height / canv_height as f32;
-
-        Self {
-            x_cf, y_cf,
-            right: cam.d.normalize().cross(&cam.up),
-            x_off: (canv_width as f32) / 2.0,
-            y_off: (canv_height as f32) / 2.0,
-        }
-    }
-    fn pix_cam_to_ray(&self, (x, y): (i32, i32), cam: &Cam) -> Ray {
-        let up = &cam.up;
-        let right = &self.right;
-    
-        let s_x: f32 = self.x_cf * (x as f32 - self.x_off);
-        let s_y: f32 = self.y_cf * (y as f32 - self.y_off);
-    
-        let d = cam.d + s_x * right + s_y * up;
-    
-        Ray{d: d.normalize(), o: cam.o}
-    }
 }

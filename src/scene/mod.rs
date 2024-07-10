@@ -5,18 +5,27 @@ use basic_shape::Sphere;
 
 mod basic_shape;
 
-pub struct Cam {
-    pub d: Vector3<f32>, // to center of screen
-    pub o: Vector3<f32>,
-    pub up: Vector3<f32>,
-    // in-scene dimensions, not view pixels
-    pub screen_width: f32, 
-    pub screen_height: f32,
-}
+pub fn render_to_target(render_target: &RenderTarget, scene: &Scene) {
+    use rayon::prelude::*;
 
-pub struct Scene {
-    pub cam: Cam,
-    objs: Vec<Sphere>,
+    let ray_compute = RayCompute::new(&render_target, &scene.cam);
+
+    render_target.buff_mux.lock()
+        .par_chunks_mut(4) // pixels have rgba values, so chunk by 4
+        .enumerate()
+        .map(|(i, pix)| (render_target.chunk_to_pix(i.try_into().unwrap()), pix))
+        .for_each(|((x, y), pix)| {
+            let ray = ray_compute.pix_cam_to_ray((x,y), &scene.cam);
+
+            let dat: [u8; 4] = if scene.objs.iter().any(|sph| sph.intersect(&ray).is_some()) {
+                [100, 50, 255, 0]
+            } else {
+                [0, 0, 0, 0]
+            };
+
+            // let dat: [u8; 4] = [200, 0, 100, 0];
+            pix.copy_from_slice(&dat);
+        });
 }
 
 pub fn give_crap() -> Scene {
@@ -49,25 +58,16 @@ pub fn give_crap() -> Scene {
     }
 }
 
-pub fn render_to_target(render_target: &RenderTarget, scene: &Scene) {
-    use rayon::prelude::*;
+pub struct Cam {
+    pub d: Vector3<f32>, // to center of screen
+    pub o: Vector3<f32>,
+    pub up: Vector3<f32>,
+    // in-scene dimensions, not view pixels
+    pub screen_width: f32, 
+    pub screen_height: f32,
+}
 
-    let ray_compute = RayCompute::new(&render_target, &scene.cam);
-
-    render_target.buff_mux.lock()
-        .par_chunks_mut(4) // pixels have rgba values, so chunk by 4
-        .enumerate()
-        .map(|(i, pix)| (render_target.chunk_to_pix(i.try_into().unwrap()), pix))
-        .for_each(|((x, y), pix)| {
-            let ray = ray_compute.pix_cam_to_ray((x,y), &scene.cam);
-
-            let dat: [u8; 4] = if scene.objs.iter().any(|sph| sph.intersect(&ray).is_some()) {
-                [100, 50, 255, 0]
-            } else {
-                [0, 0, 0, 0]
-            };
-
-            // let dat: [u8; 4] = [200, 0, 100, 0];
-            pix.copy_from_slice(&dat);
-        });
+pub struct Scene {
+    pub cam: Cam,
+    objs: Vec<Sphere>,
 }

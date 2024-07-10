@@ -68,10 +68,12 @@ pub fn give_crap() -> Scene {
 }
 
 pub fn render_to_target(render_target: &RenderTarget, scene: &Scene) {
+    use rayon::prelude::*;
+
     let ray_compute = RayCompute::new(&render_target, &scene.cam);
 
     render_target.buff_mux.lock()
-        .chunks_mut(4) // pixels have rgba values
+        .par_chunks_mut(4) // pixels have rgba values, so chunk by 4
         .enumerate()
         .map(|(i, pix)| (render_target.chunk_to_pix(i.try_into().unwrap()), pix))
         .for_each(|((x, y), pix)| {

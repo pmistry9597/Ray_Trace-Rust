@@ -54,11 +54,6 @@ pub fn give_crap() -> Scene {
     Scene {
         cam,
         objs: vec![
-                Sphere{c: vector![-2.0, -0.5, -10.0], r: 4.0, rgb: [60, 200, 150]},
-                Sphere{c: vector![10.0, -5.0, -20.0], r: 1.0, rgb: [255, 0, 150]},
-                Sphere{c: vector![10.0, 5.0, -20.0], r: 1.0, rgb: [255, 80, 150]},
-                Sphere{c: vector![-10.0, 5.0, -20.0], r: 1.0, rgb: [255, 0, 150]},
-
                 // Sphere{c: vector![-10.0, -5.0, -25.0], r: 1.0},
                 // Sphere{c: vector![10.0, -5.0, -25.0], r: 1.0},
                 // Sphere{c: vector![10.0, 5.0, -25.0], r: 1.0},
@@ -68,6 +63,13 @@ pub fn give_crap() -> Scene {
                 Sphere{c: vector![10.0, -5.0, -30.0], r: 1.0, rgb: [150, 0, 255]},
                 Sphere{c: vector![10.0, 5.0, -30.0], r: 1.0, rgb: [150, 0, 255]},
                 Sphere{c: vector![-10.0, 5.0, -30.0], r: 1.0, rgb: [150, 0, 255]},
+
+                Sphere{c: vector![10.0, -5.0, -20.0], r: 1.0, rgb: [255, 0, 150]},
+                Sphere{c: vector![10.0, 5.0, -20.0], r: 1.0, rgb: [255, 80, 150]},
+                Sphere{c: vector![-10.0, 5.0, -20.0], r: 1.0, rgb: [255, 0, 150]},
+
+                Sphere{c: vector![2.0, 0.5, -10.0], r: 4.0, rgb: [100, 200, 150]},
+                Sphere{c: vector![2.0, 0.5, -6.0], r: 1.0, rgb: [0, 255, 30]},
             ],
     }
 }

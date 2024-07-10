@@ -23,9 +23,16 @@ impl Hitable for Sphere {
         let dir = ray.d.dot(&oc);
         let consts = oc.dot(&oc) - self.r * self.r;
 
-        let thing = dir * dir - consts;
-        if thing > 0.0 {
-            Some(HitResult{l: -1.0, intermed: ()})
+        let thing2 = dir * dir - consts;
+        if thing2 > 0.0 {
+            let offset = dir.abs();
+            let thing = thing2.sqrt();
+            let ls = [offset + thing, offset - thing];
+
+            match ls.into_iter().filter(|e| *e > 0.0).reduce(|prev, e| if e < prev {e} else {prev}) {
+                Some(l) => Some(HitResult{l, intermed: ()}),
+                None => None,
+            }
         } else {
             None
         }

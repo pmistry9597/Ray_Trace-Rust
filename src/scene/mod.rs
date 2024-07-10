@@ -1,27 +1,9 @@
 use nalgebra::{Vector3, vector};
 use crate::render_target::RenderTarget;
-use crate::ray::{Intersectable, Ray, RayCompute};
+use crate::ray::{RayCompute, Intersectable};
+use basic_shape::Sphere;
 
-struct Sphere {
-    c: Vector3<f32>,
-    r: f32,
-}
-
-impl Intersectable for Sphere {
-    fn intersect(&self, ray: &Ray) -> Option<()> {        
-        // solve quadratic equation for sphere-ray intersection, from https://en.wikipedia.org/wiki/Line%E2%80%93sphere_intersection
-        let oc = ray.o - self.c;
-        let dir = ray.d.dot(&oc);
-        let consts = oc.dot(&oc) - self.r * self.r;
-
-        let thing = dir * dir - consts;
-        if thing > 0.0 {
-            Some(())
-        } else {
-            None
-        }
-    }
-}
+mod basic_shape;
 
 pub struct Cam {
     pub d: Vector3<f32>, // to center of screen

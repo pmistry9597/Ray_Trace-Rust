@@ -1,6 +1,6 @@
 use nalgebra::{Vector3, vector};
 use crate::render_target::RenderTarget;
-use crate::ray::{RayCompute, Intersectable};
+use crate::ray::{RayCompute, Hitable};
 use basic_shape::Sphere;
 
 mod basic_shape;
@@ -59,9 +59,9 @@ pub fn give_crap() -> Scene {
 }
 
 pub struct Cam {
-    pub d: Vector3<f32>, // to center of screen
+    pub d: Vector3<f32>, // o -> center of screen, has distance
     pub o: Vector3<f32>,
-    pub up: Vector3<f32>,
+    pub up: Vector3<f32>, // should be unit vector
     // in-scene dimensions, not view pixels
     pub screen_width: f32, 
     pub screen_height: f32,

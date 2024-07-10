@@ -1,15 +1,7 @@
+use crate::scene::Cam;
 use nalgebra::Vector3;
 use crate::render_target::RenderTarget;
-use super::scene::Cam;
-
-pub struct Ray {
-    pub d: Vector3<f32>, // should be unit vector
-    pub o: Vector3<f32>,
-}
-
-pub trait Intersectable {
-    fn intersect(&self, ray: &Ray) -> Option<()>;
-}
+use super::Ray;
 
 pub struct RayCompute {
     x_cf: f32, y_cf: f32,

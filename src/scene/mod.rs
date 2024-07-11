@@ -21,25 +21,30 @@ pub fn render_to_target(render_target: &RenderTarget, scene: &Scene) {
             let ray = ray_compute.pix_cam_to_ray((x,y), &scene.cam);
 
             let hit_results: Vec<_> = scene.objs.iter().map(|sph| sph.intersect(&ray)).collect();
-            let mut dat: [u8; 4] = [0, 0, 0, 0];
             
-            if let Some((obj, hit_result)) = zip(&scene.objs, &hit_results)
+            let obj_w_hit = zip(&scene.objs, &hit_results)
                 .filter_map(|(o, hro)| {
                     match hro {
                         Some(hr) => Some((o, hr)),
                         None => None,
                     }
                 })
-                .min_by_key(|(_, hr)| *hr)
-            {
-                dat[0..3].copy_from_slice(&obj.hit_info(hit_result).rgb);
-            };
+                .min_by_key(|(_, hr)| *hr);
+            let rgb = if let Some((obj, hit_result)) = obj_w_hit { obj.hit_info(hit_result).rgb } else { vector![0.0, 0.0, 0.0] };
 
             // let dat: [u8; 4] = [200, 0, 100, 0];
-            pix.copy_from_slice(&dat);
+            pix.copy_from_slice(&rgb_f_to_u8(&rgb));
         });
     let elapsed = start.elapsed();
     println!("elapsed {:?}", elapsed);
+}
+
+fn rgb_f_to_u8(f: &Vector3<f32>) -> [u8; 4] {
+    // assuming values are 0.0 -> 1.0
+    let scaled = *f * 255.0;
+    let mut out: Vec<u8> = scaled.iter().map(|e| e.round() as u8).collect();
+    out.push(0);
+    out.try_into().expect("bad conversion to [u8; 4]")
 }
 
 pub fn give_crap() -> Scene {
@@ -59,17 +64,17 @@ pub fn give_crap() -> Scene {
                 // Sphere{c: vector![10.0, 5.0, -25.0], r: 1.0},
                 // Sphere{c: vector![-10.0, 5.0, -25.0], r: 1.0},
 
-                Sphere{c: vector![-10.0, -5.0, -30.0], r: 1.0, rgb: [150, 0, 255]},
-                Sphere{c: vector![10.0, -5.0, -30.0], r: 1.0, rgb: [150, 0, 255]},
-                Sphere{c: vector![10.0, 5.0, -30.0], r: 1.0, rgb: [150, 0, 255]},
-                Sphere{c: vector![-10.0, 5.0, -30.0], r: 1.0, rgb: [150, 0, 255]},
+                Sphere{c: vector![-10.0, -5.0, -30.0], r: 1.0, rgb: vector![0.6, 0.0, 1.0]},
+                Sphere{c: vector![10.0, -5.0, -30.0], r: 1.0, rgb: vector![0.6, 0.0, 1.0]},
+                Sphere{c: vector![10.0, 5.0, -30.0], r: 1.0, rgb: vector![0.6, 0.0, 1.0]},
+                Sphere{c: vector![-10.0, 5.0, -30.0], r: 1.0, rgb: vector![0.6, 0.0, 1.0]},
 
-                Sphere{c: vector![10.0, -5.0, -20.0], r: 1.0, rgb: [255, 0, 150]},
-                Sphere{c: vector![10.0, 5.0, -20.0], r: 1.0, rgb: [255, 80, 150]},
-                Sphere{c: vector![-10.0, 5.0, -20.0], r: 1.0, rgb: [255, 0, 150]},
+                Sphere{c: vector![10.0, -5.0, -20.0], r: 1.0, rgb: vector![1.0, 0.0, 0.6]},
+                Sphere{c: vector![10.0, 5.0, -20.0], r: 1.0, rgb: vector![1.0, 0.2, 0.6]},
+                Sphere{c: vector![-10.0, 5.0, -20.0], r: 1.0, rgb: vector![1.0, 0.0, 0.6]},
 
-                Sphere{c: vector![2.0, 0.5, -10.0], r: 4.0, rgb: [100, 200, 150]},
-                Sphere{c: vector![2.0, 0.5, -6.0], r: 1.0, rgb: [0, 255, 30]},
+                Sphere{c: vector![2.0, 0.5, -10.0], r: 4.0, rgb: vector![0.4, 0.8, 0.6]},
+                Sphere{c: vector![2.0, 0.5, -6.0], r: 1.0, rgb: vector![0.0, 1.0, 0.1]},
             ],
     }
 }

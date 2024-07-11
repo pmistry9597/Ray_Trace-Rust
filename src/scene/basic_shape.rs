@@ -5,7 +5,7 @@ pub struct Sphere {
     pub c: Vector3<f32>,
     pub r: f32,
 
-    pub rgb: [u8; 3],
+    pub rgb: Vector3<f32>,
 }
 
 impl HasHitInfo for Sphere {

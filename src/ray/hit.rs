@@ -1,4 +1,5 @@
 use super::Ray;
+use nalgebra::Vector3;
 use std::cmp::Ordering;
 
 pub struct HitResult<I> {
@@ -7,7 +8,7 @@ pub struct HitResult<I> {
 }
 
 pub struct HitInfo {
-    pub rgb: [u8; 3],
+    pub rgb: Vector3<f32>,
 }
 
 pub trait Hitable { // use I to determine if should select this object

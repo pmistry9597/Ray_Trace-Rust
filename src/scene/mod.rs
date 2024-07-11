@@ -2,12 +2,12 @@ use nalgebra::{Vector3, vector};
 use crate::render_target::RenderTarget;
 use crate::ray::{RayCompute, Hitable, HasHitInfo};
 use basic_shape::Sphere;
+use std::iter::zip;
 
 mod basic_shape;
 
 pub fn render_to_target(render_target: &RenderTarget, scene: &Scene) {
     use rayon::prelude::*;
-    use std::iter::zip;
 
     let ray_compute = RayCompute::new(&render_target, &scene.cam);
 
@@ -29,7 +29,7 @@ pub fn render_to_target(render_target: &RenderTarget, scene: &Scene) {
                         None => None,
                     }
                 })
-                .min_by_key(|(_, hr)| *hr);
+                .min_by_key(|(_, hr)| *hr); // closest hit result found here
             let rgb = if let Some((obj, hit_result)) = obj_w_hit { obj.hit_info(hit_result).rgb } else { vector![0.0, 0.0, 0.0] };
 
             // let dat: [u8; 4] = [200, 0, 100, 0];
@@ -40,11 +40,9 @@ pub fn render_to_target(render_target: &RenderTarget, scene: &Scene) {
 }
 
 fn rgb_f_to_u8(f: &Vector3<f32>) -> [u8; 4] {
-    // assuming values are 0.0 -> 1.0
-    let scaled = *f * 255.0;
-    let mut out: Vec<u8> = scaled.iter().map(|e| e.round() as u8).collect();
-    out.push(0);
-    out.try_into().expect("bad conversion to [u8; 4]")
+    let mut out: [u8; 4] = [0; 4];
+    zip(out.iter_mut(), f.iter()).for_each(|(e, f)| *e = (f * 255.0).trunc() as u8); // assume 0.0 -> 1.0 range
+    out
 }
 
 pub fn give_crap() -> Scene {

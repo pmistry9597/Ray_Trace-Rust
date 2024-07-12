@@ -16,6 +16,8 @@ impl RenderTarget {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::sync::Arc;
+    use egui::mutex::Mutex;
 
     #[test]
     fn test_renderer_chunk_to_pix() {
@@ -33,7 +35,7 @@ mod tests {
         let expected_bot_right = (canv_width - 1, 0);
         assert_eq!(render_target.chunk_to_pix(bot_right_idx), expected_bot_right, "Bottom right index wrong");
 
-        let top_right_idx = (canv_height * canv_width - 1);
+        let top_right_idx = canv_height * canv_width - 1;
         let expected_top_right = (canv_width - 1, canv_height - 1);
         assert_eq!(render_target.chunk_to_pix(top_right_idx), expected_top_right, "Top right index wrong");
 

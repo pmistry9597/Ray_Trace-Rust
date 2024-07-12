@@ -38,7 +38,7 @@ impl Hitable for Sphere {
 
         let thing2 = dir * dir - consts;
         if thing2 > 0.0 {
-            let offset = dir.abs();
+            let offset = -dir;
             let thing = thing2.sqrt();
             let ls = [offset + thing, offset - thing];
 

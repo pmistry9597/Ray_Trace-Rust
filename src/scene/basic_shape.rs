@@ -44,7 +44,7 @@ impl Hitable for Sphere {
 
             match ls.into_iter().filter(|e| *e > 0.0).reduce(|prev, e| if e < prev {e} else {prev}) {
                 Some(f) => {
-                    Some(HitResult{l: f.into(), intermed: (ray.o + ray.d * l)})
+                    Some(HitResult{l: f.into(), intermed: (ray.o + ray.d * f)})
                 },
                 None => None,
             }

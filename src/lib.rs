@@ -39,8 +39,7 @@ impl Renderer {
     }
     pub fn consume_and_do(self) {
         thread::spawn(move || {
-            
-            let mut skene = scene::give_crap();
+            let mut skene = scene::test_rig::walled();
             use nalgebra::{vector, Vector3};
             skene.cam.d = vector![0.5, 0.0, -5.0];
             let mut other_d: Vector3<f32> = vector![-0.5, 0.0, -5.0];

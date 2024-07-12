@@ -4,6 +4,7 @@ use crate::ray::{RayCompute, Hitable, HasHitInfo};
 use basic_shape::Sphere;
 use std::iter::zip;
 
+pub mod test_rig;
 mod basic_shape;
 
 pub fn render_to_target(render_target: &RenderTarget, scene: &Scene) {
@@ -30,7 +31,17 @@ pub fn render_to_target(render_target: &RenderTarget, scene: &Scene) {
                     }
                 })
                 .min_by_key(|(_, hr)| hr.l.clone()); // closest hit result found here
+            
             let rgb = if let Some((obj, hit_result)) = obj_w_hit { obj.hit_info(hit_result).rgb } else { vector![0.0, 0.0, 0.0] };
+
+            // use std::collections::HashSet;
+            // let check_set = HashSet::from([(0,0), (1000,0)]);
+            // if let Some((_obj, hit_result)) = obj_w_hit {
+            //     if check_set.contains(&(x,y)) {
+            //         let fuck: f32 = hit_result.l.clone().into();
+            //         println!("pixel: {:?}, ray len: {}", (x,y), fuck);
+            //     }
+            // }
 
             // let dat: [u8; 4] = [200, 0, 100, 0];
             pix.copy_from_slice(&rgb_f_to_u8(&rgb));
@@ -43,58 +54,6 @@ fn rgb_f_to_u8(f: &Vector3<f32>) -> [u8; 4] {
     let mut out: [u8; 4] = [0; 4];
     zip(out.iter_mut(), f.iter()).for_each(|(e, f)| *e = (f * 255.0).trunc() as u8); // assume 0.0 -> 1.0 range
     out
-}
-
-pub fn give_crap() -> Scene {
-    // let pee: Vector3<f32> = vector![1.0,1.0,1.0];
-    use basic_shape::Coloring::*;
-    use std::sync::Arc;
-    let cam = Cam {
-        d: vector![0.0, 0.0, -5.0],
-        o: vector![0.0, 0.0, 0.0],
-        up: vector![0.0, 1.0, 0.0].normalize(),
-        screen_width: 10.0,
-        screen_height: 5.0,
-    };
-    Scene {
-        cam,
-        objs: vec![
-                // Sphere{c: vector![-10.0, -5.0, -25.0], r: 1.0},
-                // Sphere{c: vector![10.0, -5.0, -25.0], r: 1.0},
-                // Sphere{c: vector![10.0, 5.0, -25.0], r: 1.0},
-                // Sphere{c: vector![-10.0, 5.0, -25.0], r: 1.0},
-
-                Sphere{c: vector![-10.0, -5.0, -30.0], r: 1.0, 
-                    coloring: UsePos(Arc::new(
-                        |pos, sph| vector![0.8, 0.8*(pos[0] + sph.r - sph.c[0]).abs()/(2.0*sph.r), 0.5]))
-                },
-                Sphere{c: vector![10.0, -5.0, -30.0], r: 1.0, 
-                    coloring: UsePos(Arc::new(
-                        |pos, sph| vector![(pos[2] + sph.r - sph.c[2]).abs()/(2.0*sph.r), 0.0, 0.1]))
-                },
-                Sphere{c: vector![10.0, 5.0, -30.0], r: 1.0, 
-                    coloring: UsePos(Arc::new(
-                        |pos, sph| vector![(pos[2] + sph.r - sph.c[2]).abs()/(2.0*sph.r), 0.6, 0.0]))
-                },
-                Sphere{c: vector![-10.0, 5.0, -30.0], r: 1.0, coloring: Solid(vector![0.6, 0.0, 1.0])},
-
-                // Sphere{c: vector![10.0, -5.0, -20.0], r: 1.0, coloring: Solid(vector![1.0, 0.0, 0.6])},
-                // Sphere{c: vector![10.0, 5.0, -20.0], r: 1.0, coloring: Solid(vector![1.0, 0.2, 0.6])},
-                Sphere{c: vector![-10.0, 5.0, -20.0], r: 1.0, 
-                    coloring: UsePos(Arc::new(
-                        |pos, sph| vector![(pos[1] - sph.c[1]).abs()/sph.r, 0.9, 0.1]))
-                },
-
-                Sphere{c: vector![2.0, 0.5, -10.0], r: 4.0, 
-                    coloring: UsePos(Arc::new(
-                        |pos, sph| vector![(pos[2] - sph.c[2]).abs()/sph.r, 0.2, 0.8]))
-                },
-                Sphere{c: vector![2.0, 0.5, -6.0], r: 1.0, 
-                    coloring: UsePos(Arc::new(
-                        |pos, sph| vector![0.3, (pos[0] + sph.r - sph.c[0]).abs()/(2.0*sph.r), 0.8]))
-                },
-            ],
-    }
 }
 
 pub struct Cam {

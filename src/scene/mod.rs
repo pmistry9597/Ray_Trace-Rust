@@ -64,13 +64,22 @@ pub fn give_crap() -> Scene {
                 // Sphere{c: vector![10.0, 5.0, -25.0], r: 1.0},
                 // Sphere{c: vector![-10.0, 5.0, -25.0], r: 1.0},
 
-                Sphere{c: vector![-10.0, -5.0, -30.0], r: 1.0, coloring: Solid(vector![0.6, 0.0, 1.0])},
-                Sphere{c: vector![10.0, -5.0, -30.0], r: 1.0, coloring: Solid(vector![0.6, 0.0, 1.0])},
-                Sphere{c: vector![10.0, 5.0, -30.0], r: 1.0, coloring: Solid(vector![0.6, 0.0, 1.0])},
+                Sphere{c: vector![-10.0, -5.0, -30.0], r: 1.0, 
+                    coloring: UsePos(Arc::new(
+                        |pos, sph| vector![0.8, 0.8*(pos[0] + sph.r - sph.c[0]).abs()/(2.0*sph.r), 0.5]))
+                },
+                Sphere{c: vector![10.0, -5.0, -30.0], r: 1.0, 
+                    coloring: UsePos(Arc::new(
+                        |pos, sph| vector![(pos[2] + sph.r - sph.c[2]).abs()/(2.0*sph.r), 0.0, 0.1]))
+                },
+                Sphere{c: vector![10.0, 5.0, -30.0], r: 1.0, 
+                    coloring: UsePos(Arc::new(
+                        |pos, sph| vector![(pos[2] + sph.r - sph.c[2]).abs()/(2.0*sph.r), 0.6, 0.0]))
+                },
                 Sphere{c: vector![-10.0, 5.0, -30.0], r: 1.0, coloring: Solid(vector![0.6, 0.0, 1.0])},
 
-                Sphere{c: vector![10.0, -5.0, -20.0], r: 1.0, coloring: Solid(vector![1.0, 0.0, 0.6])},
-                Sphere{c: vector![10.0, 5.0, -20.0], r: 1.0, coloring: Solid(vector![1.0, 0.2, 0.6])},
+                // Sphere{c: vector![10.0, -5.0, -20.0], r: 1.0, coloring: Solid(vector![1.0, 0.0, 0.6])},
+                // Sphere{c: vector![10.0, 5.0, -20.0], r: 1.0, coloring: Solid(vector![1.0, 0.2, 0.6])},
                 Sphere{c: vector![-10.0, 5.0, -20.0], r: 1.0, 
                     coloring: UsePos(Arc::new(
                         |pos, sph| vector![(pos[1] - sph.c[1]).abs()/sph.r, 0.9, 0.1]))

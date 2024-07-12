@@ -29,7 +29,7 @@ pub fn render_to_target(render_target: &RenderTarget, scene: &Scene) {
                         None => None,
                     }
                 })
-                .min_by_key(|(_, hr)| *hr); // closest hit result found here
+                .min_by_key(|(_, hr)| hr.l.clone()); // closest hit result found here
             let rgb = if let Some((obj, hit_result)) = obj_w_hit { obj.hit_info(hit_result).rgb } else { vector![0.0, 0.0, 0.0] };
 
             // let dat: [u8; 4] = [200, 0, 100, 0];

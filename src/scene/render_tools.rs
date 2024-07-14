@@ -1,8 +1,10 @@
-use nalgebra::{Vector3, vector};
+use nalgebra::Vector3;
 use std::iter::zip;
 use crate::render_target::RenderTarget;
-use crate::ray::{RayCompute, Hitable, HasHitInfo};
+use crate::ray::RayCompute;
 use super::Scene;
+
+use super::radiance::radiance;
 
 pub fn render_to_target(render_target: &RenderTarget, scene: &Scene) {
     use rayon::prelude::*;
@@ -17,30 +19,8 @@ pub fn render_to_target(render_target: &RenderTarget, scene: &Scene) {
         .map(|(i, pix)| (render_target.chunk_to_pix(i.try_into().unwrap()), pix))
         .for_each(|((x, y), pix)| {
             let ray = ray_compute.pix_cam_to_ray((x,y), &scene.cam);
+            let rgb = radiance(&ray, &scene.objs);
 
-            let hit_results: Vec<_> = scene.objs.iter().map(|sph| sph.intersect(&ray)).collect();
-            
-            let obj_w_hit = zip(&scene.objs, &hit_results)
-                .filter_map(|(o, hro)| {
-                    match hro {
-                        Some(hr) => Some((o, hr)),
-                        None => None,
-                    }
-                })
-                .min_by_key(|(_, hr)| hr.l.clone()); // closest hit result found here
-            
-            let rgb = if let Some((obj, hit_result)) = obj_w_hit { obj.hit_info(hit_result).rgb } else { vector![0.0, 0.0, 0.0] };
-
-            // use std::collections::HashSet;
-            // let check_set = HashSet::from([(0,0), (1000,0)]);
-            // if let Some((_obj, hit_result)) = obj_w_hit {
-            //     if check_set.contains(&(x,y)) {
-            //         let fuck: f32 = hit_result.l.clone().into();
-            //         println!("pixel: {:?}, ray len: {}", (x,y), fuck);
-            //     }
-            // }
-
-            // let dat: [u8; 4] = [200, 0, 100, 0];
             pix.copy_from_slice(&rgb_f_to_u8(&rgb));
         });
     let elapsed = start.elapsed();

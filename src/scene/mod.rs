@@ -4,6 +4,7 @@ use basic_shape::Sphere;
 pub mod test_rig;
 mod basic_shape;
 mod render_tools;
+mod radiance;
 pub use render_tools::*;
 
 pub struct Cam {

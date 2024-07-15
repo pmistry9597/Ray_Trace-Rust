@@ -18,15 +18,15 @@ pub struct Sphere {
 }
 
 impl InteractsWithRay for Sphere {
-    fn shoot_new_ray(&self, ray: &Ray, hit_info: &HitInfo<Self::BounceInfo>) -> Ray {
+    fn shoot_new_ray(&self, ray: &Ray, hit_info: &HitInfo<Self::BounceInfo>) -> (Ray, f32) {
         let o = &hit_info.pos;
         let norm = &hit_info.norm;
 
         self.mat.gen_new_ray(ray, norm, o)
     }
     fn does_dls(&self) -> bool {
-        use SpecDiff::*;
-        matches!(self.mat.spec_or_diff, Diff) || matches!(self.mat.spec_or_diff, Both)
+        use DivertRayMethod::*;
+        matches!(self.mat.divert_ray, Diff | DiffSpec(_))
     }
     fn emits(&self) -> bool {
         self.mat.emissive.is_some()

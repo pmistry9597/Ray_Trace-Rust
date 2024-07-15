@@ -1,15 +1,16 @@
 use nalgebra::Vector3;
 use crate::ray::Ray;
+use rand::Rng;
 
 pub struct CommonMaterial {
     pub emissive: Option<Vector3<f32>>,
-    pub spec_or_diff: SpecDiff,
+    pub divert_ray: DivertRayMethod,
 }
 
-pub enum SpecDiff {
+pub enum DivertRayMethod {
     Spec,
     Diff,
-    Both,
+    DiffSpec(f32),
 }
 
 fn spec(ray: &Ray, norm: &Vector3<f32>, o: &Vector3<f32>) -> Ray {
@@ -22,7 +23,6 @@ fn diff(ray: &Ray, norm: &Vector3<f32>, o: &Vector3<f32>) -> Ray {
     let xd = ray.d - norm * (ray.d.dot(&norm));
     let yd = xd.cross(norm);
 
-    use rand::Rng;
     let mut rng = rand::thread_rng();
     let u: f32 = rng.gen();
     let v: f32 = rng.gen();
@@ -39,18 +39,24 @@ fn diff(ray: &Ray, norm: &Vector3<f32>, o: &Vector3<f32>) -> Ray {
 }
 
 impl CommonMaterial {
-    pub fn gen_new_ray(&self, ray: &Ray, norm: &Vector3<f32>, o: &Vector3<f32>) -> Ray {
-        use SpecDiff::*;
-        match self.spec_or_diff {
+    pub fn gen_new_ray(&self, ray: &Ray, norm: &Vector3<f32>, o: &Vector3<f32>) -> (Ray, f32) {
+        use DivertRayMethod::*;
+        match self.divert_ray {
             Spec => {
-                spec(ray, norm, o)
+                (spec(ray, norm, o), 1.0)
             },
             Diff => {
-                diff(ray, norm, o)
+                (diff(ray, norm, o), 1.0)
             },
-            Both => {
-                // CHANGE THIS
-                unimplemented!();
+            DiffSpec(diffp) => {
+                let mut rng = rand::thread_rng();
+                let u: f32 = rng.gen();
+
+                if u < diffp {
+                    (diff(ray, norm, o), diffp)
+                } else {
+                    (spec(ray, norm, o), 1.0 - diffp)
+                }
             }
         }
     }

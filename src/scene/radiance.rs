@@ -27,7 +27,7 @@ pub fn radiance(ray: &Ray, objs: &Vec<Obj>, depth: i32) -> (Vector3<f32>, Option
         if roull_pass {
             match hit_info.bounce_info {
                 Some(_) => {
-                    let new_ray = obj.shoot_new_ray(ray, &hit_info);
+                    let (new_ray, p) = obj.shoot_new_ray(ray, &hit_info);
                     let (incoming_rgb, incoming_idx) = radiance(&new_ray, objs, depth + 1);
     
                     let mul = if obj.does_dls() {
@@ -37,9 +37,9 @@ pub fn radiance(ray: &Ray, objs: &Vec<Obj>, depth: i32) -> (Vector3<f32>, Option
                             vec![obj_idx]
                         };
                         let light_contrib = establish_dls_contrib(&omit_idxs, objs, &hit_info);
-                        incoming_rgb + light_contrib
+                        incoming_rgb / p + light_contrib
                     } else {
-                        incoming_rgb
+                        incoming_rgb / p
                     };
     
                     (hit_info.emissive + hit_info.rgb.component_mul(&mul), Some(obj_idx))

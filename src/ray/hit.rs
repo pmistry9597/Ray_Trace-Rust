@@ -28,7 +28,7 @@ pub trait HasHitInfo : Hitable {
 }
 
 pub trait InteractsWithRay : HasHitInfo {
-    fn shoot_new_ray(&self, ray: &Ray, bounce_info: &Self::BounceInfo) -> Ray;
+    fn shoot_new_ray(&self, ray: &Ray, hit_info: &HitInfo<Self::BounceInfo>) -> Ray;
     fn does_dls(&self) -> bool;
     fn emits(&self) -> bool;
 }

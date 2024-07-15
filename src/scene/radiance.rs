@@ -1,7 +1,7 @@
 use crate::ray::Ray;
 use nalgebra::{Vector3, vector};
 use super::basic_shape::{Sphere};
-use crate::ray::{Hitable, HasHitInfo, InteractsWithRay, HitResult};
+use crate::ray::{Hitable, HasHitInfo, InteractsWithRay, HitResult, HitInfo};
 // use std::iter::zip;
 
 type Obj = Sphere;
@@ -31,40 +31,16 @@ pub fn radiance(ray: &Ray, objs: &Vec<Obj>, depth: i32) -> Vector3<f32> { // col
     if let Some(idx) = idxo { 
         let obj = &objs[idx];
         let hit_result = &hit_results[idx].as_ref().unwrap();
-        // (obj, hit_result)
         let hit_info = obj.hit_info(hit_result);
-        if depth < 30 {
+        if depth < 5 {
             match hit_info.bounce_info {
-                Some(b_inf) => {
-                    let new_ray = obj.shoot_new_ray(ray, &b_inf);
+                Some(_) => {
+                    let new_ray = obj.shoot_new_ray(ray, &hit_info);
                     let incoming_rgb = radiance(&new_ray, objs, depth + 1);
-                    
-                    // use SpecDiff::*;
-                    // let rgb = hit_info.emissive; // + hit_info.rgb.component_mul(&incoming_rgb);
 
-                    // direct light sampling https://iquilezles.org/articles/simplepathtracing/
+                    // direct light sampling based on https://iquilezles.org/articles/simplepathtracing/
                     let mul = if obj.does_dls() {
-                        let lights = objs.iter().enumerate().filter(|(_i,o)| o.emits());
-                        let light_contrib = lights.fold(vector![0.0,0.0,0.0], |a, (i,l)| {
-                            // let o = hit_result.l * ray.d + ray.o;
-                            let d = (l.c - hit_info.pos).normalize();
-                            let light_dot = d.dot(&hit_info.norm);
-                            if light_dot > crate::EPS {
-                                let dls_ray = Ray{ d, o: hit_info.pos }; 
-                                let (hrs, idxo) = closest_ray_hit(&dls_ray, objs);
-                                if let Some(idx) = idxo {
-                                    if i == idx { // make sure its the same light source!!
-                                        a + light_dot.max(0.0) * objs[idx].hit_info(&hrs[idx].as_ref().unwrap()).emissive
-                                    } else {
-                                        a
-                                    }
-                                } else {
-                                    a
-                                }
-                            } else {
-                                a
-                            }
-                        });
+                        let light_contrib = establish_dls_contrib(obj, objs, &hit_info);
                         incoming_rgb + light_contrib
                     } else {
                         incoming_rgb
@@ -84,6 +60,30 @@ pub fn radiance(ray: &Ray, objs: &Vec<Obj>, depth: i32) -> Vector3<f32> { // col
     }
 }
 
+fn establish_dls_contrib(obj: &Obj, objs: &Vec<Obj>, hit_info: &HitInfo<()>) -> Vector3<f32> {
+    let lights = objs.iter().enumerate().filter(|(_i,o)| o.emits());
+    lights.fold(vector![0.0,0.0,0.0], |a, (i,l)| {
+        let d = (l.c - hit_info.pos).normalize(); // change l.c to be random sample from light
+        let light_dot = d.dot(&hit_info.norm);
+        if light_dot > crate::EPS {
+            let dls_ray = Ray{ d, o: hit_info.pos }; 
+            let (hrs, idxo) = closest_ray_hit(&dls_ray, objs);
+            if let Some(idx) = idxo {
+                if i == idx { // make sure its the same light source!!
+                    a + light_dot.max(0.0) * objs[idx].hit_info(&hrs[idx].as_ref().unwrap()).emissive
+                } else {
+                    a
+                }
+            } else {
+                a
+            }
+        } else {
+            a
+        }
+    })
+}
+
+// return results of ray hitting object and the closest intersection
 fn closest_ray_hit(ray: &Ray, objs: &Vec<Obj>) -> (Vec<Option<HitResult<Vector3<f32>>>>, Option<usize>) {
     let hit_results: Vec<_> = objs.iter().map(|obj| obj.intersect(&ray)).collect();
     

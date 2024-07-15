@@ -74,14 +74,11 @@ impl CommonMaterial {
 }
 
 impl InteractsWithRay for Sphere {
-    fn shoot_new_ray(&self, ray: &Ray, bounce_info: &Self::BounceInfo) -> Ray {
-        // purely specular reflection
-        let o = bounce_info;
-        let norm = (o - self.c).normalize();
+    fn shoot_new_ray(&self, ray: &Ray, hit_info: &HitInfo<Self::BounceInfo>) -> Ray {
+        let o = &hit_info.pos;
+        let norm = &hit_info.norm;
 
-        // let d = ray.d - norm * 2.0 * ray.d.dot(&norm);
-        self.mat.gen_new_ray(ray, &norm, &o)
-        // Ray {d, o: o.clone()}
+        self.mat.gen_new_ray(ray, norm, o)
     }
     fn does_dls(&self) -> bool {
         use SpecDiff::*;
@@ -93,7 +90,7 @@ impl InteractsWithRay for Sphere {
 }
 
 impl HasHitInfo for Sphere {
-    type BounceInfo = Vector3<f32>;
+    type BounceInfo = ();
 
     fn hit_info(&self, info: &HitResult<Self::Interm>) -> HitInfo<Self::BounceInfo> {
         use Coloring::*;
@@ -109,7 +106,7 @@ impl HasHitInfo for Sphere {
             vector![0.0,0.0,0.0]
         };
         let norm = (pos - self.c).normalize();
-        HitInfo {rgb, emissive, pos, norm, bounce_info: Some(pos)}
+        HitInfo {rgb, emissive, pos, norm, bounce_info: Some(())}
     }
 }
 

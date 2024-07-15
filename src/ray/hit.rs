@@ -7,8 +7,12 @@ pub struct HitResult<I> {
     pub intermed: I, // data to be plugged into hit_info should the result be required, can be () if not needed
 }
 
-pub struct HitInfo {
+pub struct HitInfo<B> {
     pub rgb: Vector3<f32>,
+    pub emissive: Vector3<f32>,
+    pub pos: Vector3<f32>,
+    pub norm: Vector3<f32>,
+    pub bounce_info: Option<B>,
 }
 
 pub trait Hitable { // use I to determine if should select this object
@@ -18,11 +22,19 @@ pub trait Hitable { // use I to determine if should select this object
 }
 
 pub trait HasHitInfo : Hitable {
-    fn hit_info(&self, info: &HitResult<Self::Interm>) -> HitInfo;
+    type BounceInfo;
+
+    fn hit_info(&self, info: &HitResult<Self::Interm>) -> HitInfo<Self::BounceInfo>;
+}
+
+pub trait InteractsWithRay : HasHitInfo {
+    fn shoot_new_ray(&self, ray: &Ray, bounce_info: &Self::BounceInfo) -> Ray;
+    fn does_dls(&self) -> bool;
+    fn emits(&self) -> bool;
 }
 
 #[derive(Clone)]
-pub struct RayLen(f32);
+pub struct RayLen(pub f32);
 
 impl From<f32> for RayLen {
     fn from(f: f32) -> RayLen {RayLen(f)}

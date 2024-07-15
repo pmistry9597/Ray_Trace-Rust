@@ -1,7 +1,8 @@
 use super::{Scene, Cam};
 use nalgebra::vector;
 use super::basic_shape::Coloring::*;
-use super::basic_shape::{Sphere, CommonMaterial, SpecDiff};
+use super::basic_shape::Sphere;
+use crate::material::{SpecDiff, CommonMaterial};
 use std::sync::Arc;
 
 pub fn walled() -> Scene {

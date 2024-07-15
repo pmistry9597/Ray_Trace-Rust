@@ -6,6 +6,7 @@ use render_target::RenderTarget;
 mod scene;
 mod render_target;
 mod ray;
+mod material;
 
 pub type ArcMux<T> = Arc<Mutex<T>>;
 pub type BufferMux = Arc<Mutex<Vec<u8>>>;

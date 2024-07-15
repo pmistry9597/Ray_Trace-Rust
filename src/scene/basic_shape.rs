@@ -38,7 +38,10 @@ impl HasHitInfo for Sphere {
 
     fn hit_info(&self, info: &HitResult<Self::Interm>) -> HitInfo<Self::BounceInfo> {
         use Coloring::*;
-        let pos = info.intermed;
+        let perfect_pos = info.intermed;
+        let norm = (perfect_pos - self.c).normalize();
+        let pos = perfect_pos + norm * crate::EPS; // create offset from surface to prevent errors
+
         let rgb = match &self.coloring {
             Solid(rgb) => *rgb,
             UsePos(coloring_fn) => coloring_fn(&pos, self),
@@ -49,7 +52,6 @@ impl HasHitInfo for Sphere {
             use nalgebra::vector;
             vector![0.0,0.0,0.0]
         };
-        let norm = (pos - self.c).normalize();
         HitInfo {rgb, emissive, pos, norm, bounce_info: Some(())}
     }
 }

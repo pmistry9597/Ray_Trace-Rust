@@ -12,6 +12,7 @@ pub fn walled() -> Scene {
         up: vector![0.0, 1.0, 0.0].normalize(),
         screen_width: 10.0,
         screen_height: 5.0,
+        lens_r: Some(0.5),
     };
 
     let wr_x = 15.0;

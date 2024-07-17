@@ -14,6 +14,7 @@ pub struct Cam {
     // in-scene dimensions, not view pixels
     pub screen_width: f32, 
     pub screen_height: f32,
+    pub lens_r: Option<f32>,
 }
 
 pub struct Scene {

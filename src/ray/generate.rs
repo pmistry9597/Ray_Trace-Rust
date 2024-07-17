@@ -53,6 +53,24 @@ impl RayCompute {
     
         let d = cam.d + s_x * right + s_y * up;
 
-        Ray{d, o: cam.o}
+        match cam.lens_r {
+            Some(a) => { // lens effect
+                use rand::Rng;
+
+                let mut rng = rand::thread_rng();
+                let u: f32 = rng.gen::<f32>();
+                let v: f32 = rng.gen::<f32>();
+
+                let r = u.sqrt();
+                let thet = 2.0 * std::f32::consts::PI * v;
+
+                let x = (r - 0.5) * 2.0 * a * thet.cos();
+                let y = (r - 0.5) * 2.0 * a * thet.sin();
+                let off = right * x + up * y;
+
+                Ray{d: d - off, o: off + cam.o}
+            },
+            None => Ray{d, o: cam.o}
+        }
     }
 }

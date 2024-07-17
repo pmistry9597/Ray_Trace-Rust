@@ -27,13 +27,12 @@ fn diff(ray: &Ray, norm: &Vector3<f32>, o: &Vector3<f32>) -> Ray {
     let u: f32 = rng.gen();
     let v: f32 = rng.gen();
 
-    let phi = std::f32::consts::PI * 2.0 * u;
-    let thet = v.sqrt().asin();
+    let r = u.sqrt();
+    let thet = 2.0 * std::f32::consts::PI * v;
 
-    let cphi = phi.cos();
-    let sthet = thet.sin();
-    let sphi = phi.sin();
-    let d = xd * (cphi * sthet) + yd * (sphi * sthet) + norm * thet.cos();
+    let x = r * thet.cos();
+    let y = r * thet.sin();
+    let d = xd * x + yd * y + norm * (1.0 - u).max(0.0).sqrt();
 
     Ray {d, o: o.clone()}
 }

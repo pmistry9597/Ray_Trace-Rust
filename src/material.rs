@@ -53,9 +53,9 @@ impl CommonMaterial {
                 let u: f32 = rng.gen();
 
                 if u < diffp {
-                    (diff(ray, norm, o), diffp)
+                    (diff(ray, norm, o), 1.0)
                 } else {
-                    (spec(ray, norm, o), 1.0 - diffp)
+                    (spec(ray, norm, o), 1.0)
                 }
             }
         }

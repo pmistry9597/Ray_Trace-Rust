@@ -7,7 +7,7 @@ use rand::Rng;
 
 type Obj = Sphere;
 
-pub fn radiance(ray: &Ray, objs: &Vec<Obj>, depth: i32) -> (Vector3<f32>, Option<usize>) { // color from a ray in a collection of hittable objects
+pub fn radiance(ray: &Ray, objs: &Vec<Obj>, depth: i32) -> (Vector3<f32>, Option<usize>) { // color from a ray in a collection of hittable objects, and index of object that was hit
     let (hit_results, idxo) = closest_ray_hit(ray, objs);
     
     // use std::collections::HashSet;
@@ -61,7 +61,7 @@ fn russian_roulette_filter(depth: i32, mut hit_info: HitInfo<()>) -> (HitInfo<()
         let mut rng = rand::thread_rng();
         let russ_roull: f32 = rng.gen();
         // let thres = hit_info.rgb.iter().reduce(|prev, e| if e > prev {e} else {prev}).expect("ain't there a max color??");
-        let thres: f32 = 0.7;
+        let thres: f32 = 0.5;
         // println!("russian rollete {} {}", russ_roull, thres);
         if russ_roull < thres {
             hit_info.rgb = hit_info.rgb / thres; // monte carlo normalizing term for when russian roulette active

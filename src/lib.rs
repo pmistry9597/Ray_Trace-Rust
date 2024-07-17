@@ -47,8 +47,8 @@ impl Renderer {
 
             loop {
                 std::mem::swap(&mut skene.cam.d, &mut other_d);
-                scene::render_to_target(&self.target, &skene);
-                self.update_output();
+                scene::render_to_target(&self.target, &skene, || self.update_output());
+                // self.update_output();
                 thread::sleep(std::time::Duration::from_millis(500));
 
             }

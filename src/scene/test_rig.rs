@@ -3,7 +3,7 @@ use nalgebra::vector;
 use super::basic_shape::Coloring::*;
 use super::basic_shape::Sphere;
 use crate::material::{DivertRayMethod, CommonMaterial};
-use std::sync::Arc;
+// use std::sync::Arc;
 
 pub fn walled() -> Scene {
     let cam = Cam {
@@ -43,31 +43,31 @@ pub fn walled() -> Scene {
     ];
     let elements = vec![
         Sphere{c: vector![1.0, 0.5, -20.0], r: 4.0, 
-            coloring: UsePos(Arc::new(
-                |pos, sph| vector![(pos[2] - sph.c[2]).abs()/sph.r, 0.2, 0.8])),
-            // coloring: Solid(vector![0.6, 0.0, 0.8]),
+            // coloring: UsePos(Arc::new(
+            //     |pos, sph| vector![(pos[2] - sph.c[2]).abs()/sph.r, 0.2, 0.8])),
+            coloring: Solid(vector![0.6, 0.0, 0.8]),
             mat: CommonMaterial{ divert_ray: Diff, emissive: None, },
         },
         Sphere{c: vector![-3.0, -1.0, -6.0], r: 1.0, 
             // coloring: UsePos(Arc::new(
             //     |pos, sph| vector![0.8, (pos[0] + sph.r - sph.c[0]).abs()/(2.0*sph.r), 0.1])),
-            coloring: Solid(vector![1.0, 0.2, 0.3]),
-            mat: CommonMaterial{ divert_ray: DiffSpec(0.9), emissive: None, },
+            coloring: Solid(vector![1.0, 1.0, 1.0]),
+            mat: CommonMaterial{ divert_ray: Spec, emissive: None, },
         },
         Sphere{c: vector![1.0, -1.5, -5.5], r: 0.5, 
             // coloring: UsePos(Arc::new(
             //     |pos, sph| vector![0.8, (pos[0] + sph.r - sph.c[0]).abs()/(2.0*sph.r), 0.1])),
-            coloring: Solid(vector![1.0, 1.0, 1.0]),
-            mat: CommonMaterial{ divert_ray: Spec, emissive: None, },
+            coloring: Solid(vector![0.2, 1.0, 0.5]),
+            mat: CommonMaterial{ divert_ray: DiffSpec(0.9), emissive: None, },
         },
     ];
     let lights = vec![
-        // Sphere{c: vector![0.0, 6.0, -15.0], r: 1.0, coloring: Solid(vector![0.0,0.0,0.0]),
-        //     mat: CommonMaterial{ divert_ray:  Diff, emissive: Some(vector![1.0, 1.0, 1.0] * 0.9)},
-        // },
-        Sphere{c: vector![3.0, -2.0, -5.0], r: 0.5, coloring: Solid(vector![0.0,0.0,0.0]),
-            mat: CommonMaterial{ divert_ray:  Diff, emissive: Some(vector![1.0, 1.0, 1.0] * 0.7)},
+        Sphere{c: vector![0.0, 6.0, -15.0], r: 1.0, coloring: Solid(vector![0.0,0.0,0.0]),
+            mat: CommonMaterial{ divert_ray:  Diff, emissive: Some(vector![1.0, 1.0, 1.0] * 4.0)},
         },
+        // Sphere{c: vector![1.0, 1.0, -5.0], r: 0.5, coloring: Solid(vector![0.0,0.0,0.0]),
+        //     mat: CommonMaterial{ divert_ray:  Diff, emissive: Some(vector![1.0, 1.0, 1.0] * 2.0)},
+        // },
     ];
 
     Scene {

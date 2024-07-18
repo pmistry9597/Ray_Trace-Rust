@@ -12,6 +12,7 @@ pub struct HitInfo<B> {
     pub emissive: Vector3<f32>,
     pub pos: Vector3<f32>,
     pub norm: Vector3<f32>,
+    pub dls: bool,
     pub bounce_info: Option<B>,
 }
 
@@ -29,7 +30,7 @@ pub trait HasHitInfo : Hitable {
 
 pub trait InteractsWithRay : HasHitInfo {
     fn shoot_new_ray(&self, ray: &Ray, hit_info: &HitInfo<Self::BounceInfo>) -> (Ray, f32); // probability that the ray was shot
-    fn does_dls(&self) -> bool;
+    // fn does_dls(&self) -> bool;
     fn emits(&self) -> bool;
 }
 

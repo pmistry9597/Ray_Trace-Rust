@@ -30,7 +30,7 @@ pub fn radiance(ray: &Ray, objs: &Vec<Obj>, depth: i32) -> (Vector3<f32>, Option
                     let (new_ray, p) = obj.shoot_new_ray(ray, &hit_info);
                     let (incoming_rgb, incoming_idx) = radiance(&new_ray, objs, depth + 1);
     
-                    let mul = if obj.does_dls() {
+                    let mul = if hit_info.dls {
                         let omit_idxs = if incoming_idx.is_some() {
                             vec![obj_idx, incoming_idx.unwrap()]
                         } else {
@@ -56,7 +56,7 @@ pub fn radiance(ray: &Ray, objs: &Vec<Obj>, depth: i32) -> (Vector3<f32>, Option
     }
 }
 
-fn russian_roulette_filter(depth: i32, mut hit_info: HitInfo<()>) -> (HitInfo<()>, bool) {
+fn russian_roulette_filter<T>(depth: i32, mut hit_info: HitInfo<T>) -> (HitInfo<T>, bool) {
     if depth > 10 {
         let mut rng = rand::thread_rng();
         let russ_roull: f32 = rng.gen();
@@ -75,7 +75,7 @@ fn russian_roulette_filter(depth: i32, mut hit_info: HitInfo<()>) -> (HitInfo<()
 }
 
 // direct light sampling based on https://iquilezles.org/articles/simplepathtracing/
-fn establish_dls_contrib(omit_idxs: &[usize], objs: &Vec<Obj>, hit_info: &HitInfo<()>) -> Vector3<f32> {
+fn establish_dls_contrib<T>(omit_idxs: &[usize], objs: &Vec<Obj>, hit_info: &HitInfo<T>) -> Vector3<f32> {
     const PI_INV: f32 = 1.0 / std::f32::consts::PI;
 
     // only use lights and dont use self

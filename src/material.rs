@@ -13,6 +13,11 @@ pub enum DivertRayMethod {
     DiffSpec(f32),
 }
 
+pub enum SeedingRay {
+    DiffSpec(bool),
+    NoSeed,
+}
+
 fn spec(ray: &Ray, norm: &Vector3<f32>, o: &Vector3<f32>) -> Ray {
     let d = ray.d - norm * 2.0 * ray.d.dot(&norm);
     Ray {d, o: o.clone()}
@@ -38,7 +43,25 @@ fn diff(ray: &Ray, norm: &Vector3<f32>, o: &Vector3<f32>) -> Ray {
 }
 
 impl CommonMaterial {
-    pub fn gen_new_ray(&self, ray: &Ray, norm: &Vector3<f32>, o: &Vector3<f32>) -> (Ray, f32) {
+    pub fn generate_seed(&self) -> SeedingRay {
+        use DivertRayMethod::*;
+        match self.divert_ray {
+            Diff | Spec => {
+                SeedingRay::NoSeed
+            },
+            DiffSpec(diffp) => {
+                let mut rng = rand::thread_rng();
+                let u: f32 = rng.gen();
+
+                SeedingRay::DiffSpec(u < diffp)
+            }
+        }
+    }
+    pub fn should_dls(&self, seeding: &SeedingRay) -> bool {
+        use DivertRayMethod::*;
+        matches!((&self.divert_ray, seeding), (Diff, _) | (DiffSpec(_), SeedingRay::DiffSpec(true)))
+    }
+    pub fn gen_new_ray(&self, ray: &Ray, norm: &Vector3<f32>, o: &Vector3<f32>, seeding: &SeedingRay) -> (Ray, f32) {
         use DivertRayMethod::*;
         match self.divert_ray {
             Spec => {
@@ -47,14 +70,15 @@ impl CommonMaterial {
             Diff => {
                 (diff(ray, norm, o), 1.0)
             },
-            DiffSpec(diffp) => {
-                let mut rng = rand::thread_rng();
-                let u: f32 = rng.gen();
-
-                if u < diffp {
-                    (diff(ray, norm, o), 1.0)
+            DiffSpec(_) => {
+                if let SeedingRay::DiffSpec(should_diff) = seeding {
+                    if *should_diff {
+                        (diff(ray, norm, o), 1.0)
+                    } else {
+                        (spec(ray, norm, o), 1.0)
+                    }
                 } else {
-                    (spec(ray, norm, o), 1.0)
+                    panic!("seed should be set to DiffSpec!")
                 }
             }
         }

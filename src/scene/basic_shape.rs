@@ -8,6 +8,10 @@ pub enum Coloring<S> {
     UsePos(Arc<dyn Fn(&Vector3<f32>, &S) -> Vector3<f32> + Send + Sync>),
 }
 
+pub struct BounceInfo {
+    seeding: SeedingRay,
+}
+
 pub struct Sphere {
     pub c: Vector3<f32>,
     pub r: f32,
@@ -21,20 +25,21 @@ impl InteractsWithRay for Sphere {
     fn shoot_new_ray(&self, ray: &Ray, hit_info: &HitInfo<Self::BounceInfo>) -> (Ray, f32) {
         let o = &hit_info.pos;
         let norm = &hit_info.norm;
+        let seeding = &hit_info.bounce_info.as_ref().unwrap().seeding;
 
-        self.mat.gen_new_ray(ray, norm, o)
+        self.mat.gen_new_ray(ray, norm, o, &seeding)
     }
-    fn does_dls(&self) -> bool {
-        use DivertRayMethod::*;
-        matches!(self.mat.divert_ray, Diff | DiffSpec(_))
-    }
+    // fn does_dls(&self) -> bool {
+    //     use DivertRayMethod::*;
+    //     matches!(self.mat.divert_ray, Diff | DiffSpec(_))
+    // }
     fn emits(&self) -> bool {
         self.mat.emissive.is_some()
     }
 }
 
 impl HasHitInfo for Sphere {
-    type BounceInfo = ();
+    type BounceInfo = BounceInfo;
 
     fn hit_info(&self, info: &HitResult<Self::Interm>) -> HitInfo<Self::BounceInfo> {
         use Coloring::*;
@@ -52,7 +57,9 @@ impl HasHitInfo for Sphere {
             use nalgebra::vector;
             vector![0.0,0.0,0.0]
         };
-        HitInfo {rgb, emissive, pos, norm, bounce_info: Some(())}
+        let bounce_info = BounceInfo { seeding: self.mat.generate_seed() }; // AHHHH NOTE: PENIS
+
+        HitInfo {rgb, emissive, pos, norm, dls: self.mat.should_dls(&bounce_info.seeding), bounce_info: Some(bounce_info)}
     }
 }
 

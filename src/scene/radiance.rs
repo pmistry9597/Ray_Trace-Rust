@@ -30,18 +30,18 @@ pub fn radiance(ray: &Ray, objs: &Vec<Obj>, depth: i32) -> (Vector3<f32>, Option
                     let (new_ray, p) = obj.shoot_new_ray(ray, &hit_info);
                     let (incoming_rgb, incoming_idx) = radiance(&new_ray, objs, depth + 1);
     
-                    // let mul = if hit_info.dls {
-                    //     let omit_idxs = if incoming_idx.is_some() {
-                    //         vec![obj_idx, incoming_idx.unwrap()]
-                    //     } else {
-                    //         vec![obj_idx]
-                    //     };
-                    //     let light_contrib = establish_dls_contrib(&omit_idxs, objs, &hit_info, ray);
-                    //     incoming_rgb / p + light_contrib
-                    // } else {
-                    //     incoming_rgb / p
-                    // };
-                    let mul = incoming_rgb / p;
+                    let mul = if hit_info.dls {
+                        let omit_idxs = if incoming_idx.is_some() {
+                            vec![obj_idx, incoming_idx.unwrap()]
+                        } else {
+                            vec![obj_idx]
+                        };
+                        let light_contrib = establish_dls_contrib(&omit_idxs, objs, &hit_info, ray);
+                        incoming_rgb / p + light_contrib
+                    } else {
+                        incoming_rgb / p
+                    };
+                    // let mul = incoming_rgb / p;
     
                     (hit_info.emissive + hit_info.rgb.component_mul(&mul), Some(obj_idx))
                 },
@@ -77,7 +77,7 @@ fn russian_roulette_filter<T>(depth: i32, mut hit_info: HitInfo<T>) -> (HitInfo<
 
 // direct light sampling based on https://iquilezles.org/articles/simplepathtracing/
 fn establish_dls_contrib<T>(omit_idxs: &[usize], objs: &Vec<Obj>, hit_info: &HitInfo<T>, ray: &Ray) -> Vector3<f32> {
-    const PI_INV: f32 = 1.0 / std::f32::consts::PI;
+    const NORMZE: f32 = 1.0 / (4.0 * std::f32::consts::PI);
 
     // only use lights and dont use self
     let lights = objs.iter().enumerate()
@@ -87,7 +87,7 @@ fn establish_dls_contrib<T>(omit_idxs: &[usize], objs: &Vec<Obj>, hit_info: &Hit
         let d = (l.c - hit_info.pos).normalize(); // NOTE: change l.c to be sample from light, no assumption that it is a sphere
         let light_dot = d.dot(&hit_info.norm);
 
-        if light_dot > crate::EPS {
+        if light_dot > 0.0 {
             let dls_ray = Ray{ d, o: hit_info.pos }; 
             let (hrs, idxo) = closest_ray_hit(&dls_ray, objs);
 
@@ -95,7 +95,7 @@ fn establish_dls_contrib<T>(omit_idxs: &[usize], objs: &Vec<Obj>, hit_info: &Hit
                 if i == idx { // make sure its the same light source!!
                     let hit_info = objs[idx].hit_info(&hrs[idx].as_ref().unwrap(), ray);
                     // let cos_a_max = 2.0 * std::f32::consts::PI * (1.0 - objs[idx].r.powf(2.0) / (hit_info.pos - objs[idx].c).dot(&(hit_info.pos - objs[idx].c)));
-                    a + light_dot * hit_info.emissive * PI_INV // brdf-esque normalizing, perhaps ask object for brdf value for a ray?
+                    a + light_dot * hit_info.emissive * NORMZE // brdf-esque normalizing, perhaps ask object for brdf value for a ray?
                 } else {
                     a
                 }

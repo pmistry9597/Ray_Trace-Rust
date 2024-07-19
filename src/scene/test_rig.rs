@@ -12,8 +12,7 @@ pub fn walled() -> Scene {
         up: vector![0.0, 1.0, 0.0].normalize(),
         screen_width: 10.0,
         screen_height: 5.0,
-        // lens_r: Some(0.1),
-        lens_r: None,
+        lens_r: Some(0.1),
     };
 
     let wr_x = 15.0;
@@ -60,15 +59,15 @@ pub fn walled() -> Scene {
             // coloring: UsePos(Arc::new(
             //     |pos, sph| vector![0.8, (pos[0] + sph.r - sph.c[0]).abs()/(2.0*sph.r), 0.1])),
             coloring: Solid(vector![0.2, 1.0, 0.5]),
-            mat: CommonMaterial{ divert_ray: DiffSpec(1.0), emissive: None, },
+            mat: CommonMaterial{ divert_ray: DiffSpec(0.7), emissive: None, },
         },
     ];
     let lights = vec![
-        Sphere{c: vector![0.0, 6.0, -15.0], r: 1.0, coloring: Solid(vector![0.0,0.0,0.0]),
-            mat: CommonMaterial{ divert_ray:  Diff, emissive: Some(vector![1.0, 1.0, 1.0] * 30.0)},
+        Sphere{c: vector![0.0, 6.0, -15.0], r: 2.0, coloring: Solid(vector![0.0,0.0,0.0]),
+            mat: CommonMaterial{ divert_ray:  Diff, emissive: Some(vector![1.0, 1.0, 1.0] * 2.0)},
         },
         Sphere{c: vector![1.0, 1.0, -5.0], r: 0.5, coloring: Solid(vector![0.0,0.0,0.0]),
-            mat: CommonMaterial{ divert_ray:  Diff, emissive: Some(vector![1.0, 1.0, 1.0] * 30.0)},
+            mat: CommonMaterial{ divert_ray:  Diff, emissive: Some(vector![1.0, 1.0, 1.0] * 5.0)},
         },
     ];
 

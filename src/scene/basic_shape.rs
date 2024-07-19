@@ -50,13 +50,8 @@ impl HasHitInfo for Sphere {
         } else {
             -norm
         };
-        // let norm = if (perfect_pos - self.c).norm() < (crate::EPS + self.r) { // inside or outside
-        //     norm
-        // } else {
-        //     -norm
-        // };
-        let pos = perfect_pos + norm * crate::EPS; // create offset from surface to prevent errors
 
+        let pos = perfect_pos + norm * crate::EPS; // create offset from surface to prevent errors
         let rgb = match &self.coloring {
             Solid(rgb) => *rgb,
             UsePos(coloring_fn) => coloring_fn(&pos, self),
@@ -91,11 +86,7 @@ impl Hitable for Sphere {
             match ls.into_iter().filter(|e| *e > 0.0).reduce(|prev, e| if e < prev {e} else {prev}) {
                 Some(f) => {
                     let pos = ray.o + ray.d * f;
-                    if ((pos - self.c).norm() - self.r).abs() > crate::EPS { // last minute check that its within surface
-                        None
-                    } else {
-                        Some(HitResult{l: f.into(), intermed: pos})
-                    }
+                    Some(HitResult{l: f.into(), intermed: pos})
                 },
                 None => None,
             }

@@ -51,6 +51,6 @@ fn rgb_f_to_u8(f: &[f32]) -> [u8; 4] {
     let mut out: [u8; 4] = [0; 4];
     // 255.0 * (1.0 - 1.0 / (f * 10.0 + 1.0))
     // powf mapping from from smallpt
-    zip(out.iter_mut(), f.iter()).for_each(|(e, f)| *e = (f.clamp(0.0, 1.0).powf(0.45) * 255.0 + 0.5).trunc() as u8); // assume 0.0 -> 1.0 range
+    zip(out.iter_mut(), f.iter()).for_each(|(e, f)| *e = (f.clamp(0.0, 1.0).powf(0.9) * 255.0 + 0.5).trunc() as u8); // assume 0.0 -> 1.0 range
     out
 }

@@ -19,14 +19,14 @@ pub enum SeedingRay {
 }
 
 fn spec(ray: &Ray, norm: &Vector3<f32>, o: &Vector3<f32>) -> Ray {
-    let d = ray.d - norm * 2.0 * ray.d.dot(&norm);
+    let d = (ray.d - norm * 2.0 * ray.d.dot(&norm)).normalize();
     Ray {d, o: o.clone()}
 }
 
 fn diff(ray: &Ray, norm: &Vector3<f32>, o: &Vector3<f32>) -> Ray {
     // cosine weighted hemisphere importance sampling based on https://www.mathematik.uni-marburg.de/~thormae/lectures/graphics1/code/ImportanceSampling/importance_sampling_notes.pdf
-    let xd = ray.d - norm * (ray.d.dot(&norm));
-    let yd = xd.cross(norm);
+    let xd = (ray.d - norm * (ray.d.dot(&norm))).normalize();
+    let yd = (norm.cross(&xd)).normalize();
 
     let mut rng = rand::thread_rng();
     let u: f32 = rng.gen();
@@ -37,7 +37,7 @@ fn diff(ray: &Ray, norm: &Vector3<f32>, o: &Vector3<f32>) -> Ray {
 
     let x = r * thet.cos();
     let y = r * thet.sin();
-    let d = xd * x + yd * y + norm * (1.0 - u).max(0.0).sqrt();
+    let d = (xd * x + yd * y + norm * (1.0 - u).max(0.0).sqrt()).normalize();
 
     Ray {d, o: o.clone()}
 }

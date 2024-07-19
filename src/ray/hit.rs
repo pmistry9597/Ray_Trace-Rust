@@ -25,7 +25,7 @@ pub trait Hitable { // use I to determine if should select this object
 pub trait HasHitInfo : Hitable {
     type BounceInfo;
 
-    fn hit_info(&self, info: &HitResult<Self::Interm>) -> HitInfo<Self::BounceInfo>;
+    fn hit_info(&self, info: &HitResult<Self::Interm>, ray: &Ray) -> HitInfo<Self::BounceInfo>;
 }
 
 pub trait InteractsWithRay : HasHitInfo {

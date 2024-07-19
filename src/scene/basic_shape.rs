@@ -41,10 +41,20 @@ impl InteractsWithRay for Sphere {
 impl HasHitInfo for Sphere {
     type BounceInfo = BounceInfo;
 
-    fn hit_info(&self, info: &HitResult<Self::Interm>) -> HitInfo<Self::BounceInfo> {
+    fn hit_info(&self, info: &HitResult<Self::Interm>, ray: &Ray) -> HitInfo<Self::BounceInfo> {
         use Coloring::*;
         let perfect_pos = info.intermed;
         let norm = (perfect_pos - self.c).normalize();
+        let norm = if ray.d.dot(&norm) < 0.0 { // inside or outside
+            norm
+        } else {
+            -norm
+        };
+        // let norm = if (perfect_pos - self.c).norm() < (crate::EPS + self.r) { // inside or outside
+        //     norm
+        // } else {
+        //     -norm
+        // };
         let pos = perfect_pos + norm * crate::EPS; // create offset from surface to prevent errors
 
         let rgb = match &self.coloring {
@@ -57,7 +67,7 @@ impl HasHitInfo for Sphere {
             use nalgebra::vector;
             vector![0.0,0.0,0.0]
         };
-        let bounce_info = BounceInfo { seeding: self.mat.generate_seed() }; // AHHHH NOTE: PENIS
+        let bounce_info = BounceInfo { seeding: self.mat.generate_seed() };
 
         HitInfo {rgb, emissive, pos, norm, dls: self.mat.should_dls(&bounce_info.seeding), bounce_info: Some(bounce_info)}
     }
@@ -80,7 +90,12 @@ impl Hitable for Sphere {
 
             match ls.into_iter().filter(|e| *e > 0.0).reduce(|prev, e| if e < prev {e} else {prev}) {
                 Some(f) => {
-                    Some(HitResult{l: f.into(), intermed: (ray.o + ray.d * f)})
+                    let pos = ray.o + ray.d * f;
+                    if ((pos - self.c).norm() - self.r).abs() > crate::EPS { // last minute check that its within surface
+                        None
+                    } else {
+                        Some(HitResult{l: f.into(), intermed: pos})
+                    }
                 },
                 None => None,
             }

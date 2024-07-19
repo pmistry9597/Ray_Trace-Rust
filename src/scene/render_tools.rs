@@ -17,7 +17,7 @@ pub fn render_to_target<F : Fn() -> ()>(render_target: &RenderTarget, scene: &Sc
     let mut sample_count: f32 = 0.0;
     let mut target: Vec<[f32; 3]> = [[0.0, 0.0, 0.0]].repeat((render_target.canv_width * render_target.canv_height).try_into().unwrap());
 
-    let num_samples = 4000;
+    let num_samples = 100000;
     for r_it in 0..num_samples {
         target.par_iter_mut()
             .enumerate()

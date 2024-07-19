@@ -18,7 +18,7 @@ impl RayCompute {
 
         Self {
             x_cf, y_cf,
-            right: cam.d.normalize().cross(&cam.up),
+            right: cam.d.normalize().cross(&cam.up).normalize(),
             x_off: (canv_width as f32) / 2.0,
             y_off: (canv_height as f32) / 2.0,
         }

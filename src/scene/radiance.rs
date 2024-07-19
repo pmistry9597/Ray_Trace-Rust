@@ -22,7 +22,7 @@ pub fn radiance(ray: &Ray, objs: &Vec<Obj>, depth: i32) -> (Vector3<f32>, Option
     if let Some(obj_idx) = idxo { 
         let obj = &objs[obj_idx];
         let hit_result = &hit_results[obj_idx].as_ref().unwrap();
-        let (hit_info, roull_pass) = russian_roulette_filter(depth, obj.hit_info(hit_result));
+        let (hit_info, roull_pass) = russian_roulette_filter(depth, obj.hit_info(hit_result, ray));
 
         if roull_pass {
             match hit_info.bounce_info {
@@ -30,17 +30,18 @@ pub fn radiance(ray: &Ray, objs: &Vec<Obj>, depth: i32) -> (Vector3<f32>, Option
                     let (new_ray, p) = obj.shoot_new_ray(ray, &hit_info);
                     let (incoming_rgb, incoming_idx) = radiance(&new_ray, objs, depth + 1);
     
-                    let mul = if hit_info.dls {
-                        let omit_idxs = if incoming_idx.is_some() {
-                            vec![obj_idx, incoming_idx.unwrap()]
-                        } else {
-                            vec![obj_idx]
-                        };
-                        let light_contrib = establish_dls_contrib(&omit_idxs, objs, &hit_info);
-                        incoming_rgb / p + light_contrib
-                    } else {
-                        incoming_rgb / p
-                    };
+                    // let mul = if hit_info.dls {
+                    //     let omit_idxs = if incoming_idx.is_some() {
+                    //         vec![obj_idx, incoming_idx.unwrap()]
+                    //     } else {
+                    //         vec![obj_idx]
+                    //     };
+                    //     let light_contrib = establish_dls_contrib(&omit_idxs, objs, &hit_info, ray);
+                    //     incoming_rgb / p + light_contrib
+                    // } else {
+                    //     incoming_rgb / p
+                    // };
+                    let mul = incoming_rgb / p;
     
                     (hit_info.emissive + hit_info.rgb.component_mul(&mul), Some(obj_idx))
                 },
@@ -57,11 +58,11 @@ pub fn radiance(ray: &Ray, objs: &Vec<Obj>, depth: i32) -> (Vector3<f32>, Option
 }
 
 fn russian_roulette_filter<T>(depth: i32, mut hit_info: HitInfo<T>) -> (HitInfo<T>, bool) {
-    if depth > 10 {
+    if depth > 5 {
         let mut rng = rand::thread_rng();
         let russ_roull: f32 = rng.gen();
         // let thres = hit_info.rgb.iter().reduce(|prev, e| if e > prev {e} else {prev}).expect("ain't there a max color??");
-        let thres: f32 = 0.5;
+        let thres: f32 = 0.8;
         // println!("russian rollete {} {}", russ_roull, thres);
         if russ_roull < thres {
             hit_info.rgb = hit_info.rgb / thres; // monte carlo normalizing term for when russian roulette active
@@ -75,7 +76,7 @@ fn russian_roulette_filter<T>(depth: i32, mut hit_info: HitInfo<T>) -> (HitInfo<
 }
 
 // direct light sampling based on https://iquilezles.org/articles/simplepathtracing/
-fn establish_dls_contrib<T>(omit_idxs: &[usize], objs: &Vec<Obj>, hit_info: &HitInfo<T>) -> Vector3<f32> {
+fn establish_dls_contrib<T>(omit_idxs: &[usize], objs: &Vec<Obj>, hit_info: &HitInfo<T>, ray: &Ray) -> Vector3<f32> {
     const PI_INV: f32 = 1.0 / std::f32::consts::PI;
 
     // only use lights and dont use self
@@ -92,7 +93,7 @@ fn establish_dls_contrib<T>(omit_idxs: &[usize], objs: &Vec<Obj>, hit_info: &Hit
 
             if let Some(idx) = idxo {
                 if i == idx { // make sure its the same light source!!
-                    let hit_info = objs[idx].hit_info(&hrs[idx].as_ref().unwrap());
+                    let hit_info = objs[idx].hit_info(&hrs[idx].as_ref().unwrap(), ray);
                     // let cos_a_max = 2.0 * std::f32::consts::PI * (1.0 - objs[idx].r.powf(2.0) / (hit_info.pos - objs[idx].c).dot(&(hit_info.pos - objs[idx].c)));
                     a + light_dot * hit_info.emissive * PI_INV // brdf-esque normalizing, perhaps ask object for brdf value for a ray?
                 } else {

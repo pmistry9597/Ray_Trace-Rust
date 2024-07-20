@@ -11,6 +11,7 @@ pub enum DivertRayMethod {
     Spec,
     Diff,
     DiffSpec(f32),
+    Dielectric(f32, f32),
 }
 
 pub enum SeedingRay {
@@ -42,11 +43,44 @@ fn diff(ray: &Ray, norm: &Vector3<f32>, o: &Vector3<f32>) -> Ray {
     Ray {d, o: o.clone()}
 }
 
+fn refract(ray: &Ray, norm: &Vector3<f32>, o: &Vector3<f32>, n_out: &f32, n_in: &f32) -> (Ray, f32) {
+    // adapt from scratchapixel and smallpt
+    let c_ = norm.dot(&ray.d);
+    let into: bool = c_ < 0.0;
+    let (n1, n2, c1, norm_refr) = if into {
+        (*n_out, *n_in, -c_, norm.clone())
+    } else {
+        (*n_in, *n_out, c_, -norm)
+    };
+    let n_over = n1 / n2;
+    let c22 = 1.0 - n_over * n_over * (1.0 - c1 * c1);
+
+    let total_internal: bool = c22 < 0.0;
+    let refl = spec(ray, &norm_refr, o);
+    if total_internal {
+        (refl, 1.0)
+    } else {
+        let trns = n_over * ray.d + norm_refr * (n_over * c1 - c22.sqrt());
+        let r0 = ((n1 - n2) / (n1 + n2)).powf(2.0);
+        let c = 1.0 - if into { c1 } else { trns.dot(norm) };
+        let re = r0 + (1.0 + r0) * c.powf(5.0);
+        
+        let mut rng = rand::thread_rng();
+        let u: f32 = rng.gen();
+
+        if u < re {
+            (refl, 1.0 / re)
+        } else {
+            (Ray {d: trns.normalize(), o: o.clone()}, 1.0 / (1.0 - re))
+        }
+    }
+}
+
 impl CommonMaterial {
     pub fn generate_seed(&self) -> SeedingRay {
         use DivertRayMethod::*;
         match self.divert_ray {
-            Diff | Spec => {
+            Diff | Spec | Dielectric(_, _) => {
                 SeedingRay::NoSeed
             },
             DiffSpec(diffp) => {
@@ -80,7 +114,10 @@ impl CommonMaterial {
                 } else {
                     panic!("seed should be set to DiffSpec!")
                 }
-            }
+            },
+            Dielectric(n_out, n_in) => {
+                refract(ray, norm, o, &n_out, &n_in)
+            },
         }
     }
 }

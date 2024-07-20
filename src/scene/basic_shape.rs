@@ -41,15 +41,15 @@ impl InteractsWithRay for Sphere {
 impl HasHitInfo for Sphere {
     type BounceInfo = BounceInfo;
 
-    fn hit_info(&self, info: &HitResult<Self::Interm>, ray: &Ray) -> HitInfo<Self::BounceInfo> {
+    fn hit_info(&self, info: &HitResult<Self::Interm>, _ray: &Ray) -> HitInfo<Self::BounceInfo> {
         use Coloring::*;
         let perfect_pos = info.intermed;
         let norm = (perfect_pos - self.c).normalize();
-        let norm = if ray.d.dot(&norm) < 0.0 { // inside or outside
-            norm
-        } else {
-            -norm
-        };
+        // let norm = if ray.d.dot(&norm) < 0.0 { // inside or outside
+        //     norm
+        // } else {
+        //     -norm
+        // };
 
         let pos = perfect_pos + norm * crate::EPS; // create offset from surface to prevent errors
         let rgb = match &self.coloring {

@@ -77,7 +77,7 @@ fn russian_roulette_filter<T>(depth: i32, mut hit_info: HitInfo<T>) -> (HitInfo<
 
 // direct light sampling based on https://iquilezles.org/articles/simplepathtracing/
 fn establish_dls_contrib<T>(omit_idxs: &[usize], objs: &Vec<Obj>, hit_info: &HitInfo<T>, ray: &Ray) -> Vector3<f32> {
-    const NORMZE: f32 = 1.0 / (4.0 * std::f32::consts::PI);
+    const NORMZE: f32 = 1.0 / (30.0 * std::f32::consts::PI);
 
     // only use lights and dont use self
     let lights = objs.iter().enumerate()
@@ -117,7 +117,13 @@ fn closest_ray_hit(ray: &Ray, objs: &Vec<Obj>) -> (Vec<Option<HitResult<Vector3<
         .enumerate()
         .filter_map(|(i, hro)| {
             match hro {
-                Some(hr) => Some((i, hr)),
+                Some(hr) => {
+                    if hr.l < (crate::EPS * 10.0).into() { // prevent immediate collision
+                        None
+                    } else {
+                        Some((i, hr))
+                    }
+                },
                 None => None,
             }
         })

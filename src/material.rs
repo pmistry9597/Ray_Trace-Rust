@@ -60,10 +60,10 @@ fn refract(ray: &Ray, norm: &Vector3<f32>, o: &Vector3<f32>, n_out: &f32, n_in: 
     if total_internal {
         (refl, 1.0)
     } else {
-        let trns = n_over * ray.d + norm_refr * (n_over * c1 - c22.sqrt());
+        let trns = n_over * ray.d + norm_refr * (n_over * c1 - c22.sqrt()); // derived from snells law
         let r0 = ((n1 - n2) / (n1 + n2)).powf(2.0);
         let c = 1.0 - if into { c1 } else { trns.dot(norm) };
-        let re = r0 + (1.0 + r0) * c.powf(5.0);
+        let re = r0 + (1.0 + r0) * c.powf(5.0); // schlick approximation for reflection coef in fresnel equation
         
         let mut rng = rand::thread_rng();
         let u: f32 = rng.gen();

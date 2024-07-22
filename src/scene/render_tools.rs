@@ -5,6 +5,8 @@ use super::Scene;
 
 use super::radiance::radiance;
 
+use serde::Deserialize;
+#[derive(Deserialize, Debug)]
 pub struct RenderInfo {
     pub samps_per_pix: i32,
     pub dir_light_samp: bool,

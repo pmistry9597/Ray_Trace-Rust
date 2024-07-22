@@ -9,12 +9,12 @@ mod ui_util;
 fn main() -> Result<(), eframe::Error> {
     env_logger::init();
 
-    let paff = Path::new("/home/moistry/Documents/endeavors/raytracer_graphics_fuck/ray_trace-rust/build_file.yml");
+    let paff = Path::new("/home/moistry/Documents/endeavors/raytracer_graphics_fuck/ray_trace-rust/scheme.yml");
     let mut file = File::open(&paff).expect("file boss???");
-    let mut build = String::new();
-    file.read_to_string(&mut build).unwrap();
+    let mut scheme_dat = String::new();
+    file.read_to_string(&mut scheme_dat).unwrap();
 
-    let scheme = Scheme::from_yml(build);
+    let scheme = Scheme::from_yml(scheme_dat);
 
     let (region_width, region_height) = (1200 as i32, 600 as i32);
     let buffer_renderer = Renderer::new(region_width, region_height, scheme);

@@ -2,11 +2,15 @@ use nalgebra::Vector3;
 use crate::ray::Ray;
 use rand::Rng;
 
+
+use serde::Deserialize;
+#[derive(Deserialize, Debug)]
 pub struct CommonMaterial {
     pub emissive: Option<Vector3<f32>>,
     pub divert_ray: DivertRayMethod,
 }
 
+#[derive(Deserialize, Debug)]
 pub enum DivertRayMethod {
     Spec,
     Diff,

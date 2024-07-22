@@ -45,8 +45,8 @@ impl Renderer {
             out: Arc::new(RenderOut{ buffer_avail }),
 
             consume_on_run: Some(ConsumeOnRun {
-                render_info: scheme.render_info(),
-                cam: scheme.cam(),
+                render_info: scheme.render_info,
+                cam: scheme.cam,
             }),
         }
     }

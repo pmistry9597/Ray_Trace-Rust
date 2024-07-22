@@ -1,23 +1,26 @@
 use nalgebra::Vector3;
 use crate::ray::{Ray, Hitable, HitResult, HitInfo, HasHitInfo, InteractsWithRay};
-use std::sync::Arc;
 use crate::material::*;
+use serde::Deserialize;
 
-pub enum Coloring<S> {
+#[derive(Deserialize, Debug)]
+// pub enum Coloring<S> {
+pub enum Coloring {
     Solid(Vector3<f32>),
-    UsePos(Arc<dyn Fn(&Vector3<f32>, &S) -> Vector3<f32> + Send + Sync>),
+    // UsePos(Arc<dyn Fn(&Vector3<f32>, &S) -> Vector3<f32> + Send + Sync>),
 }
 
 pub struct BounceInfo {
     seeding: SeedingRay,
 }
 
+#[derive(Deserialize, Debug)]
 pub struct Sphere {
     pub c: Vector3<f32>,
     pub r: f32,
 
     // pub rgb: Vector3<f32>,
-    pub coloring: Coloring<Self>,
+    pub coloring: Coloring, //<Self>,
     pub mat: CommonMaterial,
 }
 
@@ -54,7 +57,7 @@ impl HasHitInfo for Sphere {
         let pos = perfect_pos + norm * crate::EPS; // create offset from surface to prevent errors
         let rgb = match &self.coloring {
             Solid(rgb) => *rgb,
-            UsePos(coloring_fn) => coloring_fn(&pos, self),
+            // UsePos(coloring_fn) => coloring_fn(&pos, self),
         };
         let emissive = if let Some(emissive) = self.mat.emissive {
             emissive.clone()

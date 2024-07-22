@@ -1,5 +1,6 @@
 use nalgebra::Vector3;
 use basic_shape::Sphere;
+use serde::Deserialize;
 
 pub mod test_rig;
 mod basic_shape;
@@ -7,6 +8,7 @@ mod render_tools;
 mod radiance;
 pub use render_tools::*;
 
+#[derive(Deserialize, Debug)]
 pub struct Cam {
     pub d: Vector3<f32>, // o -> center of screen, has distance
     pub o: Vector3<f32>,
@@ -17,6 +19,7 @@ pub struct Cam {
     pub lens_r: Option<f32>,
 }
 
+#[derive(Deserialize, Debug)]
 pub struct Scene {
     pub cam: Cam,
     objs: Vec<Sphere>,

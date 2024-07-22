@@ -45,6 +45,7 @@ fn diff(ray: &Ray, norm: &Vector3<f32>, o: &Vector3<f32>) -> Ray {
 
 fn refract(ray: &Ray, norm: &Vector3<f32>, o: &Vector3<f32>, n_out: &f32, n_in: &f32) -> (Ray, f32) {
     // adapt from scratchapixel and smallpt
+    // this helped a bit: https://blog.demofox.org/2020/06/14/casual-shadertoy-path-tracing-3-fresnel-rough-refraction-absorption-orbit-camera/
     let c_ = norm.dot(&ray.d);
     let into: bool = c_ < 0.0;
     let (n1, n2, c1, norm_refr) = if into {

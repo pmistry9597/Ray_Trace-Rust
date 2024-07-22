@@ -5,7 +5,12 @@ use super::Scene;
 
 use super::radiance::radiance;
 
-pub fn render_to_target<F : Fn() -> ()>(render_target: &RenderTarget, scene: &Scene, update_hook: F) {
+pub struct RenderInfo {
+    pub samps_per_pix: i32,
+    pub dir_light_samp: bool,
+}
+
+pub fn render_to_target<F : Fn() -> ()>(render_target: &RenderTarget, scene: &Scene, update_hook: F, render_info: &RenderInfo) {
     use rayon::prelude::*;
 
     let ray_compute = RayCompute::new(&render_target, &scene.cam);
@@ -17,14 +22,14 @@ pub fn render_to_target<F : Fn() -> ()>(render_target: &RenderTarget, scene: &Sc
     let mut sample_count: f32 = 0.0;
     let mut target: Vec<[f32; 3]> = [[0.0, 0.0, 0.0]].repeat((render_target.canv_width * render_target.canv_height).try_into().unwrap());
 
-    let num_samples = 100000;
-    for r_it in 0..num_samples {
+    // let num_samples = 100000;
+    for r_it in 0..render_info.samps_per_pix {
         target.par_iter_mut()
             .enumerate()
             .map(|(i, pix)| (render_target.chunk_to_pix(i.try_into().unwrap()), pix))
             .for_each(|((x, y), pix)| {
                 let ray = ray_compute.pix_cam_to_rand_ray((x,y), &scene.cam);
-                let (rgb, _) = radiance(&ray, &scene.objs, 0);
+                let (rgb, _) = radiance(&ray, &scene.objs, 0, render_info.dir_light_samp);
                 let rgb: Vec<f32> = rgb.iter().copied().collect();
 
                 zip(pix.iter_mut(), &rgb).for_each(|(p, r)| {

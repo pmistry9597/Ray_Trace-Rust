@@ -7,7 +7,7 @@ use rand::Rng;
 
 type Obj = Sphere;
 
-pub fn radiance(ray: &Ray, objs: &Vec<Obj>, depth: i32) -> (Vector3<f32>, Option<usize>) { // color from a ray in a collection of hittable objects, and index of object that was hit
+pub fn radiance(ray: &Ray, objs: &Vec<Obj>, depth: i32, dir_light_samp: bool) -> (Vector3<f32>, Option<usize>) { // color from a ray in a collection of hittable objects, and index of object that was hit
     let (hit_results, idxo) = closest_ray_hit(ray, objs);
     
     // use std::collections::HashSet;
@@ -28,9 +28,9 @@ pub fn radiance(ray: &Ray, objs: &Vec<Obj>, depth: i32) -> (Vector3<f32>, Option
             match hit_info.bounce_info {
                 Some(_) => {
                     let (new_ray, p) = obj.shoot_new_ray(ray, &hit_info);
-                    let (incoming_rgb, incoming_idx) = radiance(&new_ray, objs, depth + 1);
+                    let (incoming_rgb, incoming_idx) = radiance(&new_ray, objs, depth + 1, dir_light_samp);
     
-                    let mul = if hit_info.dls {
+                    let mul = if dir_light_samp && hit_info.dls {
                         let omit_idxs = if incoming_idx.is_some() {
                             vec![obj_idx, incoming_idx.unwrap()]
                         } else {

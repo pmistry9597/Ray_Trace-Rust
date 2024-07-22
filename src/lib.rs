@@ -2,7 +2,7 @@ use std::thread;
 use std::sync::Arc;
 use egui::mutex::Mutex;
 use render_target::RenderTarget;
-pub use scene::RenderInfo;
+pub use scene::{RenderInfo, Scene};
 pub use builder::Scheme;
 
 mod scene;
@@ -20,16 +20,11 @@ pub struct RenderOut {
     pub buffer_avail: ArcMux<Option<BufferMux>>,
 }
 
-struct ConsumeOnRun {
-    render_info: RenderInfo,
-    cam: scene::Cam,
-}
-
 pub struct Renderer {
     target: RenderTarget,
     out: Arc<RenderOut>,
 
-    consume_on_run: Option<ConsumeOnRun>,
+    scheme: Option<Scheme>,
 }
 
 impl Renderer {
@@ -43,11 +38,7 @@ impl Renderer {
         Self {
             target,
             out: Arc::new(RenderOut{ buffer_avail }),
-
-            consume_on_run: Some(ConsumeOnRun {
-                render_info: scheme.render_info,
-                cam: scheme.cam,
-            }),
+            scheme: Some(scheme),
         }
     }
     pub fn get_out(&self) -> Arc<RenderOut> {
@@ -55,12 +46,10 @@ impl Renderer {
     }
     pub fn consume_and_do(mut self) {
         thread::spawn(move || {
-            let mut skene = scene::test_rig::walled();
-            // skene.cam = self.cam;
-            let ConsumeOnRun{
-                cam, render_info
-            } = self.consume_on_run.take().unwrap();
-            skene.cam = cam;
+            let Scheme{
+                cam, render_info, scene_objs
+            } = self.scheme.take().unwrap();
+            let mut skene = Scene { cam, objs: scene_objs.into() };
 
             use nalgebra::{vector, Vector3};
             skene.cam.d = vector![0.5, 0.0, -5.0];

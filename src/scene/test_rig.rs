@@ -1,3 +1,5 @@
+// NOTE: good chance will be removed
+
 use super::{Scene, Cam};
 use nalgebra::vector;
 use super::basic_shape::Coloring::*;

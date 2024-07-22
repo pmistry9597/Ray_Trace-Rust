@@ -9,7 +9,7 @@ mod ui_util;
 fn main() -> Result<(), eframe::Error> {
     env_logger::init();
 
-    let paff = Path::new("/home/moistry/Documents/endeavors/raytracer_graphics_fuck/ray_trace-rust/scheme.yml");
+    let paff = Path::new("../../schemes/walled.yml");
     let mut file = File::open(&paff).expect("file boss???");
     let mut scheme_dat = String::new();
     file.read_to_string(&mut scheme_dat).unwrap();

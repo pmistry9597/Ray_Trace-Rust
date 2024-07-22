@@ -2,8 +2,8 @@ use nalgebra::Vector3;
 use basic_shape::Sphere;
 use serde::Deserialize;
 
-pub mod test_rig;
-mod basic_shape;
+// pub mod test_rig;
+pub mod basic_shape;
 mod render_tools;
 mod radiance;
 pub use render_tools::*;
@@ -22,5 +22,5 @@ pub struct Cam {
 #[derive(Deserialize, Debug)]
 pub struct Scene {
     pub cam: Cam,
-    objs: Vec<Sphere>,
+    pub objs: Vec<Sphere>,
 }

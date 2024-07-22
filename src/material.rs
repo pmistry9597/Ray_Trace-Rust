@@ -10,8 +10,8 @@ pub struct CommonMaterial {
 pub enum DivertRayMethod {
     Spec,
     Diff,
-    DiffSpec(f32),
-    Dielectric(f32, f32),
+    DiffSpec {diffp: f32},
+    Dielectric {n_out: f32, n_in: f32},
 }
 
 pub enum SeedingRay {
@@ -81,10 +81,10 @@ impl CommonMaterial {
     pub fn generate_seed(&self) -> SeedingRay {
         use DivertRayMethod::*;
         match self.divert_ray {
-            Diff | Spec | Dielectric(_, _) => {
+            Diff | Spec | Dielectric {..} => {
                 SeedingRay::NoSeed
             },
-            DiffSpec(diffp) => {
+            DiffSpec {diffp} => {
                 let mut rng = rand::thread_rng();
                 let u: f32 = rng.gen();
 
@@ -94,7 +94,7 @@ impl CommonMaterial {
     }
     pub fn should_dls(&self, seeding: &SeedingRay) -> bool {
         use DivertRayMethod::*;
-        matches!((&self.divert_ray, seeding), (Diff, _) | (DiffSpec(_), SeedingRay::DiffSpec(true)))
+        matches!((&self.divert_ray, seeding), (Diff, _) | (DiffSpec{..}, SeedingRay::DiffSpec(true)))
     }
     pub fn gen_new_ray(&self, ray: &Ray, norm: &Vector3<f32>, o: &Vector3<f32>, seeding: &SeedingRay) -> (Ray, f32) {
         use DivertRayMethod::*;
@@ -105,7 +105,7 @@ impl CommonMaterial {
             Diff => {
                 (diff(ray, norm, o), 1.0)
             },
-            DiffSpec(_) => {
+            DiffSpec {..} => {
                 if let SeedingRay::DiffSpec(should_diff) = seeding {
                     if *should_diff {
                         (diff(ray, norm, o), 1.0)
@@ -116,7 +116,7 @@ impl CommonMaterial {
                     panic!("seed should be set to DiffSpec!")
                 }
             },
-            Dielectric(n_out, n_in) => {
+            Dielectric {n_out, n_in} => {
                 refract(ray, norm, o, &n_out, &n_in)
             },
         }

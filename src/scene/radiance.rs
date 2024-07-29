@@ -5,10 +5,10 @@ use crate::ray::{Hitable, HasHitInfo, InteractsWithRay, HitResult, HitInfo};
 // use std::iter::zip;
 use rand::Rng;
 
-type Obj = Sphere;
+type Element = Sphere;
 
-pub fn radiance(ray: &Ray, objs: &Vec<Obj>, depth: i32, dir_light_samp: bool) -> (Vector3<f32>, Option<usize>) { // color from a ray in a collection of hittable objects, and index of object that was hit
-    let (hit_results, idxo) = closest_ray_hit(ray, objs);
+pub fn radiance(ray: &Ray, elems: &Vec<Element>, depth: i32, dir_light_samp: bool) -> (Vector3<f32>, Option<usize>) { // color from a ray in a collection of hittable objects, and index of object that was hit
+    let (hit_results, idxo) = closest_ray_hit(ray, elems);
     
     // use std::collections::HashSet;
     // let check_set = HashSet::from([(0,0), (1000,0)]);
@@ -19,38 +19,38 @@ pub fn radiance(ray: &Ray, objs: &Vec<Obj>, depth: i32, dir_light_samp: bool) ->
     //     }
     // }
     
-    if let Some(obj_idx) = idxo { 
-        let obj = &objs[obj_idx];
-        let hit_result = &hit_results[obj_idx].as_ref().unwrap();
-        let (hit_info, roull_pass) = russian_roulette_filter(depth, obj.hit_info(hit_result, ray));
+    if let Some(elem_idx) = idxo { 
+        let elem = &elems[elem_idx];
+        let hit_result = &hit_results[elem_idx].as_ref().unwrap();
+        let (hit_info, roull_pass) = russian_roulette_filter(depth, elem.hit_info(hit_result, ray));
 
         if roull_pass {
             match hit_info.bounce_info {
                 Some(_) => {
-                    let (new_ray, p) = obj.shoot_new_ray(ray, &hit_info);
-                    let (incoming_rgb, incoming_idx) = radiance(&new_ray, objs, depth + 1, dir_light_samp);
+                    let (new_ray, p) = elem.shoot_new_ray(ray, &hit_info);
+                    let (incoming_rgb, incoming_idx) = radiance(&new_ray, elems, depth + 1, dir_light_samp);
     
                     let mul = if dir_light_samp && hit_info.dls {
                         let omit_idxs = if incoming_idx.is_some() {
-                            vec![obj_idx, incoming_idx.unwrap()]
+                            vec![elem_idx, incoming_idx.unwrap()]
                         } else {
-                            vec![obj_idx]
+                            vec![elem_idx]
                         };
-                        let light_contrib = establish_dls_contrib(&omit_idxs, objs, &hit_info, ray);
+                        let light_contrib = establish_dls_contrib(&omit_idxs, elems, &hit_info, ray);
                         incoming_rgb / p + light_contrib
                     } else {
                         incoming_rgb / p
                     };
                     // let mul = incoming_rgb / p;
     
-                    (hit_info.emissive + hit_info.rgb.component_mul(&mul), Some(obj_idx))
+                    (hit_info.emissive + hit_info.rgb.component_mul(&mul), Some(elem_idx))
                 },
                 None => {
-                    (hit_info.emissive, Some(obj_idx))
+                    (hit_info.emissive, Some(elem_idx))
                 }
             }
         } else {
-            (hit_info.emissive, Some(obj_idx))
+            (hit_info.emissive, Some(elem_idx))
         }
     } else { 
         (vector![0.0, 0.0, 0.0], None)
@@ -76,11 +76,11 @@ fn russian_roulette_filter<T>(depth: i32, mut hit_info: HitInfo<T>) -> (HitInfo<
 }
 
 // direct light sampling based on https://iquilezles.org/articles/simplepathtracing/
-fn establish_dls_contrib<T>(omit_idxs: &[usize], objs: &Vec<Obj>, hit_info: &HitInfo<T>, ray: &Ray) -> Vector3<f32> {
+fn establish_dls_contrib<T>(omit_idxs: &[usize], elems: &Vec<Element>, hit_info: &HitInfo<T>, ray: &Ray) -> Vector3<f32> {
     const NORMZE: f32 = 1.0 / (30.0 * std::f32::consts::PI);
 
     // only use lights and dont use self
-    let lights = objs.iter().enumerate()
+    let lights = elems.iter().enumerate()
         .filter(|(i,o)| o.emits() && !matches!(omit_idxs.iter().position(|e| *e == *i), Some(_)));
 
     lights.fold(vector![0.0,0.0,0.0], |a, (i,l)| {
@@ -89,11 +89,11 @@ fn establish_dls_contrib<T>(omit_idxs: &[usize], objs: &Vec<Obj>, hit_info: &Hit
 
         if light_dot > 0.0 {
             let dls_ray = Ray{ d, o: hit_info.pos }; 
-            let (hrs, idxo) = closest_ray_hit(&dls_ray, objs);
+            let (hrs, idxo) = closest_ray_hit(&dls_ray, elems);
 
             if let Some(idx) = idxo {
                 if i == idx { // make sure its the same light source!!
-                    let hit_info = objs[idx].hit_info(&hrs[idx].as_ref().unwrap(), ray);
+                    let hit_info = elems[idx].hit_info(&hrs[idx].as_ref().unwrap(), ray);
                     // let cos_a_max = 2.0 * std::f32::consts::PI * (1.0 - objs[idx].r.powf(2.0) / (hit_info.pos - objs[idx].c).dot(&(hit_info.pos - objs[idx].c)));
                     a + light_dot * hit_info.emissive * NORMZE // brdf-esque normalizing, perhaps ask object for brdf value for a ray?
                 } else {
@@ -109,8 +109,8 @@ fn establish_dls_contrib<T>(omit_idxs: &[usize], objs: &Vec<Obj>, hit_info: &Hit
 }
 
 // results of ray closest object closest intersection
-fn closest_ray_hit(ray: &Ray, objs: &Vec<Obj>) -> (Vec<Option<HitResult<Vector3<f32>>>>, Option<usize>) {
-    let hit_results: Vec<_> = objs.iter().map(|obj| obj.intersect(&ray)).collect();
+fn closest_ray_hit(ray: &Ray, elems: &Vec<Element>) -> (Vec<Option<HitResult<Vector3<f32>>>>, Option<usize>) {
+    let hit_results: Vec<_> = elems.iter().map(|elem| elem.intersect(&ray)).collect();
     
     let i_hro = (&hit_results)
         .iter()

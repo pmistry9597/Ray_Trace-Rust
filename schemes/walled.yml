@@ -1,6 +1,10 @@
 render_info:
   samps_per_pix: 100000
-  dir_light_samp: false
+  rad_info:  
+    dir_light_samp: false
+    russ_roull_info:
+      assured_depth: 5
+      max_thres: 0.5
   
 cam:
   d: [0, 0, -1.0]

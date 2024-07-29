@@ -7,7 +7,19 @@ use rand::Rng;
 
 type Element = Sphere;
 
-pub fn radiance(ray: &Ray, elems: &Vec<Element>, depth: i32, dir_light_samp: bool) -> (Vector3<f32>, Option<usize>) { // color from a ray in a collection of hittable objects, and index of object that was hit
+use serde::Deserialize;
+#[derive(Deserialize, Debug)]
+pub struct RadianceInfo {
+    pub dir_light_samp: bool,
+    pub russ_roull_info: RussianRoullInfo,
+}
+#[derive(Deserialize, Debug)]
+pub struct RussianRoullInfo {
+    pub assured_depth: i32,
+    pub max_thres: f32,
+}
+
+pub fn radiance(ray: &Ray, elems: &Vec<Element>, depth: i32, rad_info: &RadianceInfo) -> (Vector3<f32>, Option<usize>) { // color from a ray in a collection of hittable objects, and index of object that was hit
     let (hit_results, idxo) = closest_ray_hit(ray, elems);
     
     // use std::collections::HashSet;
@@ -22,15 +34,16 @@ pub fn radiance(ray: &Ray, elems: &Vec<Element>, depth: i32, dir_light_samp: boo
     if let Some(elem_idx) = idxo { 
         let elem = &elems[elem_idx];
         let hit_result = &hit_results[elem_idx].as_ref().unwrap();
-        let (hit_info, roull_pass) = russian_roulette_filter(depth, elem.hit_info(hit_result, ray));
+        let hit_info = elem.hit_info(hit_result, ray);
+        let (hit_info, roull_pass) = russian_roulette_filter(depth, hit_info, &rad_info.russ_roull_info);
 
         if roull_pass {
             match hit_info.bounce_info {
                 Some(_) => {
                     let (new_ray, p) = elem.shoot_new_ray(ray, &hit_info);
-                    let (incoming_rgb, incoming_idx) = radiance(&new_ray, elems, depth + 1, dir_light_samp);
+                    let (incoming_rgb, incoming_idx) = radiance(&new_ray, elems, depth + 1, rad_info);
     
-                    let mul = if dir_light_samp && hit_info.dls {
+                    let mul = if rad_info.dir_light_samp && hit_info.dls {
                         let omit_idxs = if incoming_idx.is_some() {
                             vec![elem_idx, incoming_idx.unwrap()]
                         } else {
@@ -57,12 +70,12 @@ pub fn radiance(ray: &Ray, elems: &Vec<Element>, depth: i32, dir_light_samp: boo
     }
 }
 
-fn russian_roulette_filter<T>(depth: i32, mut hit_info: HitInfo<T>) -> (HitInfo<T>, bool) {
-    if depth > 5 {
+fn russian_roulette_filter<T>(depth: i32, mut hit_info: HitInfo<T>, russ_roull_info: &RussianRoullInfo) -> (HitInfo<T>, bool) {
+    if depth > russ_roull_info.assured_depth {
         let mut rng = rand::thread_rng();
         let russ_roull: f32 = rng.gen();
-        // let thres = hit_info.rgb.iter().reduce(|prev, e| if e > prev {e} else {prev}).expect("ain't there a max color??");
-        let thres: f32 = 0.8;
+        let color_thres = hit_info.rgb.iter().reduce(|prev, e| if e > prev {e} else {prev}).expect("ain't there a max color??");
+        let thres = russ_roull_info.max_thres.min(*color_thres);
         // println!("russian rollete {} {}", russ_roull, thres);
         if russ_roull < thres {
             hit_info.rgb = hit_info.rgb / thres; // monte carlo normalizing term for when russian roulette active

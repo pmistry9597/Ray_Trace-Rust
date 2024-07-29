@@ -3,13 +3,13 @@ use super::RenderTarget;
 use crate::ray::RayCompute;
 use crate::scene::Scene;
 
-use super::radiance::radiance;
+use super::radiance::{radiance, RadianceInfo};
 
 use serde::Deserialize;
 #[derive(Deserialize, Debug)]
 pub struct RenderInfo {
     pub samps_per_pix: i32,
-    pub dir_light_samp: bool,
+    pub rad_info: RadianceInfo,
 }
 
 pub fn render_to_target<F : Fn() -> ()>(render_target: &RenderTarget, scene: &Scene, update_hook: F, render_info: &RenderInfo) {
@@ -31,7 +31,7 @@ pub fn render_to_target<F : Fn() -> ()>(render_target: &RenderTarget, scene: &Sc
             .map(|(i, pix)| (render_target.chunk_to_pix(i.try_into().unwrap()), pix))
             .for_each(|((x, y), pix)| {
                 let ray = ray_compute.pix_cam_to_rand_ray((x,y), &scene.cam);
-                let (rgb, _) = radiance(&ray, &scene.objs, 0, render_info.dir_light_samp);
+                let (rgb, _) = radiance(&ray, &scene.objs, 0, &render_info.rad_info);
                 let rgb: Vec<f32> = rgb.iter().copied().collect();
 
                 zip(pix.iter_mut(), &rgb).for_each(|(p, r)| {

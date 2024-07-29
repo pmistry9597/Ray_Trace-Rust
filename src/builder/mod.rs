@@ -10,7 +10,7 @@ mod inner;
 pub struct Scheme {
     pub render_info: RenderInfo,
     pub cam: Cam,
-    pub scene_objs: VecInto<ObjectType>,
+    pub scene_objs: VecInto<ElementType>,
 }
 
 impl Scheme {

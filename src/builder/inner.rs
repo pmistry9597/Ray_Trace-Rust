@@ -15,13 +15,13 @@ where
 }
 
 #[derive(Deserialize, Debug)]
-pub enum ObjectType {
+pub enum ElementType {
     Sphere(Sphere), //{c: [f32; 3], r: f32, coloring: [f32; 3], mat: CommonMaterial},
 }
 
-impl From<ObjectType> for Sphere {
-    fn from(val: ObjectType) -> Self {
-        use ObjectType::*;
+impl From<ElementType> for Sphere {
+    fn from(val: ElementType) -> Self {
+        use ElementType::*;
         match val {
             Sphere(s) => s
         }

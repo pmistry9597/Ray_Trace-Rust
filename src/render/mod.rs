@@ -1,5 +1,5 @@
-mod render_tools;
+mod draw_scene;
 mod radiance;
-mod render_target;
-pub use render_tools::*;
-pub use render_target::*;
+mod target;
+pub use draw_scene::*;
+pub use target::*;

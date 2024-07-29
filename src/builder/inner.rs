@@ -1,5 +1,5 @@
 use serde::Deserialize;
-use crate::scene::basic_shape::Sphere;
+use crate::elements::sphere::Sphere;
 
 #[derive(Deserialize, Debug)]
 pub struct VecInto<T>(Vec<T>);

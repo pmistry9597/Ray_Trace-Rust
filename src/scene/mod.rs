@@ -1,9 +1,7 @@
 use nalgebra::Vector3;
-use basic_shape::Sphere;
+use crate::elements::sphere::Sphere;
 use serde::Deserialize;
 
-// pub mod test_rig;
-pub mod basic_shape;
 mod render_tools;
 mod radiance;
 pub use render_tools::*;

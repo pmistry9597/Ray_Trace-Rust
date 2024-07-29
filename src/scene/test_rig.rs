@@ -3,7 +3,7 @@
 use super::{Scene, Cam};
 use nalgebra::vector;
 use super::basic_shape::Coloring::*;
-use super::basic_shape::Sphere;
+use crate::elements::sphere::Sphere;
 use crate::material::{DivertRayMethod, CommonMaterial};
 // use std::sync::Arc;
 

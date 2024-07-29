@@ -1,6 +1,6 @@
 use crate::ray::Ray;
 use nalgebra::{Vector3, vector};
-use super::basic_shape::{Sphere};
+use crate::elements::sphere::Sphere;
 use crate::ray::{Hitable, HasHitInfo, InteractsWithRay, HitResult, HitInfo};
 // use std::iter::zip;
 use rand::Rng;

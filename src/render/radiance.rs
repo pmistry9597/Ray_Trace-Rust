@@ -10,6 +10,7 @@ type Element = Sphere;
 use serde::Deserialize;
 #[derive(Deserialize, Debug)]
 pub struct RadianceInfo {
+    pub debug_single_ray: bool,
     pub dir_light_samp: bool,
     pub russ_roull_info: RussianRoullInfo,
 }
@@ -35,35 +36,40 @@ pub fn radiance(ray: &Ray, elems: &Vec<Element>, depth: i32, rad_info: &Radiance
         let elem = &elems[elem_idx];
         let hit_result = &hit_results[elem_idx].as_ref().unwrap();
         let hit_info = elem.hit_info(hit_result, ray);
-        let (hit_info, roull_pass) = russian_roulette_filter(depth, hit_info, &rad_info.russ_roull_info);
 
-        if roull_pass {
-            match hit_info.bounce_info {
-                Some(_) => {
-                    let (new_ray, p) = elem.shoot_new_ray(ray, &hit_info);
-                    let (incoming_rgb, incoming_idx) = radiance(&new_ray, elems, depth + 1, rad_info);
-    
-                    let mul = if rad_info.dir_light_samp && hit_info.dls {
-                        let omit_idxs = if incoming_idx.is_some() {
-                            vec![elem_idx, incoming_idx.unwrap()]
-                        } else {
-                            vec![elem_idx]
-                        };
-                        let light_contrib = establish_dls_contrib(&omit_idxs, elems, &hit_info, ray);
-                        incoming_rgb / p + light_contrib
-                    } else {
-                        incoming_rgb / p
-                    };
-                    // let mul = incoming_rgb / p;
-    
-                    (hit_info.emissive + hit_info.rgb.component_mul(&mul), Some(elem_idx))
-                },
-                None => {
-                    (hit_info.emissive, Some(elem_idx))
-                }
-            }
+        if rad_info.debug_single_ray {
+            (hit_info.rgb, Some(elem_idx))
         } else {
-            (hit_info.emissive, Some(elem_idx))
+            let (hit_info, roull_pass) = russian_roulette_filter(depth, hit_info, &rad_info.russ_roull_info);
+            
+            if roull_pass {
+                match hit_info.bounce_info {
+                    Some(_) => {
+                        let (new_ray, p) = elem.shoot_new_ray(ray, &hit_info);
+                        let (incoming_rgb, incoming_idx) = radiance(&new_ray, elems, depth + 1, rad_info);
+        
+                        let mul = if rad_info.dir_light_samp && hit_info.dls {
+                            let omit_idxs = if incoming_idx.is_some() {
+                                vec![elem_idx, incoming_idx.unwrap()]
+                            } else {
+                                vec![elem_idx]
+                            };
+                            let light_contrib = establish_dls_contrib(&omit_idxs, elems, &hit_info, ray);
+                            incoming_rgb / p + light_contrib
+                        } else {
+                            incoming_rgb / p
+                        };
+                        // let mul = incoming_rgb / p;
+        
+                        (hit_info.emissive + hit_info.rgb.component_mul(&mul), Some(elem_idx))
+                    },
+                    None => {
+                        (hit_info.emissive, Some(elem_idx))
+                    }
+                }
+            } else {
+                (hit_info.emissive, Some(elem_idx))
+            }
         }
     } else { 
         (vector![0.0, 0.0, 0.0], None)

@@ -1,6 +1,7 @@
 render_info:
   samps_per_pix: 100000
   rad_info:  
+    debug_single_ray: false   ### for debugging
     dir_light_samp: false
     russ_roull_info:
       assured_depth: 5

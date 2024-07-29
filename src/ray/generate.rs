@@ -1,6 +1,5 @@
 use crate::scene::Cam;
 use nalgebra::Vector3;
-use crate::render_target::RenderTarget;
 use super::Ray;
 
 pub struct RayCompute {
@@ -10,17 +9,15 @@ pub struct RayCompute {
 }
 
 impl RayCompute {
-    pub fn new(render_target: &RenderTarget, cam: &Cam) -> Self {
-        let canv_width = render_target.canv_width;
-        let canv_height = render_target.canv_height;
-        let x_cf = cam.screen_width / canv_width as f32;
-        let y_cf = cam.screen_height / canv_height as f32;
+    pub fn new((canv_width, canv_height): (&i32, &i32), cam: &Cam) -> Self {
+        let x_cf = cam.screen_width / *canv_width as f32;
+        let y_cf = cam.screen_height / *canv_height as f32;
 
         Self {
             x_cf, y_cf,
             right: cam.d.normalize().cross(&cam.up).normalize(),
-            x_off: (canv_width as f32) / 2.0,
-            y_off: (canv_height as f32) / 2.0,
+            x_off: (*canv_width as f32) / 2.0,
+            y_off: (*canv_height as f32) / 2.0,
         }
     }
     pub fn pix_cam_to_rand_ray(&self, (x, y): (i32, i32), cam: &Cam) -> Ray { // randomly make over unit square of in-scene pixel

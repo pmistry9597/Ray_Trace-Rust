@@ -1,6 +1,7 @@
 use serde::Deserialize;
 use serde_yaml;
-use crate::scene::{Cam, RenderInfo};
+use crate::scene::Cam;
+use crate::render::RenderInfo;
 use inner::*;
 
 mod inner;

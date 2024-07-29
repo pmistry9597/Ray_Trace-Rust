@@ -1,7 +1,7 @@
 use std::iter::zip;
-use crate::render_target::RenderTarget;
+use super::RenderTarget;
 use crate::ray::RayCompute;
-use super::Scene;
+use crate::scene::Scene;
 
 use super::radiance::radiance;
 
@@ -15,7 +15,7 @@ pub struct RenderInfo {
 pub fn render_to_target<F : Fn() -> ()>(render_target: &RenderTarget, scene: &Scene, update_hook: F, render_info: &RenderInfo) {
     use rayon::prelude::*;
 
-    let ray_compute = RayCompute::new(&render_target, &scene.cam);
+    let ray_compute = RayCompute::new((&render_target.canv_width, &render_target.canv_height), &scene.cam);
 
     use std::time::Instant;
     let start = Instant::now();

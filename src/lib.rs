@@ -1,12 +1,12 @@
 use std::thread;
 use std::sync::Arc;
 use egui::mutex::Mutex;
-use render_target::RenderTarget;
-pub use scene::{RenderInfo, Scene};
+use scene::Scene;
+pub use render::{RenderInfo, RenderTarget};
 pub use builder::Scheme;
 
 mod scene;
-mod render_target;
+mod render;
 mod ray;
 mod material;
 mod builder;
@@ -58,7 +58,7 @@ impl Renderer {
 
             loop {
                 std::mem::swap(&mut skene.cam.d, &mut other_d);
-                scene::render_to_target(&self.target, &skene, || self.update_output(), &render_info);
+                render::render_to_target(&self.target, &skene, || self.update_output(), &render_info);
                 // self.update_output();
                 thread::sleep(std::time::Duration::from_millis(500));
 

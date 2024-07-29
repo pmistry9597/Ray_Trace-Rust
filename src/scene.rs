@@ -1,10 +1,6 @@
-use nalgebra::Vector3;
 use crate::elements::sphere::Sphere;
+use nalgebra::Vector3;
 use serde::Deserialize;
-
-mod render_tools;
-mod radiance;
-pub use render_tools::*;
 
 #[derive(Deserialize, Debug)]
 pub struct Cam {

@@ -34,16 +34,16 @@ impl InteractsWithRay for Sphere {
     }
     fn give_dls_emitter(&self) -> Option<Box<dyn DLSEmitter + '_>> {
         match self.mat.emissive {
-            Some(_) => Some(Box::new(SphereDLSEmitter{sp: self})),
+            Some(_) => Some(Box::new(DLSEmitter_{sp: self})),
             None => None,
         }
     }
 }
 
-struct SphereDLSEmitter<'a> {
+struct DLSEmitter_<'a> {
     sp: &'a Sphere,
 }
-impl<'a> DLSEmitter for SphereDLSEmitter<'a> {
+impl<'a> DLSEmitter for DLSEmitter_<'a> {
     fn dls_ray(&self, pos: &Vector3<f32>, _norm: &Vector3<f32>) -> Vector3<f32> {
         (self.sp.c - pos).normalize()
     }

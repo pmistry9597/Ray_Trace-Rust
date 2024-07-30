@@ -45,7 +45,7 @@ impl From<RayLen> for f32 {
 }
 
 // comparison based on ray distance l
-// treat NAN same as inf so we can do total ordering on l as an f32
+// treat NAN greater than inf so we can do total ordering on l as an f32
 impl Ord for RayLen {
     fn cmp(&self, other: &Self) -> Ordering {
         // let me = self.l; 
@@ -57,11 +57,11 @@ impl Ord for RayLen {
             self.0.partial_cmp(&other.0).expect("But neither are nan!")
         } else {
             let both_nan = me_and_them.iter().all(|e| e.is_nan());
-            let one_inf = me_and_them.iter().any(|e| e.is_infinite());
-            let one_nan = me_and_them.iter().any(|e| e.is_nan());
-            let inf_nan = one_inf && one_nan;
+            // let one_inf = me_and_them.iter().any(|e| e.is_infinite());
+            // let one_nan = me_and_them.iter().any(|e| e.is_nan());
+            // let inf_nan = one_inf && one_nan;
 
-            if both_nan || inf_nan {
+            if both_nan {
                 Ordering::Equal
             } else {
                 if self.0.is_nan() {
@@ -126,15 +126,15 @@ mod ray_len_test {
         assert!(me == them);
     }
     #[test]
-    fn test_nan_inf_eq() {
+    fn test_nan_inf_lt() {
         let me = RayLen(f32::NAN);
         let them = RayLen(f32::INFINITY);
 
-        assert!(me == them);
+        assert!(me > them);
 
         let me = RayLen(f32::INFINITY);
         let them = RayLen(f32::NAN);
 
-        assert!(me == them);
+        assert!(me < them);
     }
 }

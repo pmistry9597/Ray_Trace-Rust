@@ -5,7 +5,7 @@ use std::any::Any;
 
 pub struct HitResult {
     pub l: RayLen, // ray length: ray.d * l + ray.o will give you intersection point 
-    pub intermed: Box<dyn Any>, // data to be plugged into hit_info should the result be required, can be () if not needed
+    pub intermed: Option<Box<dyn Any>>, // data to be plugged into hit_info should the result be required, can be () if not needed
 }
 
 pub struct HitInfo {

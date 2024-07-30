@@ -56,7 +56,7 @@ impl<'a> DLSEmitter for DLSEmitter_<'a> {
 impl HasHitInfo for Sphere {
     fn hit_info(&self, info: &HitResult, _ray: &Ray) -> HitInfo {
         use Coloring::*;
-        let perfect_pos: &Vector3<f32> = &info.intermed.downcast_ref().unwrap();
+        let perfect_pos: &Vector3<f32> = &info.intermed.as_ref().unwrap().downcast_ref().unwrap();
         let norm = (perfect_pos - self.c).normalize();
 
         let pos = perfect_pos + norm * crate::EPS; // create offset from surface to prevent errors
@@ -92,7 +92,7 @@ impl Hitable for Sphere {
             match ls.into_iter().filter(|e| *e > 0.0).reduce(|prev, e| if e < prev {e} else {prev}) {
                 Some(f) => {
                     let pos = ray.o + ray.d * f;
-                    Some(HitResult{l: f.into(), intermed: Box::new(pos)})
+                    Some(HitResult{l: f.into(), intermed: Some(Box::new(pos))})
                 },
                 None => None,
             }

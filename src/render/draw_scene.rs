@@ -31,7 +31,7 @@ pub fn render_to_target<F : Fn() -> ()>(render_target: &RenderTarget, scene: &Sc
             .map(|(i, pix)| (render_target.chunk_to_pix(i.try_into().unwrap()), pix))
             .for_each(|((x, y), pix)| {
                 let ray = ray_compute.pix_cam_to_rand_ray((x,y), &scene.cam);
-                let (rgb, _) = radiance(&ray, &scene.objs, 0, &render_info.rad_info);
+                let (rgb, _) = radiance(&ray, &scene.elems, 0, &render_info.rad_info);
                 let rgb: Vec<f32> = rgb.iter().copied().collect();
 
                 zip(pix.iter_mut(), &rgb).for_each(|(p, r)| {

@@ -15,5 +15,5 @@ pub struct Cam {
 
 pub struct Scene {
     pub cam: Cam,
-    pub objs: Vec<Element>,
+    pub elems: Vec<Element>,
 }

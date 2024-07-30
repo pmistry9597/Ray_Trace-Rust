@@ -2,6 +2,7 @@ use nalgebra::Vector3;
 use crate::ray::{Ray, Hitable, HitResult, HitInfo, HasHitInfo, InteractsWithRay, DLSEmitter};
 use crate::material::*;
 use serde::Deserialize;
+use crate::elements::IsCompleteElement;
 
 #[derive(Deserialize, Debug)]
 // pub enum Coloring<S> {
@@ -24,11 +25,14 @@ pub struct Sphere {
     pub mat: CommonMaterial,
 }
 
+impl IsCompleteElement for Sphere {}
+
 impl InteractsWithRay for Sphere {
-    fn shoot_new_ray(&self, ray: &Ray, hit_info: &HitInfo<Self::BounceInfo>) -> (Ray, f32) {
+    fn shoot_new_ray(&self, ray: &Ray, hit_info: &HitInfo) -> (Ray, f32) {
         let o = &hit_info.pos;
         let norm = &hit_info.norm;
-        let seeding = &hit_info.bounce_info.as_ref().unwrap().seeding;
+        // let bounce_info = &hit_info.bounce_info.as_ref().unwrap();
+        let seeding = &hit_info.bounce_info.as_ref().unwrap().downcast_ref::<BounceInfo>().unwrap().seeding;
 
         self.mat.gen_new_ray(ray, norm, o, &seeding)
     }
@@ -50,17 +54,10 @@ impl<'a> DLSEmitter for DLSEmitter_<'a> {
 }
 
 impl HasHitInfo for Sphere {
-    type BounceInfo = BounceInfo;
-
-    fn hit_info(&self, info: &HitResult<Self::Interm>, _ray: &Ray) -> HitInfo<Self::BounceInfo> {
+    fn hit_info(&self, info: &HitResult, _ray: &Ray) -> HitInfo {
         use Coloring::*;
-        let perfect_pos = info.intermed;
+        let perfect_pos: &Vector3<f32> = &info.intermed.downcast_ref().unwrap();
         let norm = (perfect_pos - self.c).normalize();
-        // let norm = if ray.d.dot(&norm) < 0.0 { // inside or outside
-        //     norm
-        // } else {
-        //     -norm
-        // };
 
         let pos = perfect_pos + norm * crate::EPS; // create offset from surface to prevent errors
         let rgb = match &self.coloring {
@@ -75,14 +72,12 @@ impl HasHitInfo for Sphere {
         };
         let bounce_info = BounceInfo { seeding: self.mat.generate_seed() };
 
-        HitInfo {rgb, emissive, pos, norm, dls: self.mat.should_dls(&bounce_info.seeding), bounce_info: Some(bounce_info)}
+        HitInfo {rgb, emissive, pos, norm, dls: self.mat.should_dls(&bounce_info.seeding), bounce_info: Some(Box::new(bounce_info))}
     }
 }
 
 impl Hitable for Sphere {
-    type Interm = Vector3<f32>;
-
-    fn intersect(&self, ray: &Ray) -> Option<HitResult<Self::Interm>> {
+    fn intersect(&self, ray: &Ray) -> Option<HitResult> {
         // solve quadratic equation for sphere-ray intersection, from https://en.wikipedia.org/wiki/Line%E2%80%93sphere_intersection
         let oc = ray.o - self.c;
         let dir = ray.d.dot(&oc);
@@ -97,7 +92,7 @@ impl Hitable for Sphere {
             match ls.into_iter().filter(|e| *e > 0.0).reduce(|prev, e| if e < prev {e} else {prev}) {
                 Some(f) => {
                     let pos = ray.o + ray.d * f;
-                    Some(HitResult{l: f.into(), intermed: pos})
+                    Some(HitResult{l: f.into(), intermed: Box::new(pos)})
                 },
                 None => None,
             }

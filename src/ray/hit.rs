@@ -1,35 +1,32 @@
 use super::Ray;
 use nalgebra::Vector3;
 use std::cmp::Ordering;
+use std::any::Any;
 
-pub struct HitResult<I> {
+pub struct HitResult {
     pub l: RayLen, // ray length: ray.d * l + ray.o will give you intersection point 
-    pub intermed: I, // data to be plugged into hit_info should the result be required, can be () if not needed
+    pub intermed: Box<dyn Any>, // data to be plugged into hit_info should the result be required, can be () if not needed
 }
 
-pub struct HitInfo<B> {
+pub struct HitInfo {
     pub rgb: Vector3<f32>,
     pub emissive: Vector3<f32>,
     pub pos: Vector3<f32>,
     pub norm: Vector3<f32>,
     pub dls: bool,
-    pub bounce_info: Option<B>,
+    pub bounce_info: Option<Box<dyn Any>>,
 }
 
 pub trait Hitable { // use I to determine if should select this object
-    type Interm;
-
-    fn intersect(&self, ray: &Ray) -> Option<HitResult<Self::Interm>>;
+    fn intersect(&self, ray: &Ray) -> Option<HitResult>;
 }
 
 pub trait HasHitInfo : Hitable {
-    type BounceInfo;
-
-    fn hit_info(&self, info: &HitResult<Self::Interm>, ray: &Ray) -> HitInfo<Self::BounceInfo>;
+    fn hit_info(&self, info: &HitResult, ray: &Ray) -> HitInfo;
 }
 
 pub trait InteractsWithRay : HasHitInfo {
-    fn shoot_new_ray(&self, ray: &Ray, hit_info: &HitInfo<Self::BounceInfo>) -> (Ray, f32); // second is probability that the ray was shot
+    fn shoot_new_ray(&self, ray: &Ray, hit_info: &HitInfo) -> (Ray, f32); // second is probability that the ray was shot
     fn give_dls_emitter(&self) -> Option<Box<dyn DLSEmitter + '_>>;
 }
 

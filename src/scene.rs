@@ -1,6 +1,6 @@
-use crate::elements::sphere::Sphere;
 use nalgebra::Vector3;
 use serde::Deserialize;
+use crate::elements::Element;
 
 #[derive(Deserialize, Debug)]
 pub struct Cam {
@@ -13,8 +13,7 @@ pub struct Cam {
     pub lens_r: Option<f32>,
 }
 
-#[derive(Deserialize, Debug)]
 pub struct Scene {
     pub cam: Cam,
-    pub objs: Vec<Sphere>,
+    pub objs: Vec<Element>,
 }

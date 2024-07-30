@@ -47,10 +47,15 @@ impl Renderer {
     }
     pub fn consume_and_do(mut self) {
         thread::spawn(move || {
-            let Scheme{
-                cam, render_info, scene_objs
+            let Scheme {
+                cam, render_info, scene_elems
             } = self.scheme.take().unwrap();
-            let mut skene = Scene { cam, objs: scene_objs.into() };
+            
+            // ------------ cube map insertcion test ------------
+            let mut skene = Scene { cam, elems: scene_elems.into() };
+            use crate::elements::distant_cube_map::DistantCubeMap;
+            skene.elems.push(Box::new(DistantCubeMap{}));
+            // ------------ ------------ ------------ ------------
 
             use nalgebra::{vector, Vector3};
             skene.cam.d = vector![0.5, 0.0, -5.0];

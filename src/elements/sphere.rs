@@ -28,13 +28,13 @@ pub struct Sphere {
 impl IsCompleteElement for Sphere {}
 
 impl InteractsWithRay for Sphere {
-    fn shoot_new_ray(&self, ray: &Ray, hit_info: &HitInfo) -> (Ray, f32) {
+    fn shoot_new_ray(&self, ray: &Ray, hit_info: &HitInfo) -> Option<(Ray, f32)> {
         let o = &hit_info.pos;
         let norm = &hit_info.norm;
         // let bounce_info = &hit_info.bounce_info.as_ref().unwrap();
         let seeding = &hit_info.bounce_info.as_ref().unwrap().downcast_ref::<BounceInfo>().unwrap().seeding;
 
-        self.mat.gen_new_ray(ray, norm, o, &seeding)
+        Some(self.mat.gen_new_ray(ray, norm, o, &seeding))
     }
     fn give_dls_emitter(&self) -> Option<Box<dyn DLSEmitter + '_>> {
         match self.mat.emissive {

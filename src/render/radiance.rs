@@ -42,7 +42,7 @@ pub fn radiance(ray: &Ray, elems: &Vec<Element>, depth: i32, rad_info: &Radiance
             if roull_pass {
                 match hit_info.bounce_info {
                     Some(_) => {
-                        let (new_ray, p) = elem.shoot_new_ray(ray, &hit_info);
+                        let (new_ray, p) = elem.shoot_new_ray(ray, &hit_info).expect("cant shoot a ray??");
                         let (incoming_rgb, incoming_idx) = radiance(&new_ray, elems, depth + 1, rad_info);
         
                         let mul = if rad_info.dir_light_samp && hit_info.dls {

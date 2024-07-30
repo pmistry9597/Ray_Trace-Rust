@@ -26,7 +26,7 @@ pub trait HasHitInfo : Hitable {
 }
 
 pub trait InteractsWithRay : HasHitInfo {
-    fn shoot_new_ray(&self, ray: &Ray, hit_info: &HitInfo) -> (Ray, f32); // second is probability that the ray was shot
+    fn shoot_new_ray(&self, ray: &Ray, hit_info: &HitInfo) -> Option<(Ray, f32)>; // second is probability that the ray was shot
     fn give_dls_emitter(&self) -> Option<Box<dyn DLSEmitter + '_>>;
 }
 

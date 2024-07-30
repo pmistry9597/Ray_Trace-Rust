@@ -29,9 +29,12 @@ pub trait HasHitInfo : Hitable {
 }
 
 pub trait InteractsWithRay : HasHitInfo {
-    fn shoot_new_ray(&self, ray: &Ray, hit_info: &HitInfo<Self::BounceInfo>) -> (Ray, f32); // probability that the ray was shot
-    // fn does_dls(&self) -> bool;
-    fn emits(&self) -> bool;
+    fn shoot_new_ray(&self, ray: &Ray, hit_info: &HitInfo<Self::BounceInfo>) -> (Ray, f32); // second is probability that the ray was shot
+    fn give_dls_emitter(&self) -> Option<Box<dyn DLSEmitter + '_>>;
+}
+
+pub trait DLSEmitter {
+    fn dls_ray(&self, pos: &Vector3<f32>, norm: &Vector3<f32>) -> Vector3<f32>; // return a possible ray direction for dls with given pos and normal of hit point, should be unit vector
 }
 
 #[derive(Clone)]

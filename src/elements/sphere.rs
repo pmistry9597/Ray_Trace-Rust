@@ -1,5 +1,5 @@
 use nalgebra::Vector3;
-use crate::ray::{Ray, Hitable, HitResult, HitInfo, HasHitInfo, InteractsWithRay};
+use crate::ray::{Ray, Hitable, HitResult, HitInfo, HasHitInfo, InteractsWithRay, DLSEmitter};
 use crate::material::*;
 use serde::Deserialize;
 
@@ -32,12 +32,20 @@ impl InteractsWithRay for Sphere {
 
         self.mat.gen_new_ray(ray, norm, o, &seeding)
     }
-    // fn does_dls(&self) -> bool {
-    //     use DivertRayMethod::*;
-    //     matches!(self.mat.divert_ray, Diff | DiffSpec(_))
-    // }
-    fn emits(&self) -> bool {
-        self.mat.emissive.is_some()
+    fn give_dls_emitter(&self) -> Option<Box<dyn DLSEmitter + '_>> {
+        match self.mat.emissive {
+            Some(_) => Some(Box::new(SphereDLSEmitter{sp: self})),
+            None => None,
+        }
+    }
+}
+
+struct SphereDLSEmitter<'a> {
+    sp: &'a Sphere,
+}
+impl<'a> DLSEmitter for SphereDLSEmitter<'a> {
+    fn dls_ray(&self, pos: &Vector3<f32>, _norm: &Vector3<f32>) -> Vector3<f32> {
+        (self.sp.c - pos).normalize()
     }
 }
 

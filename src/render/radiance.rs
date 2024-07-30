@@ -98,12 +98,14 @@ fn russian_roulette_filter<T>(depth: i32, mut hit_info: HitInfo<T>, russ_roull_i
 fn establish_dls_contrib<T>(omit_idxs: &[usize], elems: &Vec<Element>, hit_info: &HitInfo<T>, ray: &Ray) -> Vector3<f32> {
     const NORMZE: f32 = 1.0 / (30.0 * std::f32::consts::PI);
 
-    // only use lights and dont use self
-    let lights = elems.iter().enumerate()
-        .filter(|(i,o)| o.emits() && !matches!(omit_idxs.iter().position(|e| *e == *i), Some(_)));
+    // only use valid lights
+    let emitters = elems.iter().enumerate()
+        .map(|(i,o)| (i, o.give_dls_emitter()))
+        .filter(|(i,e)| e.is_some() && !omit_idxs.contains(i))
+        .map(|(i,e)| (i, e.unwrap()));
 
-    lights.fold(vector![0.0,0.0,0.0], |a, (i,l)| {
-        let d = (l.c - hit_info.pos).normalize(); // NOTE: change l.c to be sample from light, no assumption that it is a sphere
+    emitters.fold(vector![0.0,0.0,0.0], |a, (i,emitter)| {
+        let d = emitter.dls_ray(&hit_info.pos, &hit_info.norm);
         let light_dot = d.dot(&hit_info.norm);
 
         if light_dot > 0.0 {

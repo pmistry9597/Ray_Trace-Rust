@@ -4,15 +4,16 @@ use crate::elements::IsCompleteElement;
 use image::{ImageBuffer, Pixel};
 
 type FaceImage = ImageBuffer<image::Rgb<f32>, Vec<f32>>;
+type FaceImagewUVScale = (FaceImage, f32, f32);
 
 // for environment mapping, all rays can hit this
 pub struct DistantCubeMap {
-    pub neg_z: FaceImage,
-    pub pos_z: FaceImage,
-    pub neg_x: FaceImage,
-    pub pos_x: FaceImage,
-    pub neg_y: FaceImage,
-    pub pos_y: FaceImage,
+    pub neg_z: FaceImagewUVScale,
+    pub pos_z: FaceImagewUVScale,
+    pub neg_x: FaceImagewUVScale,
+    pub pos_x: FaceImagewUVScale,
+    pub neg_y: FaceImagewUVScale,
+    pub pos_y: FaceImagewUVScale,
 }
 
 impl IsCompleteElement for DistantCubeMap {}
@@ -45,21 +46,21 @@ impl HasHitInfo for DistantCubeMap {
                 let (u, v) = (d[2], d[1]);
                 let fact = d[0];
 
-                (u, -v, fact, &self.pos_x)
+                (u, v, fact, &self.pos_x)
             },
             (1, Ordering::Less) => {
                 let d = ray.d.normalize();
                 let (u, v) = (d[0], d[2]);
                 let fact = d[1];
 
-                (-u, -v, fact, &self.neg_y)
+                (-u, v, fact, &self.neg_y)
             },
             (1, Ordering::Greater) => {
                 let d = ray.d.normalize();
                 let (u, v) = (d[0], d[2]);
                 let fact = d[1];
 
-                (u, -v, fact, &self.pos_y)
+                (-u, v, fact, &self.pos_y)
             },
             (2, Ordering::Less) => {
                 let d = ray.d.normalize();
@@ -89,11 +90,13 @@ impl HasHitInfo for DistantCubeMap {
     }
 }
 
-fn sample_face(u: f32, v: f32, fact: f32, face: &FaceImage) -> Vector3<f32> {
+fn sample_face(u: f32, v: f32, fact: f32, facewscale: &FaceImagewUVScale) -> Vector3<f32> {
+    let (_, us, vs) = *facewscale;
+    let face = &facewscale.0;
     let width = face.width() as f32;
     let height = face.height() as f32;
 
-    let (u, v) = (0.5 * u / fact + 0.5, 0.5 * v / fact + 0.5);
+    let (u, v) = (0.5 * u * us / fact + 0.5, 0.5 * v * vs / fact + 0.5);
     let rgb: Vec<f32> = face.get_pixel((u * width).min(width-1.0).trunc() as u32, (v * height).min(height-1.0).trunc() as u32).channels().to_vec();
     let rgb: [f32; 3] = rgb.try_into().unwrap();
     rgb.into()

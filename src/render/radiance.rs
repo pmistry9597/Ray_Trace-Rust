@@ -136,7 +136,7 @@ fn closest_ray_hit(ray: &Ray, elems: &Vec<Element>) -> (Vec<Option<HitResult>>, 
         .filter_map(|(i, hro)| {
             match hro {
                 Some(hr) => {
-                    if hr.l < (crate::EPS * 10.0).into() { // prevent immediate collision
+                    if hr.l < (crate::EPS * 20.0).into() { // prevent immediate collision
                         None
                     } else {
                         Some((i, hr))

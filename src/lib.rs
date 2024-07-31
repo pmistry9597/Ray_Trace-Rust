@@ -57,17 +57,9 @@ impl Renderer {
             skene.elems.push(Box::new(DistantCubeMap{}));
             // ------------ ------------ ------------ ------------
 
-            use nalgebra::{vector, Vector3};
-            skene.cam.d = vector![0.5, 0.0, -5.0];
-            let mut other_d: Vector3<f32> = vector![-0.5, 0.0, -5.0];
-
-            loop {
-                std::mem::swap(&mut skene.cam.d, &mut other_d);
-                render::render_to_target(&self.target, &skene, || self.update_output(), &render_info);
-                // self.update_output();
-                thread::sleep(std::time::Duration::from_millis(500));
-
-            }
+            render::render_to_target(&self.target, &skene, || self.update_output(), &render_info);
+            // self.update_output();
+            // thread::sleep(std::time::Duration::from_millis(500));
         });
     }
 

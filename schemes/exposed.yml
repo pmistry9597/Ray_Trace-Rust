@@ -8,8 +8,8 @@ render_info:
       max_thres: 0.5
   
 cam:
-  d: [0, 0, -1.0]
-  o: [0, -1, 0]
+  d: [0, 0, -5.0]
+  o: [-1, 0, 2]
   up: [0, 1, 0]
 
   # lens_r: 0.1
@@ -21,7 +21,7 @@ scene_elems:
   #### elements
   - !Sphere
     c: [1.0, -5, -20.0]
-    r: 4.0
+    r: 3.0
     coloring: !Solid [0.6, 0.0, 0.8]
     mat:
       divert_ray: Diff
@@ -111,9 +111,9 @@ scene_elems:
   #   mat:
   #     divert_ray: Diff
   - !Sphere
-    c: [0.0, -510.0, -10.0]
-    r: 500.0
-    coloring: !Solid [0.75, 0.75, 0.75]
+    c: [0.0, -10010.0, -10.0]
+    r: 10000.0
+    coloring: !Solid [0.3, 0.3, 0.3]
     mat:
       divert_ray: Diff
   # - !Sphere

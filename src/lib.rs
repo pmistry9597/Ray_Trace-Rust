@@ -53,8 +53,17 @@ impl Renderer {
             
             // ------------ cube map insertcion test ------------
             let mut skene = Scene { cam, elems: scene_elems.into() };
-            use crate::elements::distant_cube_map::DistantCubeMap;
-            skene.elems.push(Box::new(DistantCubeMap{}));
+            use crate::elements::distant_cube_map::{DistantCubeMap};
+            // use image::ImageReader;
+            // let neg_z_face = ;
+            skene.elems.push(Box::new(DistantCubeMap{
+                neg_z: image::open("../../../assets/skybox/front.jpg").unwrap().into_rgb32f(),
+                pos_z: image::open("../../../assets/skybox/back.jpg").unwrap().into_rgb32f(),
+                neg_x: image::open("../../../assets/skybox/left.jpg").unwrap().into_rgb32f(),
+                pos_x: image::open("../../../assets/skybox/right.jpg").unwrap().into_rgb32f(),
+                neg_y: image::open("../../../assets/skybox/bottom.jpg").unwrap().into_rgb32f(),
+                pos_y: image::open("../../../assets/skybox/top.jpg").unwrap().into_rgb32f(),
+            }));
             // ------------ ------------ ------------ ------------
 
             render::render_to_target(&self.target, &skene, || self.update_output(), &render_info);

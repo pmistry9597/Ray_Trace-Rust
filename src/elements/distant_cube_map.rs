@@ -4,7 +4,7 @@ use crate::elements::IsCompleteElement;
 use image::{ImageBuffer, Pixel};
 
 type FaceImage = ImageBuffer<image::Rgb<f32>, Vec<f32>>;
-type FaceImagewUVScale = (FaceImage, f32, f32);
+pub type FaceImagewUVScale = (FaceImage, f32, f32);
 
 // for environment mapping, all rays can hit this
 pub struct DistantCubeMap {
@@ -32,51 +32,23 @@ impl HasHitInfo for DistantCubeMap {
             .reduce(|(prev_i, prev_c), (i, c)| if c.abs() > prev_c.abs() {(i, c)} else {(prev_i, prev_c)})
             .unwrap();
         
+        let d = ray.d.normalize();
         use std::cmp::Ordering;
-        let (u, v, fact, face) = match (max_idx, max_c.partial_cmp(&0.0).expect(&format!("wtf {}", max_c))) {
-            (0, Ordering::Less) => {
-                let d = ray.d.normalize();
-                let (u, v) = (d[2], d[1]);
-                let fact = d[0];
+        let (u, v, fact, face) = 
+            match (max_idx, max_c.partial_cmp(&0.0).expect(&format!("wtf {}", max_c))) {
+                (0, Ordering::Less) => (d.z, d.y, d.x, &self.neg_x),
 
-                (u, v, fact, &self.neg_x)
-            },
-            (0, Ordering::Greater) => {
-                let d = ray.d.normalize();
-                let (u, v) = (d[2], d[1]);
-                let fact = d[0];
+                (0, Ordering::Greater) => (d.z, d.y, d.x, &self.pos_x),
 
-                (u, v, fact, &self.pos_x)
-            },
-            (1, Ordering::Less) => {
-                let d = ray.d.normalize();
-                let (u, v) = (d[0], d[2]);
-                let fact = d[1];
+                (1, Ordering::Less) => (d.x, d.z, d.y, &self.neg_y),
 
-                (-u, v, fact, &self.neg_y)
-            },
-            (1, Ordering::Greater) => {
-                let d = ray.d.normalize();
-                let (u, v) = (d[0], d[2]);
-                let fact = d[1];
+                (1, Ordering::Greater) => (d.x, d.z, d.y, &self.pos_y),
 
-                (-u, v, fact, &self.pos_y)
-            },
-            (2, Ordering::Less) => {
-                let d = ray.d.normalize();
-                let (u, v) = (d[0], d[1]);
-                let fact = d[2];
+                (2, Ordering::Less) => (d.x, d.y, d.z, &self.neg_z),
 
-                (-u, v, fact, &self.neg_z)
-            },
-            (2, Ordering::Greater) => {
-                let d = ray.d.normalize();
-                let (u, v) = (d[0], d[1]);
-                let fact = d[2];
+                (2, Ordering::Greater) => (d.x, d.y, d.z, &self.pos_z),
 
-                (-u, -v, fact, &self.pos_z)
-            },
-            _ => { panic!("this should be impossible!!") },
+                _ => { panic!("this should be impossible!!") },
         };
 
         HitInfo {

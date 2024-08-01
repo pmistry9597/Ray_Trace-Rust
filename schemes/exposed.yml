@@ -1,7 +1,7 @@
 render_info:
   samps_per_pix: 100000
   rad_info:  
-    debug_single_ray: false   ### for debugging
+    debug_single_ray: false
     dir_light_samp: false
     russ_roull_info:
       assured_depth: 5
@@ -33,7 +33,9 @@ scene_elems:
     r: 3.0
     coloring: !Solid [0.6, 0.0, 0.8]
     mat:
-      divert_ray: Diff
+      divert_ray: 
+        !DiffSpec 
+          diffp: 0.9
 
   - !Sphere
     c: [-3.0, 0.0, -6.0]

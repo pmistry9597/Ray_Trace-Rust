@@ -3,13 +3,18 @@ use ui_util::ui_on_render_out;
 use std::fs::File;
 use std::path::Path;
 use std::io::prelude::*;
+use std::env;
 
 mod ui_util;
 
 fn main() -> Result<(), eframe::Error> {
     env_logger::init();
 
-    let paff = Path::new("../../schemes/exposed.yml");
+    let path = match env::args().nth(1) {
+        Some(p) => p,
+        None => "../../schemes/exposed.yml".to_string(),
+    };
+    let paff = Path::new(&path);
     let mut file = File::open(&paff).expect("file boss???");
     let mut scheme_dat = String::new();
     file.read_to_string(&mut scheme_dat).unwrap();

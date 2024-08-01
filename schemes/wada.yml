@@ -1,0 +1,85 @@
+### my attempt at wada ADAPTED FROM smallpt
+
+render_info:
+  samps_per_pix: 100000
+  rad_info:  
+    debug_single_ray: false
+    dir_light_samp: false
+    russ_roull_info:
+      assured_depth: 5
+      max_thres: 0.5
+  
+cam:
+  d: [0, 0, -11.0]
+  o: [50,45,298.6]
+  up: [0, 1, 0]
+
+  # lens_r: 0.05
+
+  screen_width: 10.0
+  screen_height: 5.0
+
+scene_elems:
+  ## sky
+  - !Sphere
+    c: [50, 100, 0]
+    r: 100000
+    coloring: !Solid [0,0,0]
+    mat:
+      emissive: [15,15,15]
+      divert_ray: Diff
+  ## ground
+  - !Sphere
+    c: [50, -10129, 0]
+    r: 10000
+    coloring: !Solid [0.1,0.1,0.1]
+    mat:
+      divert_ray: Diff
+  ## red
+  - !Sphere
+    c: [109.996, 75.44, 62]
+    r: 60
+    coloring: !Solid [.999, .2, .2]
+    mat:
+      divert_ray: Spec
+  ## green
+  - !Sphere
+    c: [-10, 75.44, 62]
+    r: 60
+    coloring: !Solid [.2, .999, .2]
+    mat:
+      divert_ray: Spec
+  ## blue
+  - !Sphere
+    c: [50, -28.48, 62]
+    r: 60
+    coloring: !Solid [.2, .2, .999]
+    mat:
+      divert_ray: Spec
+  ## back
+  - !Sphere
+    c: [50, 40.8, -7.28]
+    r: 60
+    coloring: !Solid [.7, .7, .7]
+    mat:
+      divert_ray: Spec
+  ## front glass
+  - !Sphere
+    c: [50, 40.8, 160]
+    r: 60
+    coloring: !Solid [.999,.999,.999]
+    mat:
+      divert_ray:
+        !Dielectric 
+          n_out: 1.0
+          n_in: 1.5
+   ## front glass 2 :P
+  # - !Sphere
+  #   c: [50, 45.8, 200]
+  #   r: 30
+  #   coloring: !Solid [.999,.999,.999]
+  #   mat:
+  #     divert_ray:
+  #       !Dielectric 
+  #         n_out: 1.0
+  #         n_in: 1.5

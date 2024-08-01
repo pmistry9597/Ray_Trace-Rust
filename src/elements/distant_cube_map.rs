@@ -19,14 +19,12 @@ pub struct DistantCubeMap {
 impl IsCompleteElement for DistantCubeMap {}
 
 impl InteractsWithRay for DistantCubeMap {
-    fn shoot_new_ray(&self, _ray: &Ray, _hit_info: &HitInfo) -> Option<(Ray, f32)> { None } // cant shoot new ray silly
+    fn continue_ray(&self, _ray: &Ray, _hit_info: &HitInfo) -> Option<(Vector3<f32>, Ray, f32)> { None } // cant shoot new ray silly
     fn give_dls_emitter(&self) -> Option<Box<dyn DLSEmitter + '_>> { None } // maybe ill do this? for a skybox it seems almost unnecessary since all rays can hit
 }
 
 impl HasHitInfo for DistantCubeMap {
     fn hit_info(&self, _info: &HitResult, ray: &Ray) -> HitInfo {
-        use nalgebra::vector;
-        
         let comps: &[f32] = (&ray.d).into();
         let (max_idx, max_c) = comps.iter().enumerate()
             .reduce(|(prev_i, prev_c), (i, c)| if c.abs() > prev_c.abs() {(i, c)} else {(prev_i, prev_c)})
@@ -52,7 +50,6 @@ impl HasHitInfo for DistantCubeMap {
         };
 
         HitInfo {
-            rgb: vector![0.0,0.0,0.0],
             emissive: sample_face(u, v, fact, face), //: vector![0.7,0.7,1.0] * atten + red_comp,
             pos: ray.d * f32::INFINITY,
             norm: -ray.d,

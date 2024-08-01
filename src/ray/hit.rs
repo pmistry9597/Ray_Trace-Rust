@@ -9,7 +9,6 @@ pub struct HitResult {
 }
 
 pub struct HitInfo {
-    pub rgb: Vector3<f32>,
     pub emissive: Vector3<f32>,
     pub pos: Vector3<f32>,
     pub norm: Vector3<f32>,
@@ -26,7 +25,7 @@ pub trait HasHitInfo : Hitable {
 }
 
 pub trait InteractsWithRay : HasHitInfo {
-    fn shoot_new_ray(&self, ray: &Ray, hit_info: &HitInfo) -> Option<(Ray, f32)>; // second is probability that the ray was shot
+    fn continue_ray(&self, ray: &Ray, hit_info: &HitInfo) -> Option<(Vector3<f32>, Ray, f32)>; // vec is color, f32 is probability that the ray was shot
     fn give_dls_emitter(&self) -> Option<Box<dyn DLSEmitter + '_>>;
 }
 

@@ -5,7 +5,7 @@ use rand::Rng;
 
 use serde::Deserialize;
 #[derive(Deserialize, Debug)]
-pub struct CommonMaterial {
+pub struct DiffuseSpecNoBaseMaterial {
     pub emissive: Option<Vector3<f32>>,
     pub divert_ray: DivertRayMethod,
 }
@@ -81,7 +81,7 @@ fn refract(ray: &Ray, norm: &Vector3<f32>, o: &Vector3<f32>, n_out: &f32, n_in: 
     }
 }
 
-impl CommonMaterial {
+impl DiffuseSpecNoBaseMaterial {
     pub fn generate_seed(&self) -> SeedingRay {
         use DivertRayMethod::*;
         match self.divert_ray {

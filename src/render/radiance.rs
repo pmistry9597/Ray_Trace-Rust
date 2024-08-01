@@ -35,14 +35,18 @@ pub fn radiance(ray: &Ray, elems: &Vec<Element>, depth: i32, rad_info: &Radiance
         let hit_info = elem.hit_info(hit_result, ray);
 
         if rad_info.debug_single_ray {
-            (hit_info.rgb, Some(elem_idx))
+            (hit_info.emissive, Some(elem_idx))
         } else {
-            let (hit_info, roull_pass) = russian_roulette_filter(depth, hit_info, &rad_info.russ_roull_info);
+            let (roull_pass, atten) = russian_roulette_filter(depth, &rad_info.russ_roull_info);
             
             if roull_pass {
                 match hit_info.bounce_info {
                     Some(_) => {
-                        let (new_ray, p) = elem.shoot_new_ray(ray, &hit_info).expect("cant shoot a ray??");
+                        let (rgb, new_ray, p) = elem.continue_ray(ray, &hit_info).expect("cant shoot a ray??");
+                        let rgb = match atten {
+                            Some(f) => rgb / *f,
+                            None => rgb,
+                        };
                         let (incoming_rgb, incoming_idx) = radiance(&new_ray, elems, depth + 1, rad_info);
         
                         let mul = if rad_info.dir_light_samp && hit_info.dls {
@@ -58,7 +62,7 @@ pub fn radiance(ray: &Ray, elems: &Vec<Element>, depth: i32, rad_info: &Radiance
                         };
                         // let mul = incoming_rgb / p;
         
-                        (hit_info.emissive + hit_info.rgb.component_mul(&mul), Some(elem_idx))
+                        (hit_info.emissive + rgb.component_mul(&mul), Some(elem_idx))
                     },
                     None => {
                         (hit_info.emissive, Some(elem_idx))
@@ -73,21 +77,18 @@ pub fn radiance(ray: &Ray, elems: &Vec<Element>, depth: i32, rad_info: &Radiance
     }
 }
 
-fn russian_roulette_filter(depth: i32, mut hit_info: HitInfo, russ_roull_info: &RussianRoullInfo) -> (HitInfo, bool) {
+fn russian_roulette_filter(depth: i32, russ_roull_info: &RussianRoullInfo) -> (bool, Option<&f32>) { // second is normalizing term for rgb value should russian roullete be done
     if depth > russ_roull_info.assured_depth {
         let mut rng = rand::thread_rng();
         let russ_roull: f32 = rng.gen();
-        let color_thres = hit_info.rgb.iter().reduce(|prev, e| if e > prev {e} else {prev}).expect("ain't there a max color??");
-        let thres = russ_roull_info.max_thres.min(*color_thres);
-        // println!("russian rollete {} {}", russ_roull, thres);
-        if russ_roull < thres {
-            hit_info.rgb = hit_info.rgb / thres; // monte carlo normalizing term for when russian roulette active
-            (hit_info, true)
+        static THRES: f32 = 0.4;
+        if russ_roull < THRES {
+            (true, Some(&THRES))
         } else {
-            (hit_info, false)
+            (false, None)
         }
     } else {
-        (hit_info, true)
+        (true, None)
     }    
 }
 

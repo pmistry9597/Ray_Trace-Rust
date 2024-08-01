@@ -22,19 +22,24 @@ pub struct Sphere {
 
     // pub rgb: Vector3<f32>,
     pub coloring: Coloring, //<Self>,
-    pub mat: CommonMaterial,
+    pub mat: DiffuseSpecNoBaseMaterial,
 }
 
 impl IsCompleteElement for Sphere {}
 
 impl InteractsWithRay for Sphere {
-    fn shoot_new_ray(&self, ray: &Ray, hit_info: &HitInfo) -> Option<(Ray, f32)> {
+    fn continue_ray(&self, ray: &Ray, hit_info: &HitInfo) -> Option<(Vector3<f32>, Ray, f32)> {
         let o = &hit_info.pos;
         let norm = &hit_info.norm;
         // let bounce_info = &hit_info.bounce_info.as_ref().unwrap();
         let seeding = &hit_info.bounce_info.as_ref().unwrap().downcast_ref::<BounceInfo>().unwrap().seeding;
+        use Coloring::*;
+        let rgb = match self.coloring {
+            Solid(c) => c,
+        };
+        let (ray, p) = self.mat.gen_new_ray(ray, norm, o, &seeding);
 
-        Some(self.mat.gen_new_ray(ray, norm, o, &seeding))
+        Some((rgb, ray, p))
     }
     fn give_dls_emitter(&self) -> Option<Box<dyn DLSEmitter + '_>> {
         match self.mat.emissive {
@@ -55,15 +60,10 @@ impl<'a> DLSEmitter for DLSEmitter_<'a> {
 
 impl HasHitInfo for Sphere {
     fn hit_info(&self, info: &HitResult, _ray: &Ray) -> HitInfo {
-        use Coloring::*;
         let perfect_pos: &Vector3<f32> = &info.intermed.as_ref().unwrap().downcast_ref().unwrap();
         let norm = (perfect_pos - self.c).normalize();
 
         let pos = perfect_pos + norm * crate::EPS; // create offset from surface to prevent errors
-        let rgb = match &self.coloring {
-            Solid(rgb) => *rgb,
-            // UsePos(coloring_fn) => coloring_fn(&pos, self),
-        };
         let emissive = if let Some(emissive) = self.mat.emissive {
             emissive.clone()
         } else {
@@ -72,7 +72,7 @@ impl HasHitInfo for Sphere {
         };
         let bounce_info = BounceInfo { seeding: self.mat.generate_seed() };
 
-        HitInfo {rgb, emissive, pos, norm, dls: self.mat.should_dls(&bounce_info.seeding), bounce_info: Some(Box::new(bounce_info))}
+        HitInfo {emissive, pos, norm, dls: self.mat.should_dls(&bounce_info.seeding), bounce_info: Some(Box::new(bounce_info))}
     }
 }
 

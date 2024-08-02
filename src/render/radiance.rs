@@ -42,7 +42,7 @@ pub fn radiance(ray: &Ray, elems: &Vec<Element>, depth: i32, rad_info: &Radiance
             if roull_pass {
                 match hit_info.continue_info {
                     Some(_) => {
-                        let (rgb, new_ray, p) = elem.continue_ray(ray, &hit_info).expect("cant shoot a ray??");
+                        let (rgb, new_ray) = elem.continue_ray(ray, &hit_info).expect("cant shoot a ray??");
                         let rgb = match atten {
                             Some(f) => rgb / *f,
                             None => rgb,
@@ -56,9 +56,9 @@ pub fn radiance(ray: &Ray, elems: &Vec<Element>, depth: i32, rad_info: &Radiance
                                 vec![elem_idx]
                             };
                             let light_contrib = establish_dls_contrib(&omit_idxs, elems, &hit_info, ray);
-                            incoming_rgb / p + light_contrib
+                            incoming_rgb + light_contrib
                         } else {
-                            incoming_rgb / p
+                            incoming_rgb
                         };
                         // let mul = incoming_rgb / p;
         

@@ -33,12 +33,12 @@ where
     V : Index<usize, Output = Vector3<f32>>,
     N : GimmeNorm,
 {
-    fn continue_ray(&self, ray: &Ray, hit_info: &HitInfo) -> Option<(Vector3<f32>, Ray, f32)> { 
+    fn continue_ray(&self, ray: &Ray, hit_info: &HitInfo) -> Option<(Vector3<f32>, Ray)> { 
         let seeding = &hit_info.continue_info.as_ref().unwrap().downcast_ref::<ContinueInfo>().unwrap().seeding;
 
         let (ray, p) = self.mat.gen_new_ray(ray, &hit_info.norm, &hit_info.pos, &seeding);
 
-        Some((self.rgb, ray, p))
+        Some((self.rgb / p, ray))
     }
     fn give_dls_emitter(&self) -> Option<Box<dyn DLSEmitter + '_>> { None } // maybe ill do this? will i use a light source that has triangles?
 }

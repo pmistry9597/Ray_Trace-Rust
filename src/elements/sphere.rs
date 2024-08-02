@@ -28,7 +28,7 @@ pub struct Sphere {
 impl IsCompleteElement for Sphere {}
 
 impl InteractsWithRay for Sphere {
-    fn continue_ray(&self, ray: &Ray, hit_info: &HitInfo) -> Option<(Vector3<f32>, Ray, f32)> {
+    fn continue_ray(&self, ray: &Ray, hit_info: &HitInfo) -> Option<(Vector3<f32>, Ray)> {
         let o = &hit_info.pos;
         let norm = &hit_info.norm;
         // let bounce_info = &hit_info.bounce_info.as_ref().unwrap();
@@ -39,7 +39,7 @@ impl InteractsWithRay for Sphere {
         };
         let (ray, p) = self.mat.gen_new_ray(ray, norm, o, &seeding);
 
-        Some((rgb, ray, p))
+        Some((rgb / p, ray))
     }
     fn give_dls_emitter(&self) -> Option<Box<dyn DLSEmitter + '_>> {
         match self.mat.emissive {

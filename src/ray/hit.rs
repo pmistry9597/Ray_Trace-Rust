@@ -25,7 +25,7 @@ pub trait HasHitInfo : Hitable {
 }
 
 pub trait InteractsWithRay : HasHitInfo {
-    fn continue_ray(&self, ray: &Ray, hit_info: &HitInfo) -> Option<(Vector3<f32>, Ray, f32)>; // vec is color, f32 is probability that the ray was shot
+    fn continue_ray(&self, ray: &Ray, hit_info: &HitInfo) -> Option<(Vector3<f32>, Ray)>; // vec is color contrib by this element
     fn give_dls_emitter(&self) -> Option<Box<dyn DLSEmitter + '_>>;
 }
 

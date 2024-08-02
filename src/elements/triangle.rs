@@ -35,9 +35,16 @@ impl HasHitInfo for FreeTriangle {
         use nalgebra::vector;
 
         let continue_info = ContinueInfo { seeding: self.mat.generate_seed() };
+        let emissive = match self.mat.emissive {
+            Some(e) => e,
+            None => {
+                use nalgebra::vector;
+                vector![0.0,0.0,0.0]
+            }
+        };
 
         HitInfo {
-            emissive: self.mat.emissive, //: vector![0.7,0.7,1.0] * atten + red_comp,
+            emissive, //: vector![0.7,0.7,1.0] * atten + red_comp,
             pos: ray.d * info.l.0 + ray.o,
             norm: self.norm,
             dls: false,

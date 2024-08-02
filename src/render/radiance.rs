@@ -1,7 +1,7 @@
 use crate::ray::Ray;
 use nalgebra::{Vector3, vector};
 use crate::ray::{HitResult, HitInfo};
-use crate::elements::{Element, Renderable};
+use crate::elements::Renderable;
 use rand::Rng;
 
 use serde::Deserialize;

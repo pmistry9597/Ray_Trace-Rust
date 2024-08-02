@@ -1,6 +1,6 @@
 use nalgebra::Vector3;
 use serde::Deserialize;
-use crate::elements::Element;
+use crate::elements::{Element, Group};
 
 #[derive(Deserialize, Debug)]
 pub struct Cam {
@@ -15,5 +15,10 @@ pub struct Cam {
 
 pub struct Scene {
     pub cam: Cam,
-    pub elems: Vec<Element>,
+    pub members: Vec<Member>,
+}
+
+pub enum Member {
+    Elem(Element),
+    Grp(Group),
 }

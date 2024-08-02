@@ -19,7 +19,7 @@ cam:
   screen_width: 10.0
   screen_height: 5.0
 
-scene_elems:
+scene_members:
   ## sky
   - !Sphere
     c: [50, 100, 0]

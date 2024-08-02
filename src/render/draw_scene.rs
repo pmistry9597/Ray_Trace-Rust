@@ -26,7 +26,7 @@ pub fn render_to_target<F : Fn() -> ()>(render_target: &RenderTarget, scene: &Sc
     let mut target: Vec<[f32; 3]> = [[0.0, 0.0, 0.0]].repeat((render_target.canv_width * render_target.canv_height).try_into().unwrap());
 
     // NOTE: scene decomposing will happen here
-    let renderables: Vec<Renderable> = scene.elems.iter().map(|e| e.as_ref()).collect();
+    let renderables = members_to_renderables(&scene.members);
 
     // let num_samples = 100000;
     for r_it in 0..render_info.samps_per_pix {
@@ -64,4 +64,25 @@ fn rgb_f_to_u8(f: &[f32]) -> [u8; 4] {
     // powf mapping from from smallpt
     zip(out.iter_mut(), f.iter()).for_each(|(e, f)| *e = (f.clamp(0.0, 1.0) * 255.0 + 0.5).trunc() as u8); // assume 0.0 -> 1.0 range
     out
+}
+
+use crate::scene::Member;
+fn members_to_renderables(members: &Vec<Member>) -> Vec<Renderable> {
+    let mut complete: Vec<Renderable> = vec![];
+    let mut groups: Vec<Box<dyn Iterator<Item = Renderable>>> = vec![];
+
+    members.iter().for_each(|m| {
+        use crate::scene::Member::*;
+        match m {
+            Elem(e) => { complete.push(e.as_ref()); },
+            Grp(g) => { groups.push(g.decompose_to_elems()) },
+        }
+    });
+
+    let decomposed = groups.into_iter().flatten();
+
+    complete.extend(decomposed);
+    complete
+
+    // let renderables: Vec<Renderable> = scene.members.iter().map(|e| e.as_ref()).collect();
 }

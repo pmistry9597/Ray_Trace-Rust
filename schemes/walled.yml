@@ -17,7 +17,7 @@ cam:
   screen_width: 10.0
   screen_height: 5.0
 
-scene_elems:
+scene_members:
   #### elements
   - !Sphere
     c: [1.0, -5, -20.0]

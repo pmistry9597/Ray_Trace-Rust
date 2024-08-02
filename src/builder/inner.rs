@@ -1,6 +1,7 @@
 use serde::Deserialize;
 use crate::elements::sphere::Sphere;
-use crate::elements::Element;
+// use crate::elements::Element;
+use crate::scene::Member;
 use crate::elements::distant_cube_map;
 use crate::elements::triangle;
 use super::pr;
@@ -19,7 +20,7 @@ where
 }
 
 #[derive(Deserialize, Debug)]
-pub enum ElementType {
+pub enum MemberTypes {
     Sphere(Sphere),
     DistantCubeMap(pr::DistantCubeMap),
     FreeTriangle(pr::FreeTriangle),
@@ -27,30 +28,30 @@ pub enum ElementType {
     MeshFromNode(pr::MeshFromNode),
 }
 
-impl From<ElementType> for Element {
-    fn from(val: ElementType) -> Self {
-        use ElementType::*;
+impl From<MemberTypes> for Member {
+    fn from(val: MemberTypes) -> Self {
+        use MemberTypes::*;
         match val {
-            Sphere(s) => Box::new(s),
-            DistantCubeMap(prcs) => Box::new(distant_cube_map::DistantCubeMap {
+            Sphere(s) => Member::Elem(Box::new(s)),
+            DistantCubeMap(prcs) => Member::Elem(Box::new(distant_cube_map::DistantCubeMap {
                     neg_z: prcs.neg_z.into(),
                     pos_z: prcs.pos_z.into(),
                     neg_x: prcs.neg_x.into(),
                     pos_x: prcs.pos_x.into(),
                     neg_y: prcs.neg_y.into(),
                     pos_y: prcs.pos_y.into(),
-                }),
-            FreeTriangle(t) => Box::new(
+                })),
+            FreeTriangle(t) => Member::Elem(Box::new(
                 triangle::FreeTriangle {
                     norm: t.norm.normalize().into(),
                     verts: t.verts,
                     rgb: t.rgb,
                     mat: t.mat,
                 },
-            ),
+            )),
             MeshFromNode(nfm) => {
                 nfm.diagnostics();
-                Box::new(pr::DummyElement{})
+                Member::Elem(Box::new(pr::DummyElement{}))
             }
         }
     }

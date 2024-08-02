@@ -11,7 +11,7 @@ mod pr;
 pub struct Scheme {
     pub render_info: RenderInfo,
     pub cam: Cam,
-    pub scene_elems: VecInto<ElementType>,
+    pub scene_members: VecInto<MemberTypes>,
 }
 
 impl Scheme {

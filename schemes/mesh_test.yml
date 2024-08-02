@@ -17,7 +17,7 @@ cam:
   screen_width: 10.0
   screen_height: 5.0
 
-scene_elems:
+scene_members:
   ### node of interest
   - !MeshFromNode
     path: "/home/moistry/Documents/endeavors/raytracer_graphics_fuck/assets/basic_car/scene.gltf"

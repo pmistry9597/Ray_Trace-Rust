@@ -48,10 +48,10 @@ impl Renderer {
     pub fn consume_and_do(mut self) {
         thread::spawn(move || {
             let Scheme {
-                cam, render_info, scene_elems
+                cam, render_info, scene_members
             } = self.scheme.take().unwrap();
             
-            let skene = Scene { cam, elems: scene_elems.into() };
+            let skene = Scene { cam, members: scene_members.into() };
 
             render::render_to_target(&self.target, &skene, || self.update_output(), &render_info);
             // self.update_output();

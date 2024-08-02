@@ -4,10 +4,6 @@ use crate::material::*;
 use crate::elements::IsCompleteElement;
 use std::ops::Index;
 
-pub trait GimmeNorm {
-    fn get_norm(&self, pos: &Vector3<f32>) -> Vector3<f32>;
-}
-
 // #[derive(Deserialize, Debug)]
 pub struct Triangle<V, N> 
 {
@@ -16,6 +12,10 @@ pub struct Triangle<V, N>
 
     pub rgb: Vector3<f32>,
     pub mat: DiffuseSpecNoBaseMaterial,
+}
+
+pub trait GimmeNorm {
+    fn get_norm(&self, pos: &Vector3<f32>) -> Vector3<f32>;
 }
 
 impl<V, N> IsCompleteElement for Triangle<V, N> 

@@ -23,6 +23,8 @@ pub enum ElementType {
     Sphere(Sphere),
     DistantCubeMap(pr::DistantCubeMap),
     FreeTriangle(pr::FreeTriangle),
+    
+    MeshFromNode(pr::MeshFromNode),
 }
 
 impl From<ElementType> for Element {
@@ -46,6 +48,10 @@ impl From<ElementType> for Element {
                     mat: t.mat,
                 },
             ),
+            MeshFromNode(nfm) => {
+                nfm.diagnostics();
+                Box::new(pr::DummyElement{})
+            }
         }
     }
 }

@@ -1,7 +1,7 @@
 use crate::ray::Ray;
 use nalgebra::{Vector3, vector};
 use crate::ray::{HitResult, HitInfo};
-use crate::elements::Element;
+use crate::elements::{Element, Renderable};
 use rand::Rng;
 
 use serde::Deserialize;
@@ -17,7 +17,7 @@ pub struct RussianRoullInfo {
     pub max_thres: f32,
 }
 
-pub fn radiance(ray: &Ray, elems: &Vec<Element>, depth: i32, rad_info: &RadianceInfo) -> (Vector3<f32>, Option<usize>) { // color from a ray in a collection of hittable objects, and index of object that was hit
+pub fn radiance(ray: &Ray, elems: &Vec<Renderable>, depth: i32, rad_info: &RadianceInfo) -> (Vector3<f32>, Option<usize>) { // color from a ray in a collection of hittable objects, and index of object that was hit
     let (hit_results, idxo) = closest_ray_hit(ray, elems);
     
     // use std::collections::HashSet;
@@ -93,7 +93,7 @@ fn russian_roulette_filter(depth: i32, russ_roull_info: &RussianRoullInfo) -> (b
 }
 
 // direct light sampling based on https://iquilezles.org/articles/simplepathtracing/
-fn establish_dls_contrib(omit_idxs: &[usize], elems: &Vec<Element>, hit_info: &HitInfo, ray: &Ray) -> Vector3<f32> {
+fn establish_dls_contrib(omit_idxs: &[usize], elems: &Vec<Renderable>, hit_info: &HitInfo, ray: &Ray) -> Vector3<f32> {
     const NORMZE: f32 = 1.0 / (30.0 * std::f32::consts::PI);
 
     // only use valid lights
@@ -128,7 +128,7 @@ fn establish_dls_contrib(omit_idxs: &[usize], elems: &Vec<Element>, hit_info: &H
 }
 
 // results of ray closest object closest intersection
-fn closest_ray_hit(ray: &Ray, elems: &Vec<Element>) -> (Vec<Option<HitResult>>, Option<usize>) {
+fn closest_ray_hit(ray: &Ray, elems: &Vec<Renderable>) -> (Vec<Option<HitResult>>, Option<usize>) {
     let hit_results: Vec<_> = elems.iter().map(|elem| elem.intersect(&ray)).collect();
     
     let i_hro = (&hit_results)

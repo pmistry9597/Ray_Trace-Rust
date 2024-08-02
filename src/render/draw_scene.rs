@@ -2,6 +2,7 @@ use std::iter::zip;
 use super::RenderTarget;
 use crate::ray::RayCompute;
 use crate::scene::Scene;
+use crate::elements::Renderable;
 
 use super::radiance::{radiance, RadianceInfo};
 
@@ -24,6 +25,9 @@ pub fn render_to_target<F : Fn() -> ()>(render_target: &RenderTarget, scene: &Sc
     let mut sample_count: f32 = 0.0;
     let mut target: Vec<[f32; 3]> = [[0.0, 0.0, 0.0]].repeat((render_target.canv_width * render_target.canv_height).try_into().unwrap());
 
+    // NOTE: scene decomposing will happen here
+    let renderables: Vec<Renderable> = scene.elems.iter().map(|e| e.as_ref()).collect();
+
     // let num_samples = 100000;
     for r_it in 0..render_info.samps_per_pix {
         target.par_iter_mut()
@@ -31,7 +35,7 @@ pub fn render_to_target<F : Fn() -> ()>(render_target: &RenderTarget, scene: &Sc
             .map(|(i, pix)| (render_target.chunk_to_pix(i.try_into().unwrap()), pix))
             .for_each(|((x, y), pix)| {
                 let ray = ray_compute.pix_cam_to_rand_ray((x,y), &scene.cam);
-                let (rgb, _) = radiance(&ray, &scene.elems, 0, &render_info.rad_info);
+                let (rgb, _) = radiance(&ray, &renderables, 0, &render_info.rad_info);
                 let rgb: Vec<f32> = rgb.iter().copied().collect();
 
                 zip(pix.iter_mut(), &rgb).for_each(|(p, r)| {

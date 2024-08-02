@@ -13,7 +13,7 @@ pub struct HitInfo {
     pub pos: Vector3<f32>,
     pub norm: Vector3<f32>,
     pub dls: bool,
-    pub bounce_info: Option<Box<dyn Any>>,
+    pub continue_info: Option<Box<dyn Any>>,
 }
 
 pub trait Hitable { // use I to determine if should select this object

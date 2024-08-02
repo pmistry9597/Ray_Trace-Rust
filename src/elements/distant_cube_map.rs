@@ -54,7 +54,7 @@ impl HasHitInfo for DistantCubeMap {
             pos: ray.d * f32::INFINITY,
             norm: -ray.d,
             dls: false,
-            bounce_info: None,
+            continue_info: None,
         }
     }
 }

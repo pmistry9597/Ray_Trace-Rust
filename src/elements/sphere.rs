@@ -32,7 +32,7 @@ impl InteractsWithRay for Sphere {
         let o = &hit_info.pos;
         let norm = &hit_info.norm;
         // let bounce_info = &hit_info.bounce_info.as_ref().unwrap();
-        let seeding = &hit_info.bounce_info.as_ref().unwrap().downcast_ref::<BounceInfo>().unwrap().seeding;
+        let seeding = &hit_info.continue_info.as_ref().unwrap().downcast_ref::<BounceInfo>().unwrap().seeding;
         use Coloring::*;
         let rgb = match self.coloring {
             Solid(c) => c,
@@ -70,9 +70,9 @@ impl HasHitInfo for Sphere {
             use nalgebra::vector;
             vector![0.0,0.0,0.0]
         };
-        let bounce_info = BounceInfo { seeding: self.mat.generate_seed() };
+        let continue_info = BounceInfo { seeding: self.mat.generate_seed() };
 
-        HitInfo {emissive, pos, norm, dls: self.mat.should_dls(&bounce_info.seeding), bounce_info: Some(Box::new(bounce_info))}
+        HitInfo {emissive, pos, norm, dls: self.mat.should_dls(&continue_info.seeding), continue_info: Some(Box::new(continue_info))}
     }
 }
 

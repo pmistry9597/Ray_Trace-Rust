@@ -40,7 +40,7 @@ pub fn radiance(ray: &Ray, elems: &Vec<Element>, depth: i32, rad_info: &Radiance
             let (roull_pass, atten) = russian_roulette_filter(depth, &rad_info.russ_roull_info);
             
             if roull_pass {
-                match hit_info.bounce_info {
+                match hit_info.continue_info {
                     Some(_) => {
                         let (rgb, new_ray, p) = elem.continue_ray(ray, &hit_info).expect("cant shoot a ray??");
                         let rgb = match atten {

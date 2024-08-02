@@ -2,6 +2,7 @@ use serde::Deserialize;
 use crate::elements::sphere::Sphere;
 use crate::elements::Element;
 use crate::elements::distant_cube_map;
+use crate::elements::triangle;
 use super::pr;
 
 #[derive(Deserialize, Debug)]
@@ -21,6 +22,7 @@ where
 pub enum ElementType {
     Sphere(Sphere),
     DistantCubeMap(pr::DistantCubeMap),
+    FreeTriangle(triangle::FreeTriangle),
 }
 
 impl From<ElementType> for Element {
@@ -36,6 +38,9 @@ impl From<ElementType> for Element {
                     neg_y: prcs.neg_y.into(),
                     pos_y: prcs.pos_y.into(),
                 }),
+            FreeTriangle(t) => Box::new(
+                triangle::FreeTriangle {norm: t.norm.normalize(), ..t}
+            ),
         }
     }
 }

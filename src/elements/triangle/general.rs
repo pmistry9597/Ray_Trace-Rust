@@ -2,24 +2,37 @@ use nalgebra::Vector3;
 use crate::ray::{Ray, Hitable, HitResult, HitInfo, HasHitInfo, InteractsWithRay, DLSEmitter};
 use crate::material::*;
 use crate::elements::IsCompleteElement;
-use serde::Deserialize;
+use std::ops::Index;
 
-#[derive(Deserialize, Debug)]
-pub struct FreeTriangle {
-    pub verts: [Vector3<f32>; 3],
-    pub norm: Vector3<f32>, // should be normalized to unit
+pub trait GimmeNorm {
+    fn get_norm(&self, pos: &Vector3<f32>) -> Vector3<f32>;
+}
+
+// #[derive(Deserialize, Debug)]
+pub struct Triangle<V, N> 
+{
+    pub verts: V,
+    pub norm: N, // should be normalized to unit
 
     pub rgb: Vector3<f32>,
     pub mat: DiffuseSpecNoBaseMaterial,
 }
 
-impl IsCompleteElement for FreeTriangle {}
+impl<V, N> IsCompleteElement for Triangle<V, N> 
+where
+    V : Index<usize, Output = Vector3<f32>>,
+    N : GimmeNorm,
+{}
 
 struct ContinueInfo {
     seeding: SeedingRay,
 }
 
-impl InteractsWithRay for FreeTriangle {
+impl<V, N> InteractsWithRay for Triangle<V, N> 
+where
+    V : Index<usize, Output = Vector3<f32>>,
+    N : GimmeNorm,
+{
     fn continue_ray(&self, ray: &Ray, hit_info: &HitInfo) -> Option<(Vector3<f32>, Ray, f32)> { 
         let seeding = &hit_info.continue_info.as_ref().unwrap().downcast_ref::<ContinueInfo>().unwrap().seeding;
 
@@ -30,7 +43,11 @@ impl InteractsWithRay for FreeTriangle {
     fn give_dls_emitter(&self) -> Option<Box<dyn DLSEmitter + '_>> { None } // maybe ill do this? will i use a light source that has triangles?
 }
 
-impl HasHitInfo for FreeTriangle {
+impl<V, N> HasHitInfo for Triangle<V, N> 
+where
+    V : Index<usize, Output = Vector3<f32>>,
+    N : GimmeNorm,
+{
     fn hit_info(&self, info: &HitResult, ray: &Ray) -> HitInfo {
         use nalgebra::vector;
 
@@ -42,18 +59,23 @@ impl HasHitInfo for FreeTriangle {
                 vector![0.0,0.0,0.0]
             }
         };
+        let pos = ray.d * info.l.0 + ray.o;
 
         HitInfo {
             emissive, //: vector![0.7,0.7,1.0] * atten + red_comp,
-            pos: ray.d * info.l.0 + ray.o,
-            norm: self.norm,
+            pos,
+            norm: self.norm.get_norm(&pos),
             dls: false,
             continue_info: Some(Box::new(continue_info)),
         }
     }
 }
 
-impl Hitable for FreeTriangle {
+impl<V, N> Hitable for Triangle<V, N> 
+where
+    V : Index<usize, Output = Vector3<f32>>,
+    N : GimmeNorm,
+{
     fn intersect(&self, ray: &Ray) -> Option<HitResult> { // always hits since distant and covers all
         // adapted moller trumbore from https://en.wikipedia.org/wiki/M%C3%B6ller%E2%80%93Trumbore_intersection_algorithm
         // for rapid intersection test using cramer's rule to solve for barycentric coordinates

@@ -22,7 +22,7 @@ where
 pub enum ElementType {
     Sphere(Sphere),
     DistantCubeMap(pr::DistantCubeMap),
-    FreeTriangle(triangle::FreeTriangle),
+    FreeTriangle(pr::FreeTriangle),
 }
 
 impl From<ElementType> for Element {
@@ -39,7 +39,12 @@ impl From<ElementType> for Element {
                     pos_y: prcs.pos_y.into(),
                 }),
             FreeTriangle(t) => Box::new(
-                triangle::FreeTriangle {norm: t.norm.normalize(), ..t}
+                triangle::FreeTriangle {
+                    norm: t.norm.normalize().into(),
+                    verts: t.verts,
+                    rgb: t.rgb,
+                    mat: t.mat,
+                },
             ),
         }
     }

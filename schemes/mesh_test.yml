@@ -33,36 +33,36 @@ scene_members:
     pos_z: ["../../../assets/skybox/front.jpg", -1.0, -1.0]
     
   #### elements
-  - !FreeTriangle
-    verts: [[10, 5, -20], [5, -2, -20], [0, 5, -20]]
-    norm: [0, 0, 1]
-    rgb: [.5, .999, .5]
-    mat:
-      divert_ray: 
-        !DiffSpec 
-          diffp: 0.1
-  - !FreeTriangle
-    verts: [[-5, -2, -20], [5, -2, -20], [0, 5, -20]]
-    norm: [0, 0, 1]
-    rgb: [.999, .5, .5]
-    mat:
-      divert_ray: Spec
-  - !FreeTriangle
-    verts: [[-5, -2, -20], [5, -2, -20], [0, -9, -20]]
-    norm: [0, 0, 1]
-    rgb: [.999, .5, .999]
-    mat:
-      divert_ray: 
-        !DiffSpec
-          diffp: 0.8
-  - !FreeTriangle
-    verts: [[-5, -2, -20], [0, 5, -20], [-10, 5, -20]]
-    norm: [0, 0, 1]
-    rgb: [.5, .5, .999]
-    mat:
-      divert_ray: 
-        !DiffSpec 
-          diffp: 0.1
+  # - !FreeTriangle
+  #   verts: [[10, 5, -20], [5, -2, -20], [0, 5, -20]]
+  #   norm: [0, 0, 1]
+  #   rgb: [.5, .999, .5]
+  #   mat:
+  #     divert_ray: 
+  #       !DiffSpec 
+  #         diffp: 0.1
+  # - !FreeTriangle
+  #   verts: [[-5, -2, -20], [5, -2, -20], [0, 5, -20]]
+  #   norm: [0, 0, 1]
+  #   rgb: [.999, .5, .5]
+  #   mat:
+  #     divert_ray: Spec
+  # - !FreeTriangle
+  #   verts: [[-5, -2, -20], [5, -2, -20], [0, -9, -20]]
+  #   norm: [0, 0, 1]
+  #   rgb: [.999, .5, .999]
+  #   mat:
+  #     divert_ray: 
+  #       !DiffSpec
+  #         diffp: 0.8
+  # - !FreeTriangle
+  #   verts: [[-5, -2, -20], [0, 5, -20], [-10, 5, -20]]
+  #   norm: [0, 0, 1]
+  #   rgb: [.5, .5, .999]
+  #   mat:
+  #     divert_ray: 
+  #       !DiffSpec 
+  #         diffp: 0.1
 
   #### lights
   - !Sphere

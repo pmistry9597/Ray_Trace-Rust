@@ -13,12 +13,12 @@ pub struct Cam {
     pub lens_r: Option<f32>,
 }
 
-pub struct Scene {
+pub struct Scene<'e> {
     pub cam: Cam,
-    pub members: Vec<Member>,
+    pub members: Vec<Member<'e>>,
 }
 
-pub enum Member {
-    Elem(Element),
+pub enum Member<'e> {
+    Elem(Element<'e>),
     Grp(Group),
 }

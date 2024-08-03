@@ -2,7 +2,7 @@ use std::iter::zip;
 use super::RenderTarget;
 use crate::ray::RayCompute;
 use crate::scene::Scene;
-use crate::elements::Renderable;
+use crate::elements::{Renderable, Element};
 
 use super::radiance::{radiance, RadianceInfo};
 
@@ -26,7 +26,8 @@ pub fn render_to_target<F : Fn() -> ()>(render_target: &RenderTarget, scene: &Sc
     let mut target: Vec<[f32; 3]> = [[0.0, 0.0, 0.0]].repeat((render_target.canv_width * render_target.canv_height).try_into().unwrap());
 
     // NOTE: scene decomposing will happen here
-    let renderables = members_to_renderables(&scene.members);
+    let (pure_elem_refs, decomposed_groups) = decompose_groups(&scene.members);
+    let renderables: Vec<Renderable> = pure_elem_refs.into_iter().chain(decomposed_groups.iter().map(|e| e.as_ref())).collect();
 
     // let num_samples = 100000;
     for r_it in 0..render_info.samps_per_pix {
@@ -67,22 +68,23 @@ fn rgb_f_to_u8(f: &[f32]) -> [u8; 4] {
 }
 
 use crate::scene::Member;
-fn members_to_renderables(members: &Vec<Member>) -> Vec<Renderable> {
-    let mut complete: Vec<Renderable> = vec![];
-    let mut groups: Vec<Box<dyn Iterator<Item = Renderable>>> = vec![];
+fn decompose_groups<'e>(members: &'e Vec<Member<'e>>) -> (Vec<Renderable<'e>>, Vec<Element<'e>>) {
+    let mut pure_elem_refs: Vec<Renderable> = vec![];
+    let mut group_iters: Vec<Box<dyn Iterator<Item = Element>>> = vec![];
 
     members.iter().for_each(|m| {
         use crate::scene::Member::*;
         match m {
-            Elem(e) => { complete.push(e.as_ref()); },
-            Grp(g) => { groups.push(g.decompose_to_elems()) },
+            Elem(e) => { pure_elem_refs.push(e.as_ref()); },
+            Grp(g) => { group_iters.push(g.decompose_to_elems()) },
         }
     });
 
-    let decomposed = groups.into_iter().flatten();
+    let decomposed: Vec<Element<'e>> = group_iters.into_iter().flatten().collect();
+    println!("decompsoed length: {}", decomposed.len());
 
-    complete.extend(decomposed);
-    complete
+    // pure_elem_refs.extend(decomposed.iter());
+    (pure_elem_refs, decomposed)
 
     // let renderables: Vec<Renderable> = scene.members.iter().map(|e| e.as_ref()).collect();
 }

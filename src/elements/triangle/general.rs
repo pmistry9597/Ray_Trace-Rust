@@ -18,7 +18,7 @@ pub trait GimmeNorm {
     fn get_norm(&self, pos: &Vector3<f32>) -> Vector3<f32>;
 }
 
-pub trait GimmeRGB {
+pub trait GimmeRgb {
     fn get_rgb(&self, barycentric: &(f32, f32)) -> Vector3<f32>;
 }
 
@@ -32,7 +32,7 @@ impl<V, N, C> IsCompleteElement for Triangle<V, N, C>
 where
     V : Index<usize, Output = Vector3<f32>>,
     N : GimmeNorm,
-    C : GimmeRGB,
+    C : GimmeRgb,
 {}
 
 struct ContinueInfo {
@@ -44,7 +44,7 @@ impl<V, N, C> InteractsWithRay for Triangle<V, N, C>
 where
     V : Index<usize, Output = Vector3<f32>>,
     N : GimmeNorm,
-    C : GimmeRGB,
+    C : GimmeRgb,
 {
     fn continue_ray(&self, ray: &Ray, hit_info: &HitInfo) -> Option<(Vector3<f32>, Ray)> { 
         let cont_info: &ContinueInfo = &hit_info.continue_info.as_ref().unwrap().downcast_ref().unwrap();
@@ -64,7 +64,7 @@ impl<V, N, C> HasHitInfo for Triangle<V, N, C>
 where
     V : Index<usize, Output = Vector3<f32>>,
     N : GimmeNorm,
-    C : GimmeRGB,
+    C : GimmeRgb,
 {
     fn hit_info(&self, info: &HitResult, ray: &Ray) -> HitInfo {
         use nalgebra::vector;
@@ -96,7 +96,7 @@ impl<V, N, C> Hitable for Triangle<V, N, C>
 where
     V : Index<usize, Output = Vector3<f32>>,
     N : GimmeNorm,
-    C : GimmeRGB,
+    C : GimmeRgb,
 {
     fn intersect(&self, ray: &Ray) -> Option<HitResult> { // always hits since distant and covers all
         // adapted moller trumbore from https://en.wikipedia.org/wiki/M%C3%B6ller%E2%80%93Trumbore_intersection_algorithm

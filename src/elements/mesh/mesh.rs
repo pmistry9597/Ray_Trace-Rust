@@ -1,10 +1,8 @@
-use nalgebra::Vector3;
+use nalgebra::{Vector3, Vector2};
 use crate::elements::Decomposable;
 use crate::elements::Element;
 use super::*;
-
 use crate::material::*;
-use nalgebra::vector;
 
 // so it begins .....
 
@@ -13,32 +11,42 @@ pub struct Mesh {
     pub norms: Vec<Vector3<f32>>,
 
     pub indices: Vec<[usize; 3]>, // each one represents a single triangle
-    // pub triangles: Vec<MeshTriangle<'a>>, // indexes into above
+    pub tex_coords: Vec<Vector2<f32>>,
+    // all of the above likely need to be double wrapped by Vec instead of single
+    // due to all above properties existing for any primitive under the mesh
+
+    pub textures: Vec<UVRgb32FImage>, // indexed by primitive index
 }
 
 impl Decomposable for Mesh {
+    // the lifetime bound on this function was a solution that required my soul to find
+    // allows me to create box of elements with a reference to the Mesh
+    // that can exist for as long the Mesh does, skipping any useless Rc/Arc and crap
     fn decompose_to_elems<'e, 's>(&'s self) -> Box<dyn Iterator<Item = Element<'e>> + 's> 
     where
         's : 'e,
     {
         Box::new((0..self.indices.len()).map(
-                |index| {
+                |inner_idx| {
                     Box::new(MeshTriangle {
                         verts: VertexFromMesh {
-                            index,
+                            index: (0, inner_idx),
                             mesh: self,
                         },
                         norm: NormFromMesh {
-                            index,
+                            index: (0, inner_idx),
                             mesh: self,
                         },
 
                         // below needs to be updated when textures come!
                         mat: DiffuseSpecNoBaseMaterial{
-                            divert_ray: DivertRayMethod::Spec,
-                            emissive: Some(vector![0.1,0.1,0.1]),
+                            divert_ray: DivertRayMethod::Diff,
+                            emissive: None,
                         },
-                        rgb: vector![0.7,0.7,0.99],
+                        rgb: RgbFromMesh{
+                            index: (0, inner_idx),
+                            mesh: self,
+                        },
                     })} as Element<'e>))
     }
 }

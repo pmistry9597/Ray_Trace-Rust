@@ -4,7 +4,6 @@ use crate::elements::sphere::Sphere;
 use crate::scene::Member;
 use crate::elements::distant_cube_map;
 use crate::elements::triangle;
-use crate::elements::mesh::Mesh;
 use super::pr;
 
 #[derive(Deserialize, Debug)]
@@ -52,36 +51,7 @@ impl From<MemberTypes> for Member<'_> {
                         mat: t.mat,
                     },
             )),
-            MeshFromNode(nfm) => {
-                nfm.diagnostics();
-                // Member::Elem(Box::new(pr::DummyElement{}))
-                use nalgebra::vector;
-                use crate::elements::mesh::*;
-                // use std::cell::RefCell;
-                let mesh = {
-                    let mut mesh = Box::new(Mesh{
-                        poses: vec![
-                            vector![0.0, 0.0, -20.0],
-                            vector![-5.0, 5.0, -20.0],
-                            vector![5.0, 5.0, -20.0],
-                            vector![0.0, 10.0, -20.0],
-                        ],
-                        norms: vec![
-                            vector![0.0, 0.0, 1.0],
-                            vector![0.0, 0.0, 1.0],
-                            vector![0.0, 0.0, 1.0],
-                            vector![0.0, 0.0, 1.0],
-                        ],
-                        indices: vec![
-                            [0, 1, 2],
-                            [3, 1, 2],
-                        ],
-                        // triangles: RefCell::new(vec![]),
-                    });
-                    mesh
-                };
-                Member::Grp(mesh)
-            }
+            MeshFromNode(nfm) => Member::Grp(Box::new(nfm.to_mesh()))
         }
     }
 }

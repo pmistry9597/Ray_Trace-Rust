@@ -1,59 +1,40 @@
 use nalgebra::Vector3;
-use crate::ray::{Ray, Hitable, HitResult, HitInfo, HasHitInfo, InteractsWithRay, DLSEmitter};
-use crate::elements::IsCompleteElement;
 use serde::Deserialize;
+use crate::elements::mesh::Mesh;
 
 // --- -------- ------- - -- ----- - ----- FUCK --------------
-// this file should be deleted/moved around soon!!
+// this file should be deleted/changed around soon!!
 // --- --- --- --PEE ----- --- ----- ----
-
-fn diagnostics(nfm: &MeshFromNode) {
-    let (document, buffers, images) = gltf::import(&nfm.path).unwrap();
-    let node_oi = document.nodes().nth(nfm.node_index).unwrap();
-
-    println!("node of interest!!!!!!");
-    println!("{} index: {}\n\n", node_oi.name().unwrap(), node_oi.index());
-
-    let mesh = node_oi.mesh().unwrap();
-    let primitives = mesh.primitives();
-
-    println!("primitive count: {:?}", primitives.clone().count());
-
-    // let reader = primitive.reader(|buffer| Some(&buffers[buffer.index()].0));
-}
 
 #[derive(Deserialize, Debug)]
 pub struct MeshFromNode {
     path: String,
     node_index: usize,
 }
+
 impl MeshFromNode {
-    pub fn diagnostics(&self) { diagnostics(self); }
-}
+    pub fn to_mesh(&self) -> Mesh {
+        let (document, buffers, images) = gltf::import(&self.path).unwrap();
+        let node_oi = document.nodes().nth(self.node_index).unwrap();
 
-// --- -------- ------- POO POO POO  - -- ----- - -----
-// --- -------- ------- POO POO POO  - -- ----- - -----
-// dummy element section
+        let mesh = node_oi.mesh().unwrap();
+        // let primitives = mesh.primitives(); <--- soon split into multiple meshes based on different primitives
 
-pub struct DummyElement {}
+        let primitive = mesh.primitives().next().unwrap();
+        let reader = primitive.reader(|buffer| Some(&buffers[buffer.index()].0));
 
-impl IsCompleteElement for DummyElement {}
+        let flat_indices: Vec<usize> = reader.read_indices().unwrap()
+                .into_u32()
+                .map(|v| v.try_into().unwrap())
+                .collect();
 
-impl InteractsWithRay for DummyElement {
-    fn continue_ray(&self, _ray: &Ray, _info: &HitInfo) -> Option<(Vector3<f32>, Ray)> {
-        panic!("wtf r u doing here?");
+        let poses: Vec<Vector3<f32>> = reader.read_positions().unwrap().map(|p| p.into()).collect();
+        let poses: Vec<Vector3<f32>> = poses.iter().map(|v| v * 0.05).collect();
+
+        Mesh {
+            poses,
+            norms: reader.read_normals().unwrap().map(|p| p.into()).collect(),
+            indices: flat_indices.chunks(3).map(|c| c.try_into().unwrap()).collect(),
+        }
     }
-    fn give_dls_emitter(&self) -> Option<Box<dyn DLSEmitter + '_>> {
-        panic!("wtf r u doing here?");
-    }
-}
-
-impl HasHitInfo for DummyElement {
-    fn hit_info(&self, _info: &HitResult, _ray: &Ray) -> HitInfo {
-        panic!("wtf r u doing here?");
-    }
-}
-
-impl Hitable for DummyElement {
-    fn intersect(&self, _ray: &Ray) -> Option<HitResult> { None }
 }

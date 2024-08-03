@@ -1,6 +1,6 @@
 use nalgebra::Vector3;
 use crate::elements::Decomposable;
-use crate::elements::{Renderable, Element};
+use crate::elements::Element;
 use super::*;
 
 use crate::material::*;
@@ -38,7 +38,7 @@ impl Decomposable for Mesh {
                             divert_ray: DivertRayMethod::Spec,
                             emissive: Some(vector![0.1,0.1,0.1]),
                         },
-                        rgb: vector![0.99,0.99,0.99],
+                        rgb: vector![0.7,0.7,0.99],
                     })} as Element<'e>))
     }
 }

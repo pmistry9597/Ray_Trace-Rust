@@ -19,6 +19,6 @@ pub struct DistantCubeMap {
 impl From<PathwUVScale> for FaceImagewUVScale {
     fn from(pathwuvscale: PathwUVScale) -> Self { 
         let PathwUVScale (path, us, vs) = pathwuvscale;
-        (image::open(path).unwrap().into_rgb32f(), us, vs)
+        (image::open(path).unwrap().into_rgb32f().into(), us, vs)
     }
 }

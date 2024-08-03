@@ -2,7 +2,6 @@ use nalgebra::Vector3;
 use crate::ray::Ray;
 use rand::Rng;
 
-
 use serde::Deserialize;
 #[derive(Deserialize, Debug)]
 pub struct DiffuseSpecNoBaseMaterial {
@@ -125,4 +124,26 @@ impl DiffuseSpecNoBaseMaterial {
             },
         }
     }
+}
+
+
+use image::{Pixel, Rgb32FImage};
+
+pub struct UVRgb32FImage (Rgb32FImage);
+
+impl UVRgb32FImage {
+    pub fn get_pixel(&self, u: f32, v: f32) -> Vector3<f32> {
+        let face = &self.0;
+        let width = face.width() as f32;
+        let height = face.height() as f32;
+
+        let (u, v) = (0.5 * u + 0.5, 0.5 * v + 0.5);
+        let rgb: Vec<f32> = face.get_pixel((u * width).min(width-1.0).trunc() as u32, (v * height).min(height-1.0).trunc() as u32).channels().to_vec();
+        let rgb: [f32; 3] = rgb.try_into().unwrap();
+        rgb.into()
+    }
+}
+
+impl From<Rgb32FImage> for UVRgb32FImage {
+    fn from(im: Rgb32FImage) -> Self { UVRgb32FImage(im) }
 }

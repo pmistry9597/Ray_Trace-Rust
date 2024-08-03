@@ -1,10 +1,9 @@
 use nalgebra::Vector3;
 use crate::ray::{Ray, Hitable, HitResult, HitInfo, HasHitInfo, InteractsWithRay, DLSEmitter};
 use crate::elements::IsCompleteElement;
-use image::{ImageBuffer, Pixel};
+use crate::material::UVRgb32FImage;
 
-type FaceImage = ImageBuffer<image::Rgb<f32>, Vec<f32>>;
-pub type FaceImagewUVScale = (FaceImage, f32, f32);
+pub type FaceImagewUVScale = (UVRgb32FImage, f32, f32);
 
 // for environment mapping, all rays can hit this
 pub struct DistantCubeMap {
@@ -62,13 +61,8 @@ impl HasHitInfo for DistantCubeMap {
 fn sample_face(u: f32, v: f32, fact: f32, facewscale: &FaceImagewUVScale) -> Vector3<f32> {
     let (_, us, vs) = *facewscale;
     let face = &facewscale.0;
-    let width = face.width() as f32;
-    let height = face.height() as f32;
-
-    let (u, v) = (0.5 * u * us / fact + 0.5, 0.5 * v * vs / fact + 0.5);
-    let rgb: Vec<f32> = face.get_pixel((u * width).min(width-1.0).trunc() as u32, (v * height).min(height-1.0).trunc() as u32).channels().to_vec();
-    let rgb: [f32; 3] = rgb.try_into().unwrap();
-    rgb.into()
+    let (u, v) = (u * us / fact, v * vs / fact);
+    face.get_pixel(u, v)
 }
 
 impl Hitable for DistantCubeMap {

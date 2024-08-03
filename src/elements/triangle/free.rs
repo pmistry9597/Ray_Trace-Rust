@@ -1,9 +1,14 @@
 use nalgebra::Vector3;
-use super::{Triangle, GimmeNorm};
+use super::{Triangle, GimmeNorm, GimmeRGB};
 
-pub type FreeTriangle = Triangle<[Vector3<f32>; 3], UniformNorm>;
+type UniformColor = Vector3<f32>;
+pub type FreeTriangle = Triangle<[Vector3<f32>; 3], UniformNorm, UniformColor>;
 
 pub struct UniformNorm(Vector3<f32>);
+
+impl GimmeRGB for UniformColor {
+    fn get_rgb(&self, _barycentric: &(f32, f32)) -> Vector3<f32> { *self }
+}
 
 impl GimmeNorm for UniformNorm {
     fn get_norm(&self, _pos: &Vector3<f32>) -> Vector3<f32> { self.0 }

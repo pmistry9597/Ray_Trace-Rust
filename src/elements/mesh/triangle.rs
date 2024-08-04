@@ -103,14 +103,8 @@ impl GimmeNorm for NormFromMesh<'_> {
         use NormType::*;
         match self.norm_type {
             Mapped{tang_to_mod} => {
-                let (b1, b2) = *barycentric;
-                let b0 = 1.0 - b2 - b1;
-                let baryc: [f32; 3] = [b0, b1, b2];
-
-                let (prim_idx, inner_idx) = self.index;
-                let tex_coord: Vector2<f32> = zip(self.mesh.indices[inner_idx].iter(), baryc.iter())
-                    .map(|(i, b)| self.mesh.tex_coords[*i] * *b)
-                    .sum();
+                let (prim_idx, _inner_idx) = self.index;
+                let tex_coord = tex_coord_from_bary(self.mesh, barycentric, self.index);
 
                 let norm = tang_to_mod * self.mesh.normal_maps[prim_idx].get_pixel(tex_coord.x, tex_coord.y);
                 norm.normalize()
@@ -127,15 +121,20 @@ pub struct RgbFromMesh<'m> {
 
 impl GimmeRgb for RgbFromMesh<'_> {
     fn get_rgb(&self, barycentric: &(f32, f32)) -> Vector3<f32> {
-        let (b1, b2) = *barycentric;
-        let b0 = 1.0 - b2 - b1;
-        let baryc: [f32; 3] = [b0, b1, b2];
-
-        let (prim_idx, inner_idx) = self.index;
-        let tex_coord: Vector2<f32> = zip(self.mesh.indices[inner_idx].iter(), baryc.iter())
-            .map(|(i, b)| self.mesh.tex_coords[*i] * *b)
-            .sum();
+        let (prim_idx, _inner_idx) = self.index;
+        let tex_coord = tex_coord_from_bary(self.mesh, barycentric, self.index);
         
         self.mesh.textures[prim_idx].get_pixel(tex_coord.x, tex_coord.y)
     }
+}
+
+fn tex_coord_from_bary(mesh: &Mesh, barycentric: &(f32, f32), full_idx: (usize, usize)) -> Vector2<f32> {
+    let (b1, b2) = *barycentric;
+    let b0 = 1.0 - b2 - b1;
+    let baryc: [f32; 3] = [b0, b1, b2];
+
+    let (_prim_idx, inner_idx) = full_idx;
+    zip(mesh.indices[inner_idx].iter(), baryc.iter())
+        .map(|(i, b)| mesh.tex_coords[*i] * *b)
+        .sum()
 }

@@ -137,8 +137,13 @@ impl UVRgb32FImage {
         let width = face.width() as f32;
         let height = face.height() as f32;
 
-        let (u, v) = (0.5 * u + 0.5, 0.5 * v + 0.5);
-        let rgb: Vec<f32> = face.get_pixel((u * width).min(width-1.0).trunc() as u32, (v * height).min(height-1.0).trunc() as u32).channels().to_vec();
+        let rgb: Vec<f32> = face
+            .get_pixel(
+                (u * width).min(width-1.0).trunc() as u32,
+                (v * height).min(height-1.0).trunc() as u32
+                )
+            .channels()
+            .to_vec();
         let rgb: [f32; 3] = rgb.try_into().unwrap();
         rgb.into()
     }

@@ -44,8 +44,8 @@ pub struct RgbFromMesh<'m> {
 
 impl GimmeRgb for RgbFromMesh<'_> {
     fn get_rgb(&self, barycentric: &(f32, f32)) -> Vector3<f32> {
-        let (b0, b1) = *barycentric;
-        let b2 = 1.0 - b0 - b1;
+        let (b1, b2) = *barycentric;
+        let b0 = 1.0 - b2 - b1;
         let baryc: [f32; 3] = [b0, b1, b2];
 
         let (prim_idx, inner_idx) = self.index;

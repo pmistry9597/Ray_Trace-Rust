@@ -62,6 +62,8 @@ fn sample_face(u: f32, v: f32, fact: f32, facewscale: &FaceImagewUVScale) -> Vec
     let (_, us, vs) = *facewscale;
     let face = &facewscale.0;
     let (u, v) = (u * us / fact, v * vs / fact);
+    let (u, v) = (0.5 * u + 0.5, 0.5 * v + 0.5);
+    
     face.get_pixel(u, v)
 }
 

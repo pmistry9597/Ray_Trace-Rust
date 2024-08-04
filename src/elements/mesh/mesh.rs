@@ -40,7 +40,7 @@ impl Decomposable for Mesh {
 
                         // below needs to be updated when textures come!
                         mat: DiffuseSpecNoBaseMaterial{
-                            divert_ray: DivertRayMethod::Diff,
+                            divert_ray: DivertRayMethod::Spec,
                             emissive: None,
                         },
                         rgb: RgbFromMesh{

@@ -22,7 +22,7 @@ pub struct Sphere {
 
     // pub rgb: Vector3<f32>,
     pub coloring: Coloring, //<Self>,
-    pub mat: DiffuseSpecNoBaseMaterial,
+    pub mat: UniformDiffuseSpec,
 }
 
 impl IsCompleteElement for Sphere {}

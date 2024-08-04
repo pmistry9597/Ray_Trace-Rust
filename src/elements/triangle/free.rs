@@ -4,7 +4,7 @@ use crate::material::*;
 use crate::ray::Ray;
 
 type UniformColor = Vector3<f32>;
-pub type FreeTriangle = Triangle<[Vector3<f32>; 3], UniformNorm, UniformColor, DiffuseSpecNoBaseMaterial>;
+pub type FreeTriangle = Triangle<[Vector3<f32>; 3], UniformNorm, UniformColor, UniformDiffuseSpec>;
 
 pub struct UniformNorm(Vector3<f32>);
 
@@ -16,7 +16,7 @@ impl GimmeNorm for UniformNorm {
     fn get_norm(&self, _barycentric: &(f32, f32)) -> Vector3<f32> { self.0 }
 }
 
-impl DivertsRay for DiffuseSpecNoBaseMaterial {
+impl DivertsRay for UniformDiffuseSpec {
     type Seeding = SeedingRay;
 
     fn divert_ray_seed(&self, _ray: &Ray, _norm: &Vector3<f32>, _barycentric: &(f32, f32)) -> SeedingRay {

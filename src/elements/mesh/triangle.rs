@@ -3,8 +3,9 @@ use crate::elements::triangle::{Triangle, GimmeNorm, GimmeRgb};
 use super::Mesh;
 use std::ops::Index;
 use std::iter::zip;
+use crate::material::DiffuseSpecNoBaseMaterial;
 
-pub type MeshTriangle<'a> = Triangle<VertexFromMesh<'a>, NormFromMesh<'a>, RgbFromMesh<'a>>;
+pub type MeshTriangle<'a> = Triangle<VertexFromMesh<'a>, NormFromMesh<'a>, RgbFromMesh<'a>, DiffuseSpecNoBaseMaterial>;
 
 pub struct VertexFromMesh<'m> {
     pub index: (usize, usize),

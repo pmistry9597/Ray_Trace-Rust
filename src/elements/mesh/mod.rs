@@ -1,5 +1,5 @@
 mod mesh;
 mod triangle;
 
-pub use mesh::Mesh;
+pub use mesh::*;
 pub use triangle::*;

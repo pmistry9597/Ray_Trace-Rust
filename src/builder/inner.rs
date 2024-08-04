@@ -48,7 +48,7 @@ impl From<MemberTypes> for Member<'_> {
                         norm: t.norm.normalize().into(),
                         verts: t.verts,
                         rgb: t.rgb,
-                        mat: t.mat,
+                        diverts_ray: t.mat,
                     },
             )),
             MeshFromNode(nfm) => Member::Grp(Box::new(nfm.to_mesh()))

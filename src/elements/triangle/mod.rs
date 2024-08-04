@@ -1,5 +1,5 @@
-mod general;
+mod generic;
 mod free;
 
-pub use general::*;
+pub use generic::*;
 pub use free::FreeTriangle;

@@ -23,7 +23,7 @@ pub trait GimmeRgb {
 
 pub trait DivertsRay {
     type Seeding;
-    fn divert_ray_seed(&self, barycentric: &(f32, f32)) -> Self::Seeding;
+    fn divert_ray_seed(&self, ray: &Ray, norm: &Vector3<f32>, barycentric: &(f32, f32)) -> Self::Seeding;
     fn divert_new_ray(&self, ray: &Ray, norm: &Vector3<f32>, o: &Vector3<f32>, seeding: &Self::Seeding) -> (Ray, f32);
 }
 
@@ -76,9 +76,9 @@ where
 {
     fn hit_info(&self, info: &HitResult, ray: &Ray) -> HitInfo {
         let intermed: &Intermed = &info.intermed.as_ref().unwrap().downcast_ref().unwrap();
-        let continue_info = ContinueInfo { seeding: self.diverts_ray.divert_ray_seed(&intermed.baryc), baryc: intermed.baryc.clone() };
-
         let norm = self.norm.get_norm(&intermed.baryc);
+
+        let continue_info = ContinueInfo { seeding: self.diverts_ray.divert_ray_seed(ray, &norm, &intermed.baryc), baryc: intermed.baryc.clone() };
         let pos = ray.d * info.l.0 + ray.o + norm * crate::EPS; // create offset from surface to prevent errors
 
         HitInfo {

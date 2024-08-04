@@ -1,11 +1,12 @@
 use nalgebra::{Vector3, Vector2, Matrix3, Matrix3x2, Matrix2};
-use crate::elements::triangle::{Triangle, GimmeNorm, GimmeRgb};
+use crate::elements::triangle::{Triangle, GimmeNorm, GimmeRgb, DivertsRay};
+use crate::ray::Ray;
 use super::Mesh;
 use std::ops::Index;
 use std::iter::zip;
-use crate::material::DiffuseSpecNoBaseMaterial;
+use crate::material::DynDiffSpec;
 
-pub type MeshTriangle<'a> = Triangle<VertexFromMesh<'a>, NormFromMesh<'a>, RgbFromMesh<'a>, DiffuseSpecNoBaseMaterial>;
+pub type MeshTriangle<'a> = Triangle<VertexFromMesh<'a>, NormFromMesh<'a>, RgbFromMesh<'a>, DivertsRayFromMesh<'a>>;
 
 pub struct VertexFromMesh<'m> {
     pub index: (usize, usize),
@@ -105,9 +106,9 @@ impl GimmeNorm for NormFromMesh<'_> {
         match self.norm_type {
             Mapped{tang_to_mod} => {
                 let (prim_idx, _inner_idx) = self.index;
-                let tex_coord = tex_coord_from_bary(self.mesh, barycentric, self.index);
+                let norm_coord = tex_coord_from_bary(self.mesh, &self.mesh.norm_coords, barycentric, self.index);
 
-                let norm = tang_to_mod * self.mesh.normal_maps[prim_idx].get_pixel(tex_coord.x, tex_coord.y);
+                let norm = tang_to_mod * self.mesh.normal_maps[prim_idx].get_pixel(norm_coord.x, norm_coord.y);
                 norm.normalize()
             },
             Uniform(norm) => norm,
@@ -123,19 +124,67 @@ pub struct RgbFromMesh<'m> {
 impl GimmeRgb for RgbFromMesh<'_> {
     fn get_rgb(&self, barycentric: &(f32, f32)) -> Vector3<f32> {
         let (prim_idx, _inner_idx) = self.index;
-        let tex_coord = tex_coord_from_bary(self.mesh, barycentric, self.index);
+        let tex_coord = tex_coord_from_bary(self.mesh, &self.mesh.tex_coords, barycentric, self.index);
         
         self.mesh.textures[prim_idx].get_pixel(tex_coord.x, tex_coord.y)
     }
 }
 
-fn tex_coord_from_bary(mesh: &Mesh, barycentric: &(f32, f32), full_idx: (usize, usize)) -> Vector2<f32> {
+pub struct DivertsRayFromMesh<'m> {
+    pub index: (usize, usize),
+    pub mesh: &'m Mesh,
+}
+
+impl DivertsRay for DivertsRayFromMesh<'_> {
+    type Seeding = (bool, f32); // (should_diff, roughness)
+
+    fn divert_ray_seed(&self, ray: &Ray, norm: &Vector3<f32>, barycentric: &(f32, f32)) -> Self::Seeding {
+        let (prim_idx, _inner_idx) = self.index;
+
+        let (metalness, roughness) = match &self.mesh.metal_rough.coords {
+            Some(coords) => {
+                let mr_coord = tex_coord_from_bary(self.mesh, coords, barycentric, self.index);
+                let mr_val = self.mesh.metal_rough_maps[prim_idx].get_pixel(mr_coord.x, mr_coord.y);
+                (mr_val[2] * self.mesh.metal_rough.metal, mr_val[1] * self.mesh.metal_rough.rough)
+            },
+            None => (self.mesh.metal_rough.metal, self.mesh.metal_rough.rough),
+        };
+        
+        const CUSTOM_ATTEN: f32 = 1.0; // attenuate metal because i think model didnt expect reflections!
+        let r0 = 0.04 + (1.0 - 0.04) * metalness; // based on gltf definition of metalness for fresnel
+        let reflectance = r0 + (1.0 - r0) * CUSTOM_ATTEN * (1.0 - (ray.d.dot(&norm)).abs().powf(5.0)); // schlick approximation
+
+        // DynDiffSpec::should_diff(1.0 - reflectance)
+        (DynDiffSpec::should_diff(1.0 - reflectance), roughness)
+    }
+
+    fn divert_new_ray(&self, ray: &Ray, norm: &Vector3<f32>, o: &Vector3<f32>, seeding: &Self::Seeding) -> (Ray, f32) {
+        let (should_diff, roughness) = *seeding;
+        let (mut ray, p) = DynDiffSpec::gen_new_ray(ray, norm, o, should_diff);
+
+        // we do roughness here, modify the ray
+        let scatter: Vector3<f32> = {
+            use rand::Rng;
+            use nalgebra::vector;
+            let mut rng = rand::thread_rng();
+            let u: f32 = rng.gen();
+            let v: f32 = rng.gen();
+            let w: f32 = rng.gen();
+            roughness * vector![u,v,w].normalize()
+        };
+
+        ray.d = (ray.d + scatter).normalize();
+        (ray, p)
+    }
+}
+
+fn tex_coord_from_bary(mesh: &Mesh, coords: &Vec<Vector2<f32>>, barycentric: &(f32, f32), full_idx: (usize, usize)) -> Vector2<f32> {
     let (b1, b2) = *barycentric;
     let b0 = 1.0 - b2 - b1;
     let baryc: [f32; 3] = [b0, b1, b2];
 
     let (_prim_idx, inner_idx) = full_idx;
     zip(mesh.indices[inner_idx].iter(), baryc.iter())
-        .map(|(i, b)| mesh.tex_coords[*i] * *b)
+        .map(|(i, b)| coords[*i] * *b)
         .sum()
 }

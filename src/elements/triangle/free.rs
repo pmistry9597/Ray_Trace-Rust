@@ -19,7 +19,7 @@ impl GimmeNorm for UniformNorm {
 impl DivertsRay for DiffuseSpecNoBaseMaterial {
     type Seeding = SeedingRay;
 
-    fn divert_ray_seed(&self, _barycentric: &(f32, f32)) -> SeedingRay {
+    fn divert_ray_seed(&self, _ray: &Ray, _norm: &Vector3<f32>, _barycentric: &(f32, f32)) -> SeedingRay {
         self.generate_seed()
     }
     fn divert_new_ray(&self, ray: &Ray, norm: &Vector3<f32>, o: &Vector3<f32>, seeding: &SeedingRay) -> (Ray, f32) {

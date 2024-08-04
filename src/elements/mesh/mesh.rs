@@ -14,11 +14,20 @@ pub struct Mesh {
     pub tex_coords: Vec<Vector2<f32>>,
     pub norm_coords: Vec<Vector2<f32>>,
     pub tangents: Option<Vec<Vector3<f32>>>,
+    pub metal_rough: PbrMetalRough,
     // all of the above likely need to be double wrapped by Vec instead of single
     // due to all above properties existing for any primitive under the mesh
 
-    pub textures: Vec<UVRgb32FImage>, // indexed by primitive index
-    pub normal_maps: Vec<UVRgb32FImage>, // indexed by primitive index
+    // following indexed by primitive index
+    pub textures: Vec<UVRgb32FImage>,
+    pub normal_maps: Vec<UVRgb32FImage>,
+    pub metal_rough_maps: Vec<UVRgb32FImage>,
+}
+
+pub struct PbrMetalRough {
+    pub metal: f32,
+    pub rough: f32,
+    pub coords: Option<Vec<Vector2<f32>>>,
 }
 
 impl Decomposable for Mesh {
@@ -39,9 +48,9 @@ impl Decomposable for Mesh {
                         norm: NormFromMesh::from_mesh_and_inner_idx(self, (0, inner_idx)),
 
                         // below needs to be updated when textures come!
-                        mat: DiffuseSpecNoBaseMaterial{
-                            divert_ray: DivertRayMethod::Spec,
-                            emissive: None,
+                        diverts_ray: DivertsRayFromMesh{
+                            index: (0, inner_idx),
+                            mesh: self,
                         },
                         rgb: RgbFromMesh{
                             index: (0, inner_idx),

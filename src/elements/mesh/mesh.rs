@@ -12,10 +12,13 @@ pub struct Mesh {
 
     pub indices: Vec<[usize; 3]>, // each one represents a single triangle
     pub tex_coords: Vec<Vector2<f32>>,
+    pub norm_coords: Vec<Vector2<f32>>,
+    pub tangents: Option<Vec<Vector3<f32>>>,
     // all of the above likely need to be double wrapped by Vec instead of single
     // due to all above properties existing for any primitive under the mesh
 
     pub textures: Vec<UVRgb32FImage>, // indexed by primitive index
+    pub normal_maps: Vec<UVRgb32FImage>, // indexed by primitive index
 }
 
 impl Decomposable for Mesh {
@@ -33,10 +36,7 @@ impl Decomposable for Mesh {
                             index: (0, inner_idx),
                             mesh: self,
                         },
-                        norm: NormFromMesh {
-                            index: (0, inner_idx),
-                            mesh: self,
-                        },
+                        norm: NormFromMesh::from_mesh_and_inner_idx(self, (0, inner_idx)),
 
                         // below needs to be updated when textures come!
                         mat: DiffuseSpecNoBaseMaterial{

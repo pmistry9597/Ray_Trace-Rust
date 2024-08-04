@@ -15,7 +15,7 @@ pub struct Triangle<V, N, C>
 }
 
 pub trait GimmeNorm {
-    fn get_norm(&self, pos: &Vector3<f32>) -> Vector3<f32>;
+    fn get_norm(&self, barycentric: &(f32, f32)) -> Vector3<f32>;
 }
 
 pub trait GimmeRgb {
@@ -80,12 +80,11 @@ where
             }
         };
         let pos = ray.d * info.l.0 + ray.o;
-        // let intermed: Box<Intermed> = info.bounce.unwrap().downcast().unwrap();
 
         HitInfo {
-            emissive, //: vector![0.7,0.7,1.0] * atten + red_comp,
+            emissive,
             pos,
-            norm: self.norm.get_norm(&pos),
+            norm: self.norm.get_norm(&intermed.baryc),
             dls: false,
             continue_info: Some(Box::new(continue_info)),
         }

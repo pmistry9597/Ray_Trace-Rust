@@ -8,14 +8,19 @@ render_info:
       max_thres: 0.5
   
 cam:
-  d: [3, -3, -3]
+  d: [5, -5, -5]
   o: [-5, 5, 5]
   up: [.33, .33, -.33]
+
+  # d: [3, -3, 0]
+  # o: [-2, 2, 2]
+  # up: [0.74, 0.74, 0]
+
   # d: [0, 0, -5]
   # o: [0, 0, 3]
   # up: [0, 1, 0]
 
-  lens_r: 0.03
+  # lens_r: 0.03
 
   screen_width: 10.0
   screen_height: 5.0
@@ -23,9 +28,9 @@ cam:
 scene_members:
   ### node of interest
   - !MeshFromNode
-  #   path: "../../../assets/discovery_space_shuttle/scene.gltf"
-  #   node_index: 11
-  #   uniform_scale: 5
+    # path: "../../../assets/discovery_space_shuttle/scene.gltf"
+    # node_index: 11
+    # uniform_scale: 5
     path: "../../../assets/basic_car/scene.gltf"
     node_index: 4
     uniform_scale: 0.05
@@ -41,7 +46,7 @@ scene_members:
 
   #### lights
   - !Sphere
-    c: [0.0, 10.0, -15.0]
+    c: [0.0, 10.0, 0]
     r: 5.0
     coloring: !Solid [0.0,0.0,0.0]
     mat:

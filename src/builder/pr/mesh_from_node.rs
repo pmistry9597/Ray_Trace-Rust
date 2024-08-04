@@ -46,13 +46,32 @@ impl MeshFromNode {
         };
         let tex_image = dyn_image.to_rgb32f();
 
+        let norm_info = primitive.material().normal_texture().expect("no normal map texture??");
+        let norm_data = &images[norm_info.texture().index()];
+        let dyn_norm = match norm_data.format {
+            gltf::image::Format::R8G8B8 => DynamicImage::ImageRgb8(
+                ImageBuffer::from_raw(norm_data.width, norm_data.height, norm_data.pixels.clone()).expect("doesn't fit??")
+            ),
+            _ => { panic!("different image format??"); },
+        };
+        let norm_image = dyn_norm.to_rgb32f();
+
         let tex_coords: Vec<Vector2<f32>> = reader.read_tex_coords(tex_info.tex_coord()).unwrap().into_f32().map(|p| p.into()).collect();
+        let norm_coords: Vec<Vector2<f32>> = reader.read_tex_coords(norm_info.tex_coord()).unwrap().into_f32().map(|p| p.into()).collect();
+        let tangents: Option<Vec<[f32; 3]>> = match reader.read_tangents() { 
+            Some(it) => Some(it.map(|t| t[..3].try_into().unwrap()).collect()),
+            None => None,
+        };
+
         Mesh {
             poses,
             norms: reader.read_normals().unwrap().map(|p| p.into()).collect(),
             indices: flat_indices.chunks(3).map(|c| c.try_into().unwrap()).collect(),
             tex_coords,
+            norm_coords,
+            tangents: match tangents { Some(t) => Some(t.iter().map(|ta| (*ta).into()).collect()), None => None }, 
             textures: vec![tex_image.into()],
+            normal_maps: vec![norm_image.into()],
         }
     }
 }

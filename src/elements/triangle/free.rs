@@ -11,7 +11,7 @@ impl GimmeRgb for UniformColor {
 }
 
 impl GimmeNorm for UniformNorm {
-    fn get_norm(&self, _pos: &Vector3<f32>) -> Vector3<f32> { self.0 }
+    fn get_norm(&self, _barycentric: &(f32, f32)) -> Vector3<f32> { self.0 }
 }
 
 impl From<Vector3<f32>> for UniformNorm {

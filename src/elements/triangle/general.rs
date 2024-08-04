@@ -79,12 +79,13 @@ where
                 vector![0.0,0.0,0.0]
             }
         };
-        let pos = ray.d * info.l.0 + ray.o;
+        let norm = self.norm.get_norm(&intermed.baryc);
+        let pos = ray.d * info.l.0 + ray.o + norm * crate::EPS; // create offset from surface to prevent errors
 
         HitInfo {
             emissive,
             pos,
-            norm: self.norm.get_norm(&intermed.baryc),
+            norm,
             dls: false,
             continue_info: Some(Box::new(continue_info)),
         }

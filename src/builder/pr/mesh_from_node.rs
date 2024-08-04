@@ -56,8 +56,8 @@ impl MeshFromNode {
         };
         let norm_image = dyn_norm.to_rgb32f();
 
-        let tex_coords: Vec<Vector2<f32>> = reader.read_tex_coords(tex_info.tex_coord()).unwrap().into_f32().map(|p| p.into()).collect();
-        let norm_coords: Vec<Vector2<f32>> = reader.read_tex_coords(norm_info.tex_coord()).unwrap().into_f32().map(|p| p.into()).collect();
+        let tex_coords: Vec<Vector2<f32>> = reader.read_tex_coords(tex_info.tex_coord()).expect("no texture coordinates?").into_f32().map(|p| p.into()).collect();
+        let norm_coords: Vec<Vector2<f32>> = reader.read_tex_coords(norm_info.tex_coord()).expect("no normal coordinates?").into_f32().map(|p| p.into()).collect();
         let tangents: Option<Vec<[f32; 3]>> = match reader.read_tangents() { 
             Some(it) => Some(it.map(|t| t[..3].try_into().unwrap()).collect()),
             None => None,

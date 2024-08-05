@@ -101,9 +101,49 @@ where
     let coords: Vec<Vector2<f32>> = reader.read_tex_coords(tex_coord).expect("no metal roughness map coordinates?").into_f32().map(|p| p.into()).collect();
 
     let image_data = &images[texture.index()];
+    use gltf::image::Format::*;
+    println!("format!!!! : {:?}", image_data.format);
     let dyn_image = match image_data.format {
-        gltf::image::Format::R8G8B8 => DynamicImage::ImageRgb8(
+        R8 => DynamicImage::ImageLuma8(
             ImageBuffer::from_raw(image_data.width, image_data.height, image_data.pixels.clone()).expect("doesn't fit??")
+        ),
+        R8G8B8 => DynamicImage::ImageRgb8(
+            ImageBuffer::from_raw(image_data.width, image_data.height, image_data.pixels.clone()).expect("doesn't fit??")
+        ),
+        R8G8B8A8 => DynamicImage::ImageRgba8(
+            ImageBuffer::from_raw(image_data.width, image_data.height, image_data.pixels.clone()).expect("doesn't fit??")
+        ),
+        R16G16B16 => DynamicImage::ImageRgb16(
+            ImageBuffer::from_raw(image_data.width, image_data.height, 
+                image_data.pixels.clone()
+                .chunks(2)
+                .map(|c| unsafe { std::mem::transmute::<[u8; 2], u16>(c.try_into().unwrap()) })
+                .collect())
+                .expect("doesn't fit??")
+        ),
+        R16G16B16A16 => DynamicImage::ImageRgba16(
+            ImageBuffer::from_raw(image_data.width, image_data.height, 
+                image_data.pixels.clone()
+                .chunks(2)
+                .map(|c| unsafe { std::mem::transmute::<[u8; 2], u16>(c.try_into().unwrap()) })
+                .collect())
+                .expect("doesn't fit??")
+        ),
+        R32G32B32FLOAT => DynamicImage::ImageRgb32F(
+            ImageBuffer::from_raw(image_data.width, image_data.height, 
+                image_data.pixels.clone()
+                .chunks(4)
+                .map(|c| unsafe { std::mem::transmute::<[u8; 4], f32>(c.try_into().unwrap()) })
+                .collect())
+                .expect("doesn't fit??")
+        ),
+        R32G32B32A32FLOAT => DynamicImage::ImageRgba32F(
+            ImageBuffer::from_raw(image_data.width, image_data.height, 
+                image_data.pixels.clone()
+                .chunks(4)
+                .map(|c| unsafe { std::mem::transmute::<[u8; 4], f32>(c.try_into().unwrap()) })
+                .collect())
+                .expect("doesn't fit??")
         ),
         _ => { panic!("different image format??"); },
     };

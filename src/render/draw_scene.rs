@@ -51,7 +51,10 @@ pub fn render_to_target<F : Fn() -> ()>(render_target: &RenderTarget, scene: &Sc
         render_target.buff_mux.lock()
             .par_chunks_mut(4) // pixels have rgba values, so chunk by 4
             .zip(&target)
-            .for_each(|(pix, tar)| pix.copy_from_slice(&rgb_f_to_u8(tar)));
+            .for_each(|(pix, tar)| {
+                pix.copy_from_slice(&rgb_f_to_u8(tar));
+                pix[3] = 255; // alpha value
+            });
 
         update_hook();
         println!("render iteration {}: {:?}", r_it, start.elapsed());

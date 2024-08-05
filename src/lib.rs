@@ -2,6 +2,7 @@ use std::thread;
 use std::sync::Arc;
 use egui::mutex::Mutex;
 use scene::Scene;
+use std::sync::mpsc::{channel, Sender, Receiver};
 pub use render::{RenderInfo, RenderTarget};
 pub use builder::Scheme;
 
@@ -18,32 +19,29 @@ pub type BufferMux = Arc<Mutex<Vec<u8>>>;
 const EPS: f32 = 1e-4;
 
 pub struct RenderOut {
-    pub buffer_avail: ArcMux<Option<BufferMux>>,
+    pub buf_q: Receiver<Vec<u8>>,
 }
 
 pub struct Renderer {
     target: RenderTarget,
-    out: Arc<RenderOut>,
+    sender: Sender<Vec<u8>>,
 
     scheme: Option<Scheme>,
 }
 
 impl Renderer {
-    pub fn new(canv_width: i32, canv_height: i32, scheme: Scheme) -> Self {
-        let buf: Vec<u8> = [1, 0, 0, 0].repeat((canv_width * canv_height).try_into().unwrap());
+    pub fn new(canv_width: i32, canv_height: i32, scheme: Scheme) -> (Self, RenderOut) {
+        let buf: Vec<u8> = [0, 0, 0, 0].repeat((canv_width * canv_height).try_into().unwrap());
+        let (tx, rx) = channel();
         let target = RenderTarget {
             buff_mux: Arc::new(Mutex::new(buf)),
             canv_width, canv_height,
         };
-        let buffer_avail = Arc::new(Mutex::new(Some(target.buff_mux.clone())));
-        Self {
+        (Self {
             target,
-            out: Arc::new(RenderOut{ buffer_avail }),
+            sender: tx,
             scheme: Some(scheme),
-        }
-    }
-    pub fn get_out(&self) -> Arc<RenderOut> {
-        self.out.clone()
+        }, RenderOut{buf_q: rx})
     }
     pub fn consume_and_do(mut self) {
         thread::spawn(move || {
@@ -55,12 +53,10 @@ impl Renderer {
             let skene = Scene { cam: cam.into(), members: scene_members.into() };
 
             render::render_to_target(&self.target, &skene, || self.update_output(), &render_info);
-            // self.update_output();
-            // thread::sleep(std::time::Duration::from_millis(500));
         });
     }
 
     fn update_output(&self) {
-        *self.out.buffer_avail.lock() = Some(self.target.buff_mux.clone());
+        self.sender.send(self.target.buff_mux.lock().clone()).expect("cannot send??");
     }
 }

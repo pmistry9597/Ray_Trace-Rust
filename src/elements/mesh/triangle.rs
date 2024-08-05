@@ -65,28 +65,34 @@ impl<'m> NormFromMesh<'m> {
                 Mapped{tang_to_mod: Matrix3::from_columns(&[tan.normalize(), bitan.normalize(), face_norm])}
             },
             None => {
-                let t1 = mesh.tex_coords[indices[1]] - mesh.tex_coords[indices[0]];
-                let t2 = mesh.tex_coords[indices[2]] - mesh.tex_coords[indices[0]];
+                match &mesh.rgb_info.coords {
+                    Some(tex_coords) => {
+                        let t1 = tex_coords[indices[1]] - tex_coords[indices[0]];
+                        let t2 = tex_coords[indices[2]] - tex_coords[indices[0]];
 
-                let tex_poses = Matrix2::from_columns(&[t1, t2]);
-                match tex_poses.try_inverse() {
-                    Some(inv_tex_poses) => {
-                        let e1 = mesh.poses[indices[1]] - mesh.poses[indices[0]];
-                        let e2 = mesh.poses[indices[2]] - mesh.poses[indices[0]];
-                        
-                        let mod_poses = Matrix3x2::from_columns(&[e1, e2]);
-                        let incomplete = mod_poses * inv_tex_poses; // gives T and B as its columns
+                        let tex_poses = Matrix2::from_columns(&[t1, t2]);
+                        match tex_poses.try_inverse() {
+                            Some(inv_tex_poses) => {
+                                let e1 = mesh.poses[indices[1]] - mesh.poses[indices[0]];
+                                let e2 = mesh.poses[indices[2]] - mesh.poses[indices[0]];
+                                
+                                let mod_poses = Matrix3x2::from_columns(&[e1, e2]);
+                                let incomplete = mod_poses * inv_tex_poses; // gives T and B as its columns
 
-                        let mut tang_to_mod: Matrix3<f32> = incomplete.fixed_resize(0.0);
-                        for i in 0..2 {
-                            tang_to_mod.set_column(i, &tang_to_mod.column(i).normalize());
+                                let mut tang_to_mod: Matrix3<f32> = incomplete.fixed_resize(0.0);
+                                for i in 0..2 {
+                                    tang_to_mod.set_column(i, &tang_to_mod.column(i).normalize());
+                                }
+                                tang_to_mod.set_column(2, &face_norm);
+
+                                Mapped{tang_to_mod}
+                            },
+                            None => Uniform(face_norm),
                         }
-                        tang_to_mod.set_column(2, &face_norm);
-
-                        Mapped{tang_to_mod}
                     },
                     None => Uniform(face_norm),
                 }
+                
             }
         }
     }
@@ -124,9 +130,13 @@ pub struct RgbFromMesh<'m> {
 impl GimmeRgb for RgbFromMesh<'_> {
     fn get_rgb(&self, barycentric: &(f32, f32)) -> Vector3<f32> {
         let (prim_idx, _inner_idx) = self.index;
-        let tex_coord = tex_coord_from_bary(self.mesh, &self.mesh.tex_coords, barycentric, self.index);
-        
-        self.mesh.textures[prim_idx].get_pixel(tex_coord.x, tex_coord.y)
+        match &self.mesh.rgb_info.coords {
+            Some(tex_coords) => {
+                let tex_coord = tex_coord_from_bary(self.mesh, &tex_coords, barycentric, self.index);
+                self.mesh.rgb_info.factor.component_mul(&self.mesh.textures[prim_idx].get_pixel(tex_coord.x, tex_coord.y))
+            },
+            None => self.mesh.rgb_info.factor,
+        }
     }
 }
 

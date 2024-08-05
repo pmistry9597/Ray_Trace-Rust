@@ -11,7 +11,8 @@ pub struct Mesh {
     pub norms: Vec<Vector3<f32>>,
 
     pub indices: Vec<[usize; 3]>, // each one represents a single triangle
-    pub tex_coords: Vec<Vector2<f32>>,
+    // pub tex_coords: Vec<Vector2<f32>>,
+    pub rgb_info: RgbInfo,
     pub norm_coords: Vec<Vector2<f32>>,
     pub tangents: Option<Vec<Vector3<f32>>>,
     pub metal_rough: PbrMetalRough,
@@ -27,6 +28,11 @@ pub struct Mesh {
 pub struct PbrMetalRough {
     pub metal: f32,
     pub rough: f32,
+    pub coords: Option<Vec<Vector2<f32>>>,
+}
+
+pub struct RgbInfo {
+    pub factor: Vector3<f32>,
     pub coords: Option<Vec<Vector2<f32>>>,
 }
 

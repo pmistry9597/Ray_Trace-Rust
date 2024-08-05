@@ -1,6 +1,6 @@
 use nalgebra::Vector3;
 use serde::Deserialize;
-use crate::elements::mesh::{Mesh, PbrMetalRough};
+use crate::elements::mesh::{Mesh, PbrMetalRough, RgbInfo};
 use image::{DynamicImage, ImageBuffer};
 use nalgebra::Vector2;
 use crate::material::UVRgb32FImage;
@@ -39,6 +39,11 @@ impl MeshFromNode {
         let pbr_met_rough = material.pbr_metallic_roughness();
         
         let (textures, tex_coords) = texinfo_to_uvtex_and_coords(&pbr_met_rough.base_color_texture(), &reader, &images);
+        let base_color_factor: [f32; 3] = pbr_met_rough.base_color_factor()[..3].try_into().unwrap();
+        let rgb_info = RgbInfo {
+            factor: base_color_factor.into(),
+            coords: tex_coords,
+        };
         let (normal_maps, norm_coords) = norminfo_to_uvtex_and_coords(&material.normal_texture(), &reader, &images);
 
         let tangents: Option<Vec<[f32; 3]>> = reader.read_tangents().map(|tans| tans.map(|t| t[..3].try_into().unwrap()).collect());
@@ -54,7 +59,7 @@ impl MeshFromNode {
             poses,
             norms: reader.read_normals().unwrap().map(|p| p.into()).collect(),
             indices: flat_indices.chunks(3).map(|c| c.try_into().unwrap()).collect(),
-            tex_coords: tex_coords.unwrap(),
+            rgb_info,
             norm_coords: norm_coords.unwrap(),
             tangents: tangents.map(|t| t.iter().map(|ta| (*ta).into()).collect()), 
             metal_rough,

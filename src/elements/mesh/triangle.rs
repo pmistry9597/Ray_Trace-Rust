@@ -184,7 +184,6 @@ impl DivertsRay for DivertsRayFromMesh<'_> {
         let r0 = 0.04 + (1.0 - 0.04) * metalness; // based on gltf definition of metalness for fresnel
         let reflectance = r0 + (1.0 - r0) * CUSTOM_ATTEN * (1.0 - (ray.d.dot(&norm)).abs().powf(5.0)); // schlick approximation
 
-        // DynDiffSpec::should_diff(1.0 - reflectance)
         (DynDiffSpec::should_diff(1.0 - reflectance), roughness)
     }
 

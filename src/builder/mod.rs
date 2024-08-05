@@ -1,6 +1,5 @@
 use serde::Deserialize;
 use serde_yaml;
-use crate::scene::Cam;
 use crate::render::RenderInfo;
 use inner::*;
 
@@ -10,7 +9,7 @@ mod pr;
 #[derive(Deserialize, Debug)]
 pub struct Scheme {
     pub render_info: RenderInfo,
-    pub cam: Cam,
+    pub cam: pr::Cam,
     pub scene_members: VecInto<MemberTypes>,
 }
 

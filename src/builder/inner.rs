@@ -46,9 +46,6 @@ impl From<VecInto<MemberTypes>> for Vec<Member<'_>> {
                 Model(m) => {
                     members.extend(m.to_meshes().into_iter().map(|m| Member::Grp(Box::new(m))));
                 },
-                // MeshFromNode(nfm) => {
-                //     Member::Grp(Box::new(nfm.to_mesh()))
-                // },
             }
         });
 
@@ -73,34 +70,4 @@ pub enum MemberTypes {
     FreeTriangle(pr::FreeTriangle),
 
     Model(pr::Model),
-    
-    // MeshFromNode(pr::MeshFromNode),
 }
-
-// impl From<MemberTypes> for Member<'_> {
-//     fn from(val: MemberTypes) -> Self {
-//         use MemberTypes::*;
-//         match val {
-//             Sphere(s) => Member::Elem(Box::new(s)),
-//             DistantCubeMap(prcs) => Member::Elem(
-//                 Box::new(distant_cube_map::DistantCubeMap {
-//                     neg_z: prcs.neg_z.into(),
-//                     pos_z: prcs.pos_z.into(),
-//                     neg_x: prcs.neg_x.into(),
-//                     pos_x: prcs.pos_x.into(),
-//                     neg_y: prcs.neg_y.into(),
-//                     pos_y: prcs.pos_y.into(),
-//                 })),
-//             FreeTriangle(t) => Member::Elem(
-//                 Box::new(
-//                     triangle::FreeTriangle {
-//                         norm: t.norm.normalize().into(),
-//                         verts: t.verts,
-//                         rgb: t.rgb,
-//                         diverts_ray: t.mat,
-//                     },
-//             )),
-//             // MeshFromNode(nfm) => Member::Grp(Box::new(nfm.to_mesh()))
-//         }
-//     }
-// }

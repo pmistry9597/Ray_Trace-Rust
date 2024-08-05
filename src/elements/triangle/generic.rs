@@ -55,11 +55,9 @@ where
 {
     fn continue_ray(&self, ray: &Ray, hit_info: &HitInfo) -> Option<(Vector3<f32>, Ray)> { 
         let cont_info: &ContinueInfo<S> = &hit_info.continue_info.as_ref().unwrap().downcast_ref().unwrap();
-        // let seeding = cont_info.seeding;
 
         let (ray, p) = self.diverts_ray.divert_new_ray(ray, &hit_info.norm, &hit_info.pos, &cont_info.seeding);
 
-        // let intermed: &ContinueInfo = &hit_info.continue_info.as_ref().unwrap().downcast_ref().unwrap();
         let rgb = self.rgb.get_rgb(&cont_info.baryc);
 
         Some((rgb / p, ray))

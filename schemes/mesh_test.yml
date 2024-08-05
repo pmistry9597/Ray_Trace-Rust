@@ -8,17 +8,10 @@ render_info:
       max_thres: 0.5
   
 cam:
-  d: [5, -5, -5]
-  o: [-5, 5, 5]
-  up: [.33, .33, -.33]
-
-  # d: [3, -3, 0]
-  # o: [-2, 2, 2]
-  # up: [0.74, 0.74, 0]
-
-  # d: [0, 0, -5]
-  # o: [0, 0, 3]
-  # up: [0, 1, 0]
+  d: [0, 0, -5]
+  up: [0, 1, 0]
+  view_eulers: [0, -0.75, 0]
+  o: [-25, 2, 25]
 
   # lens_r: 0.03
 
@@ -26,14 +19,17 @@ cam:
   screen_height: 5.0
 
 scene_members:
-  ### node of interest
   - !Model
     path: "../../../assets/discovery_space_shuttle/scene.gltf"
-    uniform_scale: 5
-    # path: "../../../assets/basic_car/scene.gltf"
-    # # node_index: 8
-    # uniform_scale: 0.05
-    # node_index: 11
+    euler_angles: [0, 1.8, 0]
+    uniform_scale: 1
+    translation: [0, 1, 0]
+    
+  # - !Model
+  #   path: "../../../assets/basic_car/scene.gltf"
+  #   euler_angles: [0, -0.75, 0]
+  #   uniform_scale: 10
+  #   translation: [0, -0.5, 0.4]
 
   #### skybox
   - !DistantCubeMap
@@ -46,8 +42,8 @@ scene_members:
 
   #### lights
   - !Sphere
-    c: [0.0, 10.0, 0]
-    r: 5.0
+    c: [40, 10.0, 40]
+    r: 10.0
     coloring: !Solid [0.0,0.0,0.0]
     mat:
       divert_ray: Diff

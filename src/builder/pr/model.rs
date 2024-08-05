@@ -5,10 +5,6 @@ use image::{DynamicImage, ImageBuffer};
 use nalgebra::Vector2;
 use crate::material::UVRgb32FImage;
 
-// --- -------- ------- - -- ----- - ----- FUCK --------------
-// this file should be deleted/changed around soon!!
-// --- --- --- --PEE ----- --- ----- ----
-
 #[derive(Deserialize, Debug)]
 pub struct Model {
     path: String,
@@ -17,16 +13,35 @@ pub struct Model {
 
 impl Model {
     pub fn to_meshes(&self) -> Vec<Mesh> {
+        let mut meshes: Vec<Mesh> = vec![];
         let (document, buffers, images) = gltf::import(&self.path).unwrap();
-        let node_oi = document.nodes().nth(11).unwrap();
 
-        let mesh = node_oi.mesh().unwrap();
+        for scene in document.scenes() {
+            for node in scene.nodes() {
+                self.explore_node(&node, &mut meshes, &buffers, &images);
+            }
+        }
 
-        vec![get_mesh(&mesh, &buffers, &images, self.uniform_scale)]
+        meshes
+    }
+
+    fn explore_node(&self, node: &gltf::Node, meshes: &mut Vec<Mesh>, buffers: &Vec<gltf::buffer::Data>, images: &Vec<gltf::image::Data>) {
+        // let mesh = node.mesh().unwrap();
+        if let Some(mesh) = node.mesh() {
+            meshes.push(generate_mesh(&mesh, &buffers, &images, self.uniform_scale));
+        }
+    
+        for child in node.children() {
+            self.explore_node(&child, meshes, buffers, images);
+        }
     }
 }
 
-fn get_mesh(mesh: &gltf::Mesh, buffers: &Vec<gltf::buffer::Data>, images: &Vec<gltf::image::Data>, uniform_scale: f32) -> Mesh {
+fn generate_mesh(mesh: &gltf::Mesh, buffers: &Vec<gltf::buffer::Data>, 
+    images: &Vec<gltf::image::Data>, uniform_scale: f32,
+
+) -> Mesh 
+{
     let mut mesh_ =  Mesh {
         poses: vec![],
         norms: vec![],
@@ -42,7 +57,6 @@ fn get_mesh(mesh: &gltf::Mesh, buffers: &Vec<gltf::buffer::Data>, images: &Vec<g
     };
 
     for primitive in mesh.primitives() {
-        // let primitive = mesh.primitives().next().unwrap();
         let reader = primitive.reader(|buffer| Some(&buffers[buffer.index()].0));
 
         let flat_indices: Vec<usize> = reader.read_indices().unwrap()
@@ -97,25 +111,6 @@ fn get_mesh(mesh: &gltf::Mesh, buffers: &Vec<gltf::buffer::Data>, images: &Vec<g
     mesh_
 }
 
-
-// #[derive(Deserialize, Debug)]
-// pub struct MeshFromNode {
-//     path: String,
-//     node_index: usize,
-//     uniform_scale: f32,
-// }
-
-// impl MeshFromNode {
-//     pub fn to_mesh(&self) -> Mesh {
-//         let (document, buffers, images) = gltf::import(&self.path).unwrap();
-//         let node_oi = document.nodes().nth(self.node_index).unwrap();
-
-//         let mesh = node_oi.mesh().unwrap();
-
-//         get_mesh(&mesh, &buffers, &images, self.uniform_scale)
-//     }
-// }
-
 use gltf::texture::Info;
 use gltf::mesh::Reader;
 use gltf::image::Data;
@@ -139,7 +134,7 @@ where
 
     let image_data = &images[texture.index()];
     use gltf::image::Format::*;
-    println!("format!!!! : {:?}", image_data.format);
+    // println!("format!!!! : {:?}", image_data.format);
     let dyn_image = match image_data.format {
         R8 => DynamicImage::ImageLuma8(
             ImageBuffer::from_raw(image_data.width, image_data.height, image_data.pixels.clone()).expect("doesn't fit??")

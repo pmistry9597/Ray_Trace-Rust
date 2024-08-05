@@ -1,8 +1,8 @@
 ### my attempt at wada ADAPTED FROM smallpt
 
 render_info:
-  width: 500
-  height: 250
+  width: 1200
+  height: 600
   samps_per_pix: 100000
   rad_info:  
     debug_single_ray: false

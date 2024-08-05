@@ -12,9 +12,8 @@ pub fn diff(ray: &Ray, norm: &Vector3<f32>, o: &Vector3<f32>) -> Ray {
     let xd = (ray.d - norm * (ray.d.dot(&norm))).normalize();
     let yd = (norm.cross(&xd)).normalize();
 
-    let mut rng = rand::thread_rng();
-    let u: f32 = rng.gen();
-    let v: f32 = rng.gen();
+    let u: f32 = crate::RNG.with_borrow_mut(|r| r.gen());
+    let v: f32 = crate::RNG.with_borrow_mut(|r| r.gen());
 
     let r = u.sqrt();
     let thet = 2.0 * std::f32::consts::PI * v;
@@ -49,8 +48,7 @@ pub fn refract(ray: &Ray, norm: &Vector3<f32>, o: &Vector3<f32>, n_out: &f32, n_
         let c = 1.0 - if into { c1 } else { trns.dot(norm) };
         let re = r0 + (1.0 + r0) * c.powf(5.0); // schlick approximation for reflection coef in fresnel equation
         
-        let mut rng = rand::thread_rng();
-        let u: f32 = rng.gen();
+        let u: f32 = crate::RNG.with_borrow_mut(|r| r.gen());
 
         if u < re {
             (refl, 1.0 / re)

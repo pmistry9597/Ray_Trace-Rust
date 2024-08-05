@@ -195,10 +195,9 @@ impl DivertsRay for DivertsRayFromMesh<'_> {
         let scatter: Vector3<f32> = {
             use rand::Rng;
             use nalgebra::vector;
-            let mut rng = rand::thread_rng();
-            let u: f32 = rng.gen();
-            let v: f32 = rng.gen();
-            let w: f32 = rng.gen();
+            let u: f32 = crate::RNG.with_borrow_mut(|r| r.gen());
+            let v: f32 = crate::RNG.with_borrow_mut(|r| r.gen());
+            let w: f32 = crate::RNG.with_borrow_mut(|r| r.gen());
             roughness * vector![u,v,w].normalize()
         };
 

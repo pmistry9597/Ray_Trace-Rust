@@ -60,3 +60,10 @@ impl Renderer {
         self.sender.send(self.target.buff_mux.lock().clone()).expect("cannot send??");
     }
 }
+
+use std::cell::RefCell;
+use rand::rngs::ThreadRng;
+
+thread_local! {
+    pub static RNG: RefCell<ThreadRng> = rand::thread_rng().into();
+}

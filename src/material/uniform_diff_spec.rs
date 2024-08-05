@@ -31,8 +31,7 @@ impl UniformDiffuseSpec {
                 SeedingRay::NoSeed
             },
             DiffSpec {diffp} => {
-                let mut rng = rand::thread_rng();
-                let u: f32 = rng.gen();
+                let u: f32 = crate::RNG.with_borrow_mut(|r| r.gen());
 
                 SeedingRay::DiffSpec(u < diffp)
             }

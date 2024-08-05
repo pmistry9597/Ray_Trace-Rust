@@ -27,19 +27,13 @@ impl RayCompute {
         let right = &self.right;
 
         use rand::Rng;
-        let mut rng = rand::thread_rng();
-        let u: f32 = rng.gen::<f32>() - 0.5;
-        let v: f32 = rng.gen::<f32>() - 0.5;
+        let u: f32 = crate::RNG.with_borrow_mut(|r| r.gen::<f32>()) - 0.5;
+        let v: f32 = crate::RNG.with_borrow_mut(|r| r.gen::<f32>()) - 0.5;
 
         ray.d = ray.d + right * u * self.x_cf + up * v * self.y_cf;
         ray.d = ray.d.normalize();
         ray
     }
-    // pub fn pix_cam_to_ray(&self, (x, y): (i32, i32), cam: &Cam) -> Ray {
-    //     let mut ray = self.pix_cam_raw_ray((x,y), cam);
-    //     ray.d = ray.d.normalize();
-    //     ray
-    // }
 
     fn pix_cam_raw_ray(&self, (x, y): (i32, i32), cam: &Cam) -> Ray { 
         let up = &cam.up;
@@ -54,9 +48,8 @@ impl RayCompute {
             Some(a) => { // lens effect
                 use rand::Rng;
 
-                let mut rng = rand::thread_rng();
-                let u: f32 = rng.gen::<f32>();
-                let v: f32 = rng.gen::<f32>();
+                let u: f32 = crate::RNG.with_borrow_mut(|r| r.gen());
+                let v: f32 = crate::RNG.with_borrow_mut(|r| r.gen());
 
                 let r = u.sqrt();
                 let thet = 2.0 * std::f32::consts::PI * v;

@@ -25,7 +25,7 @@ pub fn render_to_target<F : Fn() -> ()>(render_target: &RenderTarget, scene: &Sc
     let mut sample_count: f32 = 0.0;
     let mut target: Vec<[f32; 3]> = [[0.0, 0.0, 0.0]].repeat((render_target.canv_width * render_target.canv_height).try_into().unwrap());
 
-    // NOTE: scene decomposing will happen here
+    // scene decomposing into renderables
     let (pure_elem_refs, decomposed_groups) = decompose_groups(&scene.members);
     let renderables: Vec<Renderable> = pure_elem_refs.into_iter().chain(decomposed_groups.iter().map(|e| e.as_ref())).collect();
 

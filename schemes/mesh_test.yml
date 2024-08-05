@@ -27,13 +27,13 @@ cam:
 
 scene_members:
   ### node of interest
-  - !MeshFromNode
-    # path: "../../../assets/discovery_space_shuttle/scene.gltf"
+  - !Model
+    path: "../../../assets/discovery_space_shuttle/scene.gltf"
+    uniform_scale: 5
+    # path: "../../../assets/basic_car/scene.gltf"
+    # # node_index: 8
+    # uniform_scale: 0.05
     # node_index: 11
-    # uniform_scale: 5
-    path: "../../../assets/basic_car/scene.gltf"
-    node_index: 4
-    uniform_scale: 0.05
 
   #### skybox
   - !DistantCubeMap

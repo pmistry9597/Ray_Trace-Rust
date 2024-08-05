@@ -1,4 +1,6 @@
 render_info:
+  width: 800
+  height: 400
   samps_per_pix: 100000
   rad_info:  
     debug_single_ray: false
@@ -42,7 +44,7 @@ scene_members:
 
   #### lights
   - !Sphere
-    c: [40, 10.0, 40]
+    c: [10, 30.0, 10]
     r: 10.0
     coloring: !Solid [0.0,0.0,0.0]
     mat:

@@ -9,6 +9,8 @@ use super::radiance::{radiance, RadianceInfo};
 use serde::Deserialize;
 #[derive(Deserialize, Debug)]
 pub struct RenderInfo {
+    pub width: i32,
+    pub height: i32,
     pub samps_per_pix: i32,
     pub rad_info: RadianceInfo,
 }

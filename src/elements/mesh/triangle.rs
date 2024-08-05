@@ -47,13 +47,14 @@ impl<'m> NormFromMesh<'m> {
 
         let (prim_idx, inner_idx) = full_idx;
         let indices = &mesh.indices[prim_idx][inner_idx];
+        let trans_mat3 = mesh.trans_mat.clone().fixed_resize::<3,3>(0.0);
         let face_norm = Self::get_face_norm(mesh, full_idx);
 
         use NormType::*;
         match &mesh.norm_info[prim_idx] {
             Some(_) => {
                 match &mesh.tangents[prim_idx] {
-                    // _ => Uniform(face_norm),
+                    // _ => Uniform((trans_mat3 * face_norm).normalize()),
         
                     Some(tans) => {
                         // maybe we need to fix below calculation
@@ -63,17 +64,22 @@ impl<'m> NormFromMesh<'m> {
                             .sum();
                         let tan = tan.normalize();
                         let bitan = tan.cross(&face_norm);
+
+                        let mut tang_to_mod: Matrix3<f32> = trans_mat3 * Matrix3::from_columns(&[tan.normalize(), bitan.normalize(), face_norm]);
+                        for i in 0..3 {
+                            tang_to_mod.set_column(i, &tang_to_mod.column(i).normalize());
+                        }
         
-                        Mapped{tang_to_mod: Matrix3::from_columns(&[tan.normalize(), bitan.normalize(), face_norm])}
+                        Mapped{tang_to_mod}
                     },
-                    None => Self::norm_type_from_tex_coords(mesh, face_norm, (prim_idx, &indices)),
+                    None => Self::norm_type_from_tex_coords(mesh, face_norm, (prim_idx, &indices), &trans_mat3),
                 }
             },
             None => Uniform(face_norm),
         }
     }
 
-    fn norm_type_from_tex_coords(mesh: &Mesh, face_norm: Vector3<f32>, full_idxs: (usize, &[usize; 3])) -> NormType {
+    fn norm_type_from_tex_coords(mesh: &Mesh, face_norm: Vector3<f32>, full_idxs: (usize, &[usize; 3]), trans_mat3: &Matrix3<f32>) -> NormType {
         use NormType::*;
         let (prim_idx, indices) = full_idxs;
         match &mesh.rgb_info[prim_idx].coords {
@@ -88,6 +94,7 @@ impl<'m> NormFromMesh<'m> {
                         let e2 = mesh.poses[prim_idx][indices[2]] - mesh.poses[prim_idx][indices[0]];
                         
                         let mod_poses = Matrix3x2::from_columns(&[e1, e2]);
+
                         let incomplete = mod_poses * inv_tex_poses; // gives T and B as its columns
 
                         let mut tang_to_mod: Matrix3<f32> = incomplete.fixed_resize(0.0);
@@ -95,6 +102,10 @@ impl<'m> NormFromMesh<'m> {
                             tang_to_mod.set_column(i, &tang_to_mod.column(i).normalize());
                         }
                         tang_to_mod.set_column(2, &face_norm);
+                        tang_to_mod = trans_mat3 * tang_to_mod;
+                        for i in 0..3 {
+                            tang_to_mod.set_column(i, &tang_to_mod.column(i).normalize());
+                        }
 
                         Mapped{tang_to_mod}
                     },

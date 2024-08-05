@@ -1,4 +1,4 @@
-use nalgebra::{Vector3, Vector2};
+use nalgebra::{Vector3, Vector2, Matrix4};
 use crate::elements::Decomposable;
 use crate::elements::Element;
 use super::*;
@@ -19,6 +19,8 @@ pub struct Mesh {
     pub textures: Vec<Option<UVRgb32FImage>>,
     pub normal_maps: Vec<Option<UVRgb32FImage>>,
     pub metal_rough_maps: Vec<Option<UVRgb32FImage>>,
+
+    pub trans_mat: Matrix4<f32>,
 }
 
 pub struct PbrMetalRoughInfo {

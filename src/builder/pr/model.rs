@@ -1,4 +1,4 @@
-use nalgebra::Vector3;
+use nalgebra::{Vector3, Matrix4};
 use serde::Deserialize;
 use crate::elements::mesh::{Mesh, PbrMetalRoughInfo, RgbInfo, NormInfo};
 use image::{DynamicImage, ImageBuffer};
@@ -16,29 +16,32 @@ impl Model {
         let mut meshes: Vec<Mesh> = vec![];
         let (document, buffers, images) = gltf::import(&self.path).unwrap();
 
+        let transform: Matrix4<f32> = Matrix4::new_scaling(self.uniform_scale);
+
         for scene in document.scenes() {
             for node in scene.nodes() {
-                self.explore_node(&node, &mut meshes, &buffers, &images);
+                self.explore_node(&node, &mut meshes, &buffers, &images, &transform);
             }
         }
 
         meshes
     }
 
-    fn explore_node(&self, node: &gltf::Node, meshes: &mut Vec<Mesh>, buffers: &Vec<gltf::buffer::Data>, images: &Vec<gltf::image::Data>) {
-        // let mesh = node.mesh().unwrap();
+    fn explore_node(&self, node: &gltf::Node, meshes: &mut Vec<Mesh>, buffers: &Vec<gltf::buffer::Data>, images: &Vec<gltf::image::Data>, trans_mat: &Matrix4<f32>) {
+        let trans_mat = (*trans_mat) * Matrix4::<f32>::from_iterator(node.transform().matrix().into_iter().flat_map(|e| e.into_iter()));
+
         if let Some(mesh) = node.mesh() {
-            meshes.push(generate_mesh(&mesh, &buffers, &images, self.uniform_scale));
+            meshes.push(generate_mesh(&mesh, &buffers, &images, &trans_mat));
         }
     
         for child in node.children() {
-            self.explore_node(&child, meshes, buffers, images);
+            self.explore_node(&child, meshes, buffers, images, &trans_mat);
         }
     }
 }
 
 fn generate_mesh(mesh: &gltf::Mesh, buffers: &Vec<gltf::buffer::Data>, 
-    images: &Vec<gltf::image::Data>, uniform_scale: f32,
+    images: &Vec<gltf::image::Data>, trans_mat: &Matrix4<f32>
 
 ) -> Mesh 
 {
@@ -54,6 +57,8 @@ fn generate_mesh(mesh: &gltf::Mesh, buffers: &Vec<gltf::buffer::Data>,
         textures: vec![],
         normal_maps: vec![],
         metal_rough_maps: vec![],
+
+        trans_mat: trans_mat.clone(),
     };
 
     for primitive in mesh.primitives() {
@@ -65,7 +70,11 @@ fn generate_mesh(mesh: &gltf::Mesh, buffers: &Vec<gltf::buffer::Data>,
                 .collect();
 
         let poses: Vec<Vector3<f32>> = reader.read_positions().unwrap().map(|p| p.into()).collect();
-        let poses: Vec<Vector3<f32>> = poses.iter().map(|v| v * uniform_scale ).collect();
+        let poses: Vec<Vector3<f32>> = poses.iter()
+            .map(|v| v.fixed_resize::<4, 1>(1.0)) // vec4 with 1 last entry for transform
+            .map(|v| trans_mat * v)
+            .map(|v| v.fixed_resize::<3, 1>(0.0))
+            .collect();
 
         let material = primitive.material();
         let pbr_met_rough = material.pbr_metallic_roughness();

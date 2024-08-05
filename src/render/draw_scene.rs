@@ -81,10 +81,6 @@ fn decompose_groups<'e>(members: &'e Vec<Member<'e>>) -> (Vec<Renderable<'e>>, V
     });
 
     let decomposed: Vec<Element<'e>> = group_iters.into_iter().flatten().collect();
-    println!("decompsoed length: {}", decomposed.len());
 
-    // pure_elem_refs.extend(decomposed.iter());
     (pure_elem_refs, decomposed)
-
-    // let renderables: Vec<Renderable> = scene.members.iter().map(|e| e.as_ref()).collect();
 }

@@ -9,14 +9,22 @@ use crate::material::UVRgb32FImage;
 pub struct Model {
     path: String,
     uniform_scale: f32,
+    translation: Vector3<f32>,
+    euler_angles: [f32; 3],
 }
 
 impl Model {
     pub fn to_meshes(&self) -> Vec<Mesh> {
         let mut meshes: Vec<Mesh> = vec![];
         let (document, buffers, images) = gltf::import(&self.path).unwrap();
+        
+        let transform: Matrix4<f32> = {
+                let [r, p, y] = self.euler_angles;
 
-        let transform: Matrix4<f32> = Matrix4::new_scaling(self.uniform_scale);
+                Matrix4::new_translation(&self.translation)
+                * Matrix4::new_scaling(self.uniform_scale)
+                * Matrix4::from_euler_angles(r, p, y)
+            };
 
         for scene in document.scenes() {
             for node in scene.nodes() {

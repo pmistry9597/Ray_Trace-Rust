@@ -11,11 +11,10 @@ pub struct Mesh {
     pub norms: Vec<Vector3<f32>>,
 
     pub indices: Vec<[usize; 3]>, // each one represents a single triangle
-    // pub tex_coords: Vec<Vector2<f32>>,
     pub rgb_info: RgbInfo,
-    pub norm_coords: Vec<Vector2<f32>>,
+    pub norm_info: Option<NormInfo>,
     pub tangents: Option<Vec<Vector3<f32>>>,
-    pub metal_rough: PbrMetalRough,
+    pub metal_rough: PbrMetalRoughInfo,
     // all of the above likely need to be double wrapped by Vec instead of single
     // due to all above properties existing for any primitive under the mesh
 
@@ -25,7 +24,7 @@ pub struct Mesh {
     pub metal_rough_maps: Vec<UVRgb32FImage>,
 }
 
-pub struct PbrMetalRough {
+pub struct PbrMetalRoughInfo {
     pub metal: f32,
     pub rough: f32,
     pub coords: Option<Vec<Vector2<f32>>>,
@@ -34,6 +33,11 @@ pub struct PbrMetalRough {
 pub struct RgbInfo {
     pub factor: Vector3<f32>,
     pub coords: Option<Vec<Vector2<f32>>>,
+}
+
+pub struct NormInfo {
+    pub scale: f32,
+    pub coords: Vec<Vector2<f32>>,
 }
 
 impl Decomposable for Mesh {

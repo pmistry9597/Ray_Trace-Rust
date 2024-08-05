@@ -1,6 +1,6 @@
 use nalgebra::Vector3;
 use serde::Deserialize;
-use crate::elements::mesh::{Mesh, PbrMetalRough, RgbInfo};
+use crate::elements::mesh::{Mesh, PbrMetalRoughInfo, RgbInfo, NormInfo};
 use image::{DynamicImage, ImageBuffer};
 use nalgebra::Vector2;
 use crate::material::UVRgb32FImage;
@@ -44,12 +44,20 @@ impl MeshFromNode {
             factor: base_color_factor.into(),
             coords: tex_coords,
         };
-        let (normal_maps, norm_coords) = norminfo_to_uvtex_and_coords(&material.normal_texture(), &reader, &images);
+        let (normal_maps, norm_info) = match material.normal_texture() {
+            Some(n_info) => {
+                let (normal_maps, norm_coords) = get_uvtex_and_coords(&n_info.texture(), n_info.tex_coord(), &reader, &images);
+                (normal_maps, Some(NormInfo { scale: n_info.scale(), coords: norm_coords.unwrap() }))
+            },
+            None => {
+                (vec![], None)
+            },
+            };
 
         let tangents: Option<Vec<[f32; 3]>> = reader.read_tangents().map(|tans| tans.map(|t| t[..3].try_into().unwrap()).collect());
 
         let (metal_rough_maps, mr_coords) = texinfo_to_uvtex_and_coords(&pbr_met_rough.metallic_roughness_texture(), &reader, &images);
-        let metal_rough = PbrMetalRough {
+        let metal_rough = PbrMetalRoughInfo {
             metal: pbr_met_rough.metallic_factor(),
             rough: pbr_met_rough.roughness_factor(),
             coords: mr_coords,
@@ -60,7 +68,7 @@ impl MeshFromNode {
             norms: reader.read_normals().unwrap().map(|p| p.into()).collect(),
             indices: flat_indices.chunks(3).map(|c| c.try_into().unwrap()).collect(),
             rgb_info,
-            norm_coords: norm_coords.unwrap(),
+            norm_info,
             tangents: tangents.map(|t| t.iter().map(|ta| (*ta).into()).collect()), 
             metal_rough,
             
@@ -74,18 +82,7 @@ impl MeshFromNode {
 use gltf::texture::Info;
 use gltf::mesh::Reader;
 use gltf::image::Data;
-use gltf::material::NormalTexture;
 use gltf::{Buffer, Texture};
-
-fn norminfo_to_uvtex_and_coords<'a, 's, F>(norm_info: &Option<NormalTexture>, reader: &Reader<'a, 's, F>, images: &Vec<Data>) -> (Vec<UVRgb32FImage>, Option<Vec<Vector2<f32>>>) 
-where
-    F: Clone + Fn(Buffer<'a>) -> Option<&'s [u8]>,
-{
-    match norm_info {
-        Some(info) => get_uvtex_and_coords(&info.texture(), info.tex_coord(), reader, images),
-        None => (vec![], None),
-    }
-}
 
 fn texinfo_to_uvtex_and_coords<'a, 's, F>(tex_info: &Option<Info>, reader: &Reader<'a, 's, F>, images: &Vec<Data>) -> (Vec<UVRgb32FImage>, Option<Vec<Vector2<f32>>>) 
 where

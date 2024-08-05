@@ -116,9 +116,9 @@ impl<'m> NormFromMesh<'m> {
 impl GimmeNorm for NormFromMesh<'_> {
     fn get_norm(&self, barycentric: &(f32, f32)) -> Vector3<f32> {
         use NormType::*;
-        let n_info = self.mesh.norm_info.as_ref().unwrap();
         match self.norm_type {
             Mapped{tang_to_mod} => {
+                let n_info = self.mesh.norm_info.as_ref().unwrap();
                 let (prim_idx, _inner_idx) = self.index;
                 let norm_coord = tex_coord_from_bary(self.mesh, &n_info.coords, barycentric, self.index);
 

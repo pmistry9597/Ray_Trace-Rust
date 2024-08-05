@@ -7,21 +7,18 @@ use crate::material::*;
 // so it begins .....
 
 pub struct Mesh {
-    pub poses: Vec<Vector3<f32>>,
-    pub norms: Vec<Vector3<f32>>,
+    // top layer of vec has each position as a single primitive
+    pub poses: Vec<Vec<Vector3<f32>>>,
+    pub norms: Vec<Vec<Vector3<f32>>>,
+    pub indices: Vec<Vec<[usize; 3]>>, // each one represents a single triangle
+    pub rgb_info: Vec<RgbInfo>,
+    pub norm_info: Vec<Option<NormInfo>>,
+    pub tangents: Vec<Option<Vec<Vector3<f32>>>>,
+    pub metal_rough: Vec<PbrMetalRoughInfo>,
 
-    pub indices: Vec<[usize; 3]>, // each one represents a single triangle
-    pub rgb_info: RgbInfo,
-    pub norm_info: Option<NormInfo>,
-    pub tangents: Option<Vec<Vector3<f32>>>,
-    pub metal_rough: PbrMetalRoughInfo,
-    // all of the above likely need to be double wrapped by Vec instead of single
-    // due to all above properties existing for any primitive under the mesh
-
-    // following indexed by primitive index
-    pub textures: Vec<UVRgb32FImage>,
-    pub normal_maps: Vec<UVRgb32FImage>,
-    pub metal_rough_maps: Vec<UVRgb32FImage>,
+    pub textures: Vec<Option<UVRgb32FImage>>,
+    pub normal_maps: Vec<Option<UVRgb32FImage>>,
+    pub metal_rough_maps: Vec<Option<UVRgb32FImage>>,
 }
 
 pub struct PbrMetalRoughInfo {
@@ -48,24 +45,28 @@ impl Decomposable for Mesh {
     where
         's : 'e,
     {
-        Box::new((0..self.indices.len()).map(
-                |inner_idx| {
-                    Box::new(MeshTriangle {
-                        verts: VertexFromMesh {
-                            index: (0, inner_idx),
-                            mesh: self,
-                        },
-                        norm: NormFromMesh::from_mesh_and_inner_idx(self, (0, inner_idx)),
-
-                        // below needs to be updated when textures come!
-                        diverts_ray: DivertsRayFromMesh{
-                            index: (0, inner_idx),
-                            mesh: self,
-                        },
-                        rgb: RgbFromMesh{
-                            index: (0, inner_idx),
-                            mesh: self,
-                        },
-                    })} as Element<'e>))
+        Box::new(self.indices.iter().enumerate()
+            .map(move |(p, idxs)| {
+                (0..idxs.len()).map(
+                    move |inner_idx| {
+                        Box::new(MeshTriangle {
+                            verts: VertexFromMesh {
+                                index: (p, inner_idx),
+                                mesh: self,
+                            },
+                            norm: NormFromMesh::from_mesh_and_inner_idx(self, (p, inner_idx)),
+    
+                            // below needs to be updated when textures come!
+                            diverts_ray: DivertsRayFromMesh{
+                                index: (p, inner_idx),
+                                mesh: self,
+                            },
+                            rgb: RgbFromMesh{
+                                index: (p, inner_idx),
+                                mesh: self,
+                            },
+                        })} as Element<'e>)
+            })
+            .flatten())
     }
 }

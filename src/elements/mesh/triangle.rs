@@ -17,8 +17,8 @@ impl Index<usize> for VertexFromMesh<'_> {
     type Output = Vector3<f32>;
 
     fn index(&self, vert_idx: usize) -> &Vector3<f32> {
-        let (_prim_idx, inner_idx) = self.index;
-        &self.mesh.poses[self.mesh.indices[inner_idx][vert_idx]]
+        let (prim_idx, inner_idx) = self.index;
+        &self.mesh.poses[prim_idx][self.mesh.indices[prim_idx][inner_idx][vert_idx]]
     }
 }
 
@@ -45,20 +45,20 @@ impl<'m> NormFromMesh<'m> {
         // some help from https://www.opengl-tutorial.org/intermediate-tutorials/tutorial-13-normal-mapping/
         // to get the tangent to model space transform
 
-        let (_prim_idx, inner_idx) = full_idx;
-        let indices = &mesh.indices[inner_idx];
+        let (prim_idx, inner_idx) = full_idx;
+        let indices = &mesh.indices[prim_idx][inner_idx];
         let face_norm = Self::get_face_norm(mesh, full_idx);
 
         use NormType::*;
-        match &mesh.norm_info {
+        match &mesh.norm_info[prim_idx] {
             Some(_) => {
-                match &mesh.tangents {
+                match &mesh.tangents[prim_idx] {
                     // _ => Uniform(face_norm),
         
                     Some(tans) => {
                         // maybe we need to fix below calculation
                         // of tangent vector, might mess up tan -> mod transform for normal maps
-                        let tan: Vector3<f32> = mesh.indices[inner_idx].iter()
+                        let tan: Vector3<f32> = mesh.indices[prim_idx][inner_idx].iter()
                             .map(|i| tans[*i])
                             .sum();
                         let tan = tan.normalize();
@@ -66,16 +66,17 @@ impl<'m> NormFromMesh<'m> {
         
                         Mapped{tang_to_mod: Matrix3::from_columns(&[tan.normalize(), bitan.normalize(), face_norm])}
                     },
-                    None => Self::norm_type_from_tex_coords(mesh, face_norm, &indices),
+                    None => Self::norm_type_from_tex_coords(mesh, face_norm, (prim_idx, &indices)),
                 }
             },
             None => Uniform(face_norm),
         }
     }
 
-    fn norm_type_from_tex_coords(mesh: &Mesh, face_norm: Vector3<f32>, indices: &[usize; 3]) -> NormType {
+    fn norm_type_from_tex_coords(mesh: &Mesh, face_norm: Vector3<f32>, full_idxs: (usize, &[usize; 3])) -> NormType {
         use NormType::*;
-        match &mesh.rgb_info.coords {
+        let (prim_idx, indices) = full_idxs;
+        match &mesh.rgb_info[prim_idx].coords {
             Some(tex_coords) => {
                 let t1 = tex_coords[indices[1]] - tex_coords[indices[0]];
                 let t2 = tex_coords[indices[2]] - tex_coords[indices[0]];
@@ -83,8 +84,8 @@ impl<'m> NormFromMesh<'m> {
                 let tex_poses = Matrix2::from_columns(&[t1, t2]);
                 match tex_poses.try_inverse() {
                     Some(inv_tex_poses) => {
-                        let e1 = mesh.poses[indices[1]] - mesh.poses[indices[0]];
-                        let e2 = mesh.poses[indices[2]] - mesh.poses[indices[0]];
+                        let e1 = mesh.poses[prim_idx][indices[1]] - mesh.poses[prim_idx][indices[0]];
+                        let e2 = mesh.poses[prim_idx][indices[2]] - mesh.poses[prim_idx][indices[0]];
                         
                         let mod_poses = Matrix3x2::from_columns(&[e1, e2]);
                         let incomplete = mod_poses * inv_tex_poses; // gives T and B as its columns
@@ -105,9 +106,9 @@ impl<'m> NormFromMesh<'m> {
     }
 
     fn get_face_norm(mesh: &Mesh, full_idx: (usize, usize)) -> Vector3<f32> {
-        let (_prim_idx, inner_idx) = full_idx;
-        let cum: Vector3<f32> = mesh.indices[inner_idx].iter()
-            .map(|i| mesh.norms[*i])
+        let (prim_idx, inner_idx) = full_idx;
+        let cum: Vector3<f32> = mesh.indices[prim_idx][inner_idx].iter()
+            .map(|i| mesh.norms[prim_idx][*i])
             .sum();
         cum.normalize()
     }
@@ -118,11 +119,11 @@ impl GimmeNorm for NormFromMesh<'_> {
         use NormType::*;
         match self.norm_type {
             Mapped{tang_to_mod} => {
-                let n_info = self.mesh.norm_info.as_ref().unwrap();
                 let (prim_idx, _inner_idx) = self.index;
+                let n_info = self.mesh.norm_info[prim_idx].as_ref().unwrap();
                 let norm_coord = tex_coord_from_bary(self.mesh, &n_info.coords, barycentric, self.index);
 
-                let norm = n_info.scale * tang_to_mod * self.mesh.normal_maps[prim_idx].get_pixel(norm_coord.x, norm_coord.y);
+                let norm = n_info.scale * tang_to_mod * self.mesh.normal_maps[prim_idx].as_ref().expect("no normal map???").get_pixel(norm_coord.x, norm_coord.y);
                 norm.normalize()
             },
             Uniform(norm) => norm,
@@ -138,12 +139,12 @@ pub struct RgbFromMesh<'m> {
 impl GimmeRgb for RgbFromMesh<'_> {
     fn get_rgb(&self, barycentric: &(f32, f32)) -> Vector3<f32> {
         let (prim_idx, _inner_idx) = self.index;
-        match &self.mesh.rgb_info.coords {
+        match &self.mesh.rgb_info[prim_idx].coords {
             Some(tex_coords) => {
                 let tex_coord = tex_coord_from_bary(self.mesh, &tex_coords, barycentric, self.index);
-                self.mesh.rgb_info.factor.component_mul(&self.mesh.textures[prim_idx].get_pixel(tex_coord.x, tex_coord.y))
+                self.mesh.rgb_info[prim_idx].factor.component_mul(&self.mesh.textures[prim_idx].as_ref().expect("no textures???").get_pixel(tex_coord.x, tex_coord.y))
             },
-            None => self.mesh.rgb_info.factor,
+            None => self.mesh.rgb_info[prim_idx].factor,
         }
     }
 }
@@ -159,13 +160,13 @@ impl DivertsRay for DivertsRayFromMesh<'_> {
     fn divert_ray_seed(&self, ray: &Ray, norm: &Vector3<f32>, barycentric: &(f32, f32)) -> Self::Seeding {
         let (prim_idx, _inner_idx) = self.index;
 
-        let (metalness, roughness) = match &self.mesh.metal_rough.coords {
+        let (metalness, roughness) = match &self.mesh.metal_rough[prim_idx].coords {
             Some(coords) => {
                 let mr_coord = tex_coord_from_bary(self.mesh, coords, barycentric, self.index);
-                let mr_val = self.mesh.metal_rough_maps[prim_idx].get_pixel(mr_coord.x, mr_coord.y);
-                (mr_val[2] * self.mesh.metal_rough.metal, mr_val[1] * self.mesh.metal_rough.rough)
+                let mr_val = self.mesh.metal_rough_maps[prim_idx].as_ref().expect("no metal rough map???").get_pixel(mr_coord.x, mr_coord.y);
+                (mr_val[2] * self.mesh.metal_rough[prim_idx].metal, mr_val[1] * self.mesh.metal_rough[prim_idx].rough)
             },
-            None => (self.mesh.metal_rough.metal, self.mesh.metal_rough.rough),
+            None => (self.mesh.metal_rough[prim_idx].metal, self.mesh.metal_rough[prim_idx].rough),
         };
         
         const CUSTOM_ATTEN: f32 = 1.0; // attenuate metal because i think model didnt expect ray tracing!
@@ -201,8 +202,8 @@ fn tex_coord_from_bary(mesh: &Mesh, coords: &Vec<Vector2<f32>>, barycentric: &(f
     let b0 = 1.0 - b2 - b1;
     let baryc: [f32; 3] = [b0, b1, b2];
 
-    let (_prim_idx, inner_idx) = full_idx;
-    zip(mesh.indices[inner_idx].iter(), baryc.iter())
+    let (prim_idx, inner_idx) = full_idx;
+    zip(mesh.indices[prim_idx][inner_idx].iter(), baryc.iter())
         .map(|(i, b)| coords[*i] * *b)
         .sum()
 }

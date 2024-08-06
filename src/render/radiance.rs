@@ -17,11 +17,11 @@ pub struct RussianRoullInfo {
 }
 
 pub fn radiance(ray: &Ray, elems: &Vec<Renderable>, depth: i32, rad_info: &RadianceInfo) -> (Vector3<f32>, Option<usize>) { // color from a ray in a collection of hittable objects, and index of object that was hit
-    let (hit_results, idxo) = closest_ray_hit(ray, elems);
+    let (hit_results, idxo) = closest_ray_hit(ray, elems.into_iter().enumerate().map(|(i, r)| (i, *r)));
     
     if let Some(elem_idx) = idxo { 
         let elem = &elems[elem_idx];
-        let hit_result = &hit_results[elem_idx].as_ref().unwrap();
+        let hit_result = &hit_results[elem_idx].1.as_ref().unwrap();
         let hit_info = elem.hit_info(hit_result, ray);
 
         if rad_info.debug_single_ray {
@@ -97,11 +97,11 @@ fn establish_dls_contrib(omit_idxs: &[usize], elems: &Vec<Renderable>, hit_info:
 
         if light_dot > 0.0 {
             let dls_ray = Ray{ d, o: hit_info.pos }; 
-            let (hrs, idxo) = closest_ray_hit(&dls_ray, elems);
+            let (hrs, idxo) = closest_ray_hit(&dls_ray, elems.into_iter().enumerate().map(|(i, r)| (i, *r)));
 
             if let Some(idx) = idxo {
                 if i == idx { // make sure its the same light source!!
-                    let hit_info = elems[idx].hit_info(&hrs[idx].as_ref().unwrap(), ray);
+                    let hit_info = elems[idx].hit_info(&hrs[idx].1.as_ref().unwrap(), ray);
                     a + light_dot * hit_info.emissive * NORMZE // brdf-esque normalizing, perhaps ask object for brdf value for a ray?
                 } else {
                     a

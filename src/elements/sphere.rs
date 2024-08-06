@@ -39,7 +39,7 @@ impl InteractsWithRay for Sphere {
         };
         let (ray, p) = self.mat.gen_new_ray(ray, norm, o, &seeding);
 
-        Some((rgb / p, ray))
+        Some((rgb * p, ray))
     }
     fn give_dls_emitter(&self) -> Option<Box<dyn DLSEmitter + '_>> {
         match self.mat.emissive {

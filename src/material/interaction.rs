@@ -51,9 +51,9 @@ pub fn refract(ray: &Ray, norm: &Vector3<f32>, o: &Vector3<f32>, n_out: &f32, n_
         let u: f32 = crate::RNG.with_borrow_mut(|r| r.gen());
 
         if u < re {
-            (refl, 1.0 / re)
+            (refl, re)
         } else {
-            (Ray {d: trns.normalize(), o: o.clone()}, 1.0 / (1.0 - re))
+            (Ray {d: trns.normalize(), o: o.clone()}, 1.0 - re)
         }
     }
 }

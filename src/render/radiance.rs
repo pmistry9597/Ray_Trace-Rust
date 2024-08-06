@@ -70,7 +70,6 @@ pub fn radiance(ray: &Ray, elems: &Vec<Renderable>, depth: i32, rad_info: &Radia
 
 fn russian_roulette_filter(depth: i32, russ_roull_info: &RussianRoullInfo) -> (bool, Option<&f32>) { // second is normalizing term for rgb value should russian roullete be done
     if depth > russ_roull_info.assured_depth {
-        // let mut rng = rand::thread_rng();
         let russ_roull: f32 = crate::RNG.with_borrow_mut(|r| r.gen());
         static THRES: f32 = 0.4;
         if russ_roull < THRES {

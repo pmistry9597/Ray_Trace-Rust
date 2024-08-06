@@ -60,7 +60,7 @@ where
 
         let rgb = self.rgb.get_rgb(&cont_info.baryc);
 
-        Some((rgb / p, ray))
+        Some((rgb * p, ray))
     }
     fn give_dls_emitter(&self) -> Option<Box<dyn DLSEmitter + '_>> { None } // maybe ill do this? will i use a light source that has triangles?
 }

@@ -12,6 +12,7 @@ mod ray;
 mod material;
 mod builder;
 mod elements;
+mod accel;
 
 pub type ArcMux<T> = Arc<Mutex<T>>;
 pub type BufferMux = Arc<Mutex<Vec<u8>>>;

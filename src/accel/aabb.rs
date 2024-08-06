@@ -16,6 +16,9 @@ impl Aabb {
         let all_entry_exit: Vec<(usize, (f32, f32))> = zip(self.bounds.iter(), zip(ray.d.iter(), ray.o.iter()))
             .enumerate()
             .map(|(a, (b, (d, o)))| {
+                let d = if d.abs() < crate::EPS { 
+                    if *d < 0.0 { -crate::EPS } else { crate:: EPS}
+                } else { *d };
                 let f = 1.0 / d;
                 (a, ((b.low - o) * f, (b.high - o) * f))
             }).collect();

@@ -12,8 +12,8 @@ render_info:
 cam:
   d: [0, 0, -5]
   up: [0, 1, 0]
-  view_eulers: [-0.75, -1, 0]
-  o: [-10, 10, 10]
+  view_eulers: [0, -0.75, 0]
+  o: [-25, 2, 25]
 
   # lens_r: 0.03
 
@@ -22,10 +22,10 @@ cam:
 
 scene_members:
   - !Model
-    path: "../../../assets/discovery_space_shuttle/scene.gltf"
+    path: "../../../assets/space_shuttle_atlantis/scene.gltf"
     euler_angles: [0, 0, 0]
     uniform_scale: 1
-    translation: [0, 1, 0]
+    translation: [0, 0, 0]
     
   # - !Model
   #   path: "../../../assets/basic_car/scene.gltf"
@@ -44,14 +44,14 @@ scene_members:
 
   #### lights
   - !Sphere
-    c: [0, 20, 0]
+    c: [10, 30.0, 10]
     r: 10.0
     coloring: !Solid [0.0,0.0,0.0]
     mat:
       divert_ray: Diff
       emissive: [5.0, 5.0, 5.0]
   - !Sphere
-    c: [1.0, 1.0, 15.0]
+    c: [1.0, 1.0, -7.0]
     r: 0.4
     coloring: !Solid [1.0, 1.0, 1.0]
     mat:

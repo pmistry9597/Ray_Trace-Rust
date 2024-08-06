@@ -89,7 +89,7 @@ impl Hitable for Sphere {
             let thing = thing2.sqrt();
             let ls = [offset + thing, offset - thing];
 
-            match ls.into_iter().filter(|e| *e > 0.0).reduce(|prev, e| if e < prev {e} else {prev}) {
+            match ls.into_iter().filter(|e| *e > 0.0).reduce(|prev, e| prev.min(e)) {
                 Some(f) => {
                     let pos = ray.o + ray.d * f;
                     Some(HitResult{l: f.into(), intermed: Some(Box::new(pos))})

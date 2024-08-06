@@ -95,4 +95,19 @@ mod test {
 
         assert_eq!(aabb.get_entry_exit(&ray), Some(((0, 1.0/2.1), (1, 1.0))))  
     }
+
+    #[test]
+    fn test_parallel_x() {
+        let aabb = Aabb {
+            bounds: [
+                PlaneBounds {low: -1.0, high: 1.0},
+                PlaneBounds {low: -1.0, high: 1.0},
+                PlaneBounds {low: -1.0, high: 1.0},
+            ],
+        };
+
+        let ray = Ray{d: vector![1.0, 0.1, 0.0], o: vector![0.0, 1.1, 0.0]};
+
+        assert_eq!(aabb.get_entry_exit(&ray), None)  
+    }
 }

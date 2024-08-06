@@ -1,6 +1,7 @@
 use nalgebra::Vector3;
 use crate::ray::{Ray, Hitable, HitResult, HitInfo, HasHitInfo, InteractsWithRay, DLSEmitter};
 use crate::elements::IsCompleteElement;
+use crate::accel::{Aabb, PlaneBounds};
 use std::ops::Index;
 
 // #[derive(Deserialize, Debug)]
@@ -131,5 +132,24 @@ where
                 }
             }
         }
+    }
+    fn give_aabb(&self) -> Option<Aabb> {
+        let axes_bounds = (0..3)
+            .map(|i| (self.verts[i][0], self.verts[i][1], self.verts[i][2]));
+        
+        let mins = axes_bounds.clone()
+            .reduce(|(px, py, pz), (x, y, z)| (px.min(x), py.min(y), pz.min(z)))
+            .unwrap();
+        let maxs = axes_bounds
+            .reduce(|(px, py, pz), (x, y, z)| (px.max(x), py.max(y), pz.max(z)))
+            .unwrap();
+
+        Some(Aabb {
+            bounds: [
+                PlaneBounds {low: mins.0, high: maxs.0},
+                PlaneBounds {low: mins.1, high: maxs.1},
+                PlaneBounds {low: mins.2, high: maxs.2},
+            ]
+        })
     }
 }

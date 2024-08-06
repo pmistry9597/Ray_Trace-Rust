@@ -2,7 +2,7 @@ use nalgebra::Vector3;
 
 pub use hit::*;
 pub use generate::*;
-pub use closest_hit::closest_ray_hit;
+pub use closest_hit::*;
 
 mod hit;
 mod generate;

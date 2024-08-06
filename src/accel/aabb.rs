@@ -6,7 +6,8 @@ pub struct Aabb {
 }
 
 pub struct PlaneBounds {
-    pub low: f32, high: f32,
+    pub low: f32, 
+    pub high: f32,
 }
 
 impl Aabb {

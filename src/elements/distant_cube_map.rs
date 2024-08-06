@@ -2,6 +2,7 @@ use nalgebra::Vector3;
 use crate::ray::{Ray, Hitable, HitResult, HitInfo, HasHitInfo, InteractsWithRay, DLSEmitter};
 use crate::elements::IsCompleteElement;
 use crate::material::UVRgb32FImage;
+use crate::accel::Aabb;
 
 pub type FaceImagewUVScale = (UVRgb32FImage, f32, f32);
 
@@ -71,4 +72,5 @@ impl Hitable for DistantCubeMap {
     fn intersect(&self, _ray: &Ray) -> Option<HitResult> { // always hits since distant and covers all
         Some(HitResult{l: f32::INFINITY.into(), intermed: None})
     }
+    fn give_aabb(&self) -> Option<Aabb> { None }
 }

@@ -2,6 +2,7 @@ use super::Ray;
 use nalgebra::Vector3;
 use std::cmp::Ordering;
 use std::any::Any;
+use crate::accel::Aabb;
 
 pub struct HitResult {
     pub l: RayLen, // ray length: ray.d * l + ray.o will give you intersection point 
@@ -18,6 +19,7 @@ pub struct HitInfo {
 
 pub trait Hitable { // use I to determine if should select this object
     fn intersect(&self, ray: &Ray) -> Option<HitResult>;
+    fn give_aabb(&self) -> Option<Aabb>;
 }
 
 pub trait HasHitInfo : Hitable {

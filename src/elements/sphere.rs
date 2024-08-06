@@ -3,6 +3,7 @@ use crate::ray::{Ray, Hitable, HitResult, HitInfo, HasHitInfo, InteractsWithRay,
 use crate::material::*;
 use serde::Deserialize;
 use crate::elements::IsCompleteElement;
+use crate::accel::{Aabb, PlaneBounds};
 
 #[derive(Deserialize, Debug)]
 // pub enum Coloring<S> {
@@ -99,5 +100,14 @@ impl Hitable for Sphere {
         } else {
             None
         }
+    }
+    fn give_aabb(&self) -> Option<Aabb> {
+        Some(Aabb {
+            bounds: [
+                PlaneBounds {low: self.c.x - self.r, high: self.c.x + self.r},
+                PlaneBounds {low: self.c.y - self.r, high: self.c.y + self.r},
+                PlaneBounds {low: self.c.z - self.r, high: self.c.z + self.r},
+            ]
+        })
     }
 }

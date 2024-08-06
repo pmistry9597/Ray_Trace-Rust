@@ -1,7 +1,9 @@
 use crate::ray::{Ray, HitResult};
 use crate::elements::Renderable;
 
-pub fn closest_ray_hit<'r, I: Iterator<Item = (usize, Renderable<'r>)>>(ray: &Ray, elems: I) -> (Vec<(usize, Option<HitResult>)>, Option<usize>) {
+pub type ClosestRayHit = (Vec<(usize, Option<HitResult>)>, Option<usize>);
+
+pub fn closest_ray_hit<'r, I: Iterator<Item = (usize, Renderable<'r>)>>(ray: &Ray, elems: I) -> ClosestRayHit {
     let hit_results: Vec<_> = elems.map(|(i, e)| (i, e.intersect(&ray))).collect();
     
     let hro = {

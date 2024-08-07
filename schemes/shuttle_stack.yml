@@ -1,0 +1,65 @@
+render_info:
+  width: 1200
+  height: 600
+  samps_per_pix: 100000
+  kd_tree_depth: 15
+  rad_info:  
+    debug_single_ray: false
+    dir_light_samp: false
+    russ_roull_info:
+      assured_depth: 5
+      max_thres: 0.5
+  
+cam:
+  d: [0, 0, -4]
+  up: [0, 1, 0]
+  view_eulers: [0.6, -1, 0]
+  o: [-10, 3, 10]
+  # d: [0, -5, 0]
+  # up: [0, 0, 1]
+  # view_eulers: [0, 0, 0]
+  # o: [-5, 90, 5]
+
+  # lens_r: 0.03
+
+  screen_width: 10.0
+  screen_height: 5.0
+
+scene_members:
+  - !Model
+    path: "../../../assets/space_shuttle/scene.gltf"
+    euler_angles: [0, -3.14, 0]
+    uniform_scale: 0.5
+    translation: [0, 0, 0]
+
+  #### skybox
+  - !DistantCubeMap
+    neg_x: ["../../../assets/skybox/right.jpg", 1.0, 1.0]
+    pos_x: ["../../../assets/skybox/left.jpg", 1.0, -1.0]
+    neg_y: ["../../../assets/skybox/bottom.jpg", 1.0, 1.0]
+    pos_y: ["../../../assets/skybox/top.jpg", -1.0, 1.0]
+    neg_z: ["../../../assets/skybox/back.jpg", -1.0, 1.0]
+    pos_z: ["../../../assets/skybox/front.jpg", -1.0, -1.0]
+
+  #### lights
+  # - !Sphere
+  #   c: [0, 5, 20]
+  #   r: 5
+  #   coloring: !Solid [0.0,0.0,0.0]
+  #   mat:
+  #     divert_ray: Diff
+  #     emissive: [10.0, 10.0, 10.0]
+  - !Sphere
+    c: [20, 0, 40]
+    r: 20.0
+    coloring: !Solid [0.0,0.0,0.0]
+    mat:
+      divert_ray: Diff
+      emissive: [5.0, 5.0, 5.0]
+  - !Sphere
+    c: [-5.0, 0.0, 0.0]
+    r: 0.4
+    coloring: !Solid [1.0, 1.0, 1.0]
+    mat:
+      divert_ray: Spec
+      emissive: [15.0, 15.0, 15.0]

@@ -2,6 +2,7 @@ render_info:
   width: 1200
   height: 600
   samps_per_pix: 100000
+  kd_tree_depth: 15
   rad_info:  
     debug_single_ray: false
     dir_light_samp: false
@@ -12,8 +13,12 @@ render_info:
 cam:
   d: [0, 0, -5]
   up: [0, 1, 0]
-  view_eulers: [0, -0.75, 0]
-  o: [-25, 2, 25]
+  view_eulers: [-0.3, -1, 0]
+  o: [-15, 5, 15]
+  # d: [0, -5, 0]
+  # up: [0, 0, 1]
+  # view_eulers: [0, 0, 0]
+  # o: [-5, 90, 5]
 
   # lens_r: 0.03
 
@@ -22,16 +27,10 @@ cam:
 
 scene_members:
   - !Model
-    path: "../../../assets/space_shuttle_atlantis/scene.gltf"
-    euler_angles: [0, 0, 0]
-    uniform_scale: 1
+    path: "../../../assets/satellite/scene.gltf"
+    euler_angles: [1.6, -0.3, 0]
+    uniform_scale: 20
     translation: [0, 0, 0]
-    
-  # - !Model
-  #   path: "../../../assets/basic_car/scene.gltf"
-  #   euler_angles: [0, -0.75, 0]
-  #   uniform_scale: 10
-  #   translation: [0, -0.5, 0.4]
 
   #### skybox
   - !DistantCubeMap
@@ -43,15 +42,22 @@ scene_members:
     pos_z: ["../../../assets/skybox/front.jpg", -1.0, -1.0]
 
   #### lights
+  # - !Sphere
+  #   c: [0, 5, 20]
+  #   r: 5
+  #   coloring: !Solid [0.0,0.0,0.0]
+  #   mat:
+  #     divert_ray: Diff
+  #     emissive: [10.0, 10.0, 10.0]
   - !Sphere
-    c: [10, 30.0, 10]
-    r: 10.0
+    c: [20, 0, 180]
+    r: 100.0
     coloring: !Solid [0.0,0.0,0.0]
     mat:
       divert_ray: Diff
-      emissive: [5.0, 5.0, 5.0]
+      emissive: [3.0, 3.0, 3.0]
   - !Sphere
-    c: [1.0, 1.0, -7.0]
+    c: [-5.0, 0.0, 0.0]
     r: 0.4
     coloring: !Solid [1.0, 1.0, 1.0]
     mat:

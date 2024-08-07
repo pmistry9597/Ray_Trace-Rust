@@ -13,6 +13,7 @@ pub struct RenderInfo {
     pub height: i32,
     pub samps_per_pix: i32,
     pub rad_info: RadianceInfo,
+    pub kd_tree_depth: usize,
 }
 
 pub fn render_to_target<F : Fn() -> ()>(render_target: &RenderTarget, scene: &Scene, update_hook: F, render_info: &RenderInfo) {
@@ -40,7 +41,7 @@ pub fn render_to_target<F : Fn() -> ()>(render_target: &RenderTarget, scene: &Sc
     let elems_and_aabbs: Vec<_> = renderables.iter().enumerate()
         .filter_map(|(i, r)| r.give_aabb().map(|aabb| (i, *r, aabb)))
         .collect();
-    let kdtree = KdTree::build(&elems_and_aabbs, &unconditional);
+    let kdtree = KdTree::build(&elems_and_aabbs, &unconditional, render_info.kd_tree_depth);
 
     // let num_samples = 100000;
     for r_it in 0..render_info.samps_per_pix {

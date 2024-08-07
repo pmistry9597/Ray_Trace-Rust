@@ -15,7 +15,7 @@ pub enum Node<'n> {
 }
 
 impl<'k> KdTree<'k> {
-    pub fn build(elems_and_aabbs: &Vec<(usize, Renderable<'k>, Aabb)>, unconditional: &'k Vec<(usize, Renderable<'k>)>) -> Self {
+    pub fn build(elems_and_aabbs: &Vec<(usize, Renderable<'k>, Aabb)>, unconditional: &'k Vec<(usize, Renderable<'k>)>, max_build_depth: usize) -> Self {
         let aabbs: Vec<&Aabb> = elems_and_aabbs.iter().map(|(_,_,aabb)| aabb).collect();
 
         let aabb = {
@@ -43,7 +43,7 @@ impl<'k> KdTree<'k> {
         KdTree {
             aabb,
             unconditional,
-            node: node_from_elems(&elems_and_aabbs.iter().map(|(i, e, aabb)| (*i, *e, aabb)).collect(), 0),
+            node: node_from_elems(&elems_and_aabbs.iter().map(|(i, e, aabb)| (*i, *e, aabb)).collect(), 0, max_build_depth),
         }
     }
 
@@ -92,9 +92,9 @@ impl<'k> KdTree<'k> {
     }
 }
 
-fn node_from_elems<'n>(elems_and_aabbs: &Vec<(usize, Renderable<'n>, &Aabb)>, depth: usize) -> Node<'n> {
+fn node_from_elems<'n>(elems_and_aabbs: &Vec<(usize, Renderable<'n>, &Aabb)>, depth: usize, max_depth: usize) -> Node<'n> {
     let axis = depth % 3;
-    if depth > 10 || elems_and_aabbs.len() <= 1 {
+    if depth > max_depth || elems_and_aabbs.len() <= 1 {
         Node::Leaf(elems_and_aabbs.iter().map(|(i, e, _)| (*i, *e)).collect())
     } else {
         let aabbs: Vec<&Aabb> = elems_and_aabbs.iter().map(|(_,_,aabb)| *aabb).collect();
@@ -119,8 +119,8 @@ fn node_from_elems<'n>(elems_and_aabbs: &Vec<(usize, Renderable<'n>, &Aabb)>, de
         Node::Branch { 
             axis, 
             split: split[axis], 
-            low: Box::new(node_from_elems(&low, depth + 1)), 
-            high: Box::new(node_from_elems(&high, depth + 1))
+            low: Box::new(node_from_elems(&low, depth + 1, max_depth)), 
+            high: Box::new(node_from_elems(&high, depth + 1, max_depth))
         }
     }
 }

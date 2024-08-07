@@ -3,8 +3,8 @@ use super::RenderTarget;
 use crate::ray::RayCompute;
 use crate::scene::Scene;
 use crate::elements::{Renderable, Element};
-
 use super::radiance::{radiance, RadianceInfo};
+use crate::accel::KdTree;
 
 use serde::Deserialize;
 #[derive(Deserialize, Debug)]
@@ -31,6 +31,17 @@ pub fn render_to_target<F : Fn() -> ()>(render_target: &RenderTarget, scene: &Sc
     let (pure_elem_refs, decomposed_groups) = decompose_groups(&scene.members);
     let renderables: Vec<Renderable> = pure_elem_refs.into_iter().chain(decomposed_groups.iter().map(|e| e.as_ref())).collect();
 
+    let unconditional: Vec<_> = renderables.iter().enumerate()
+        .filter_map(|(i, r)| match r.give_aabb() {
+            Some(_) => None,
+            None => Some((i, *r)),
+        })
+        .collect();
+    let elems_and_aabbs: Vec<_> = renderables.iter().enumerate()
+        .filter_map(|(i, r)| r.give_aabb().map(|aabb| (i, *r, aabb)))
+        .collect();
+    let kdtree = KdTree::build(&elems_and_aabbs, &unconditional);
+
     // let num_samples = 100000;
     for r_it in 0..render_info.samps_per_pix {
         target.par_iter_mut()
@@ -38,7 +49,7 @@ pub fn render_to_target<F : Fn() -> ()>(render_target: &RenderTarget, scene: &Sc
             .map(|(i, pix)| (render_target.chunk_to_pix(i.try_into().unwrap()), pix))
             .for_each(|((x, y), pix)| {
                 let ray = ray_compute.pix_cam_to_rand_ray((x,y), &scene.cam);
-                let (rgb, _) = radiance(&ray, &renderables, 0, &render_info.rad_info);
+                let (rgb, _) = radiance(&ray, &kdtree, &renderables, 0, &render_info.rad_info);
                 let rgb: Vec<f32> = rgb.iter().copied().collect();
 
                 zip(pix.iter_mut(), &rgb).for_each(|(p, r)| {

@@ -1,5 +1,6 @@
 use crate::ray::Ray;
 use std::iter::zip;
+use nalgebra::Vector3;
 
 pub struct Aabb {
     pub bounds: [PlaneBounds; 3],
@@ -11,6 +12,9 @@ pub struct PlaneBounds {
 }
 
 impl Aabb {
+    pub fn centroid(&self) -> Vector3<f32> {
+        Vector3::from_iterator(self.bounds.iter().map(|b| 0.5 * (b.low + b.high)))
+    }
     pub fn get_entry_exit(&self, ray: &Ray) -> Option<((usize, f32), (usize, f32))> { // return axis, entry exit t for ray
         // adapted from https://gamedev.stackexchange.com/questions/18436/most-efficient-aabb-vs-ray-collision-algorithms/18459#18459
 

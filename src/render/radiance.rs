@@ -1,6 +1,7 @@
 use nalgebra::{Vector3, vector};
 use crate::ray::{Ray, closest_ray_hit, HitInfo};
 use crate::elements::Renderable;
+use crate::accel::KdTree;
 use rand::Rng;
 
 use serde::Deserialize;
@@ -16,12 +17,15 @@ pub struct RussianRoullInfo {
     pub max_thres: f32,
 }
 
-pub fn radiance(ray: &Ray, elems: &Vec<Renderable>, depth: i32, rad_info: &RadianceInfo) -> (Vector3<f32>, Option<usize>) { // color from a ray in a collection of hittable objects, and index of object that was hit
-    let (hit_results, idxo) = closest_ray_hit(ray, elems.into_iter().enumerate().map(|(i, r)| (i, *r)));
+pub fn radiance(ray: &Ray, kdtree: &KdTree, elems: &Vec<Renderable>, depth: i32, rad_info: &RadianceInfo) -> (Vector3<f32>, Option<usize>) { // color from a ray in a collection of hittable objects, and index of object that was hit
+    let (hit_results, idxo) = kdtree.closest_ray_hit(ray);
+    // let (hit_results, idxo) = closest_ray_hit(ray, elems.into_iter().enumerate().map(|(i, r)| (i, *r)));
     
-    if let Some(elem_idx) = idxo { 
+    if let Some(hr_idx) = idxo { 
+        let (elem_idx, hit_result) = &hit_results[hr_idx];
+        let elem_idx = *elem_idx;
         let elem = &elems[elem_idx];
-        let hit_result = &hit_results[elem_idx].1.as_ref().unwrap();
+        let hit_result = &hit_result.as_ref().unwrap();
         let hit_info = elem.hit_info(hit_result, ray);
 
         if rad_info.debug_single_ray {
@@ -37,7 +41,7 @@ pub fn radiance(ray: &Ray, elems: &Vec<Renderable>, depth: i32, rad_info: &Radia
                             Some(f) => rgb / *f,
                             None => rgb,
                         };
-                        let (incoming_rgb, incoming_idx) = radiance(&new_ray, elems, depth + 1, rad_info);
+                        let (incoming_rgb, incoming_idx) = radiance(&new_ray, kdtree, elems, depth + 1, rad_info);
         
                         let mul = if rad_info.dir_light_samp && hit_info.dls {
                             let omit_idxs = if incoming_idx.is_some() {

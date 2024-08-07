@@ -85,7 +85,7 @@ impl<'k> KdTree<'k> {
                 if let Some(hr_idx) = idxo { 
                     let (_elem_idx, hit_result) = &hit_results[hr_idx];
                     let hit_result = &hit_result.as_ref().unwrap();
-                    if hit_result.l.0 < exit_t {
+                    if hit_result.l.0 <= (exit_t + crate::EPS) {
                         return (hit_results, idxo); // may need to handle case of primitive on the edge of the node volume
                     }
                 }
@@ -110,10 +110,10 @@ fn node_from_elems<'n>(elems_and_aabbs: &Vec<(usize, Renderable<'n>, &Aabb)>, de
     
             elems_and_aabbs.iter().for_each(|(i, e, aabb)| {
                 // this can handle case of element in both nodes
-                if aabb.bounds[axis].high > split[axis] {
+                if aabb.bounds[axis].high >= split[axis] {
                     high.push((*i, *e, aabb));
                 }
-                if aabb.bounds[axis].low < split[axis] {
+                if aabb.bounds[axis].low <= split[axis] {
                     low.push((*i, *e, aabb));
                 }
             });

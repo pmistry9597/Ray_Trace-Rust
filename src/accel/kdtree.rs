@@ -50,7 +50,7 @@ impl<'k> KdTree<'k> {
     pub fn closest_ray_hit(&self, ray: &Ray) -> ClosestRayHit {
         let enters_domain = self.aabb.get_entry_exit(ray);
         match enters_domain {
-            None => (vec![], None),
+            None => closest_ray_hit(ray, self.unconditional.iter().map(|e| *e)),
             Some(((_, entry_t), (_, exit_t))) => self.stack_search(ray, entry_t, exit_t),
         }
     }
@@ -79,11 +79,8 @@ impl<'k> KdTree<'k> {
             
             if let Leaf(elems) = current_node {
                 let (hit_results, idxo) = closest_ray_hit(ray, elems.into_iter().map(|e| *e));
-                if let Some(elem_idx) = idxo {
-                    let hit_result = &hit_results[elem_idx].1.as_ref().unwrap();
-                    if hit_result.l.0 <= exit_t { // handle case of if the primitive lies on the split plane and the intersection is beyond this node
-                        return (hit_results, idxo);
-                    }
+                if let Some(_) = idxo {
+                    return (hit_results, idxo); // may need to handle case of primitive on the edge of the node volume
                 }
             }
         }

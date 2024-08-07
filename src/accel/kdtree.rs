@@ -64,9 +64,12 @@ impl<'k> KdTree<'k> {
             let (mut current_node, entry_t, mut exit_t) = stack.pop().unwrap();
             while let Branch {axis, split, low, high} = current_node {
                 let a = *axis;
-                let t = (split - ray.o[a]) / ray.d[a]; // apparently split is a point in the paper? lets see how it goes
-                let (near, far) = if ray.o[a] < *split {(low, high)} else {(high, low)};
-                if t >= exit_t || t < 0.0 {
+                let d = if ray.d[a].abs() < crate::EPS { 
+                    if ray.d[a] < 0.0 { -crate::EPS } else { crate:: EPS}
+                } else { ray.d[a] };
+                let t = (split - ray.o[a]) / d; // apparently split is a point in the paper? lets see how it goes
+                let (near, far) = if d > 0.0 {(low, high)} else {(high, low)};
+                if t >= exit_t {
                     current_node = near;
                 } else if t <= entry_t {
                     current_node = far;
@@ -79,8 +82,12 @@ impl<'k> KdTree<'k> {
             
             if let Leaf(elems) = current_node {
                 let (hit_results, idxo) = closest_ray_hit(ray, elems.into_iter().map(|e| *e));
-                if let Some(_) = idxo {
-                    return (hit_results, idxo); // may need to handle case of primitive on the edge of the node volume
+                if let Some(hr_idx) = idxo { 
+                    let (_elem_idx, hit_result) = &hit_results[hr_idx];
+                    let hit_result = &hit_result.as_ref().unwrap();
+                    if hit_result.l.0 < exit_t {
+                        return (hit_results, idxo); // may need to handle case of primitive on the edge of the node volume
+                    }
                 }
             }
         }

@@ -22,35 +22,30 @@ impl Index<usize> for VertexFromMesh<'_> {
     }
 }
 
-pub enum NormType {
-    Mapped{tang_to_mod: Matrix3<f32>},
-    Uniform(Vector3<f32>),
-}
-
 pub struct NormFromMesh<'m> {
     pub index: (usize, usize),
-    pub norm_type: NormType,
+    pub normal_transform: Matrix3<f32>,
     pub mesh: &'m Mesh,
 }
 impl<'m> NormFromMesh<'m> {
     pub fn from_mesh_and_inner_idx(mesh: &'m Mesh, full_idx: (usize, usize)) -> Self {
         NormFromMesh {
             index: full_idx,
-            norm_type: Self::generate_norm_type(mesh, full_idx),
+            // norm_type: Self::generate_norm_type(mesh, full_idx),
+            normal_transform: Self::generate_norm_type(mesh, full_idx),
             mesh,
         }
     }
 
-    fn generate_norm_type(mesh: &Mesh, full_idx: (usize, usize)) -> NormType {
+    fn generate_norm_type(mesh: &Mesh, full_idx: (usize, usize)) -> Matrix3<f32> {
         // some help from https://www.opengl-tutorial.org/intermediate-tutorials/tutorial-13-normal-mapping/
         // to get the tangent to model space transform
 
         let (prim_idx, inner_idx) = full_idx;
         let indices = &mesh.indices[prim_idx][inner_idx];
-        let trans_mat3 = mesh.trans_mat.clone().fixed_resize::<3,3>(0.0);
+        let trans_mat3 = mesh.trans_mat.try_inverse().expect("non invertible world?").transpose().fixed_resize::<3,3>(0.0); // special transform for normal vectors
         let face_norm = Self::get_face_norm(mesh, full_idx);
 
-        use NormType::*;
         match &mesh.norm_info[prim_idx] {
             Some(_) => {
                 match &mesh.tangents[prim_idx] {
@@ -65,23 +60,27 @@ impl<'m> NormFromMesh<'m> {
                         let tan = tan.normalize();
                         let bitan = tan.cross(&face_norm);
 
-                        let mut tang_to_mod: Matrix3<f32> = trans_mat3 * Matrix3::from_columns(&[tan.normalize(), bitan.normalize(), face_norm]);
+                        let mut tang_to_mod: Matrix3<f32> = trans_mat3 * Matrix3::from_columns(&[tan.normalize(), bitan.normalize(), Vector3::zeros()]);
+                        tang_to_mod.set_column(2, &face_norm);
                         for i in 0..3 {
                             tang_to_mod.set_column(i, &tang_to_mod.column(i).normalize());
                         }
         
-                        Mapped{tang_to_mod}
+                        tang_to_mod
                     },
+                    // None => trans_mat3,
                     None => Self::norm_type_from_tex_coords(mesh, face_norm, (prim_idx, &indices), &trans_mat3),
                 }
             },
-            None => Uniform(face_norm),
+            None => trans_mat3,
+            // None => Self::norm_type_from_tex_coords(mesh, face_norm, (prim_idx, &indices), &trans_mat3),
         }
     }
 
-    fn norm_type_from_tex_coords(mesh: &Mesh, face_norm: Vector3<f32>, full_idxs: (usize, &[usize; 3]), trans_mat3: &Matrix3<f32>) -> NormType {
-        use NormType::*;
+    fn norm_type_from_tex_coords(mesh: &Mesh, face_norm: Vector3<f32>, full_idxs: (usize, &[usize; 3]), trans_mat3: &Matrix3<f32>) -> Matrix3<f32> {
+        // use NormType::*;
         let (prim_idx, indices) = full_idxs;
+        
         match &mesh.rgb_info[prim_idx].coords {
             Some(tex_coords) => {
                 let t1 = tex_coords[indices[1]] - tex_coords[indices[0]];
@@ -101,43 +100,49 @@ impl<'m> NormFromMesh<'m> {
                         for i in 0..2 {
                             tang_to_mod.set_column(i, &tang_to_mod.column(i).normalize());
                         }
-                        tang_to_mod.set_column(2, &face_norm);
                         tang_to_mod = trans_mat3 * tang_to_mod;
+                        tang_to_mod.set_column(2, &face_norm);
                         for i in 0..3 {
                             tang_to_mod.set_column(i, &tang_to_mod.column(i).normalize());
                         }
 
-                        Mapped{tang_to_mod}
+                        tang_to_mod
                     },
-                    None => Uniform(face_norm),
+                    None => *trans_mat3,
                 }
             },
-            None => Uniform(face_norm),
+            None => *trans_mat3,
         }
     }
 
     fn get_face_norm(mesh: &Mesh, full_idx: (usize, usize)) -> Vector3<f32> {
         let (prim_idx, inner_idx) = full_idx;
-        let cum: Vector3<f32> = mesh.indices[prim_idx][inner_idx].iter()
-            .map(|i| mesh.norms[prim_idx][*i])
-            .sum();
-        cum.normalize()
+        let poses: Vec<Vector3<f32>> = mesh.indices[prim_idx][inner_idx].iter()
+            .map(|i| mesh.poses[prim_idx][*i])
+            .collect();
+        let n = (poses[1] - poses[0]).cross(&(poses[2] - poses[0]));
+        n.normalize()
     }
 }
 
 impl GimmeNorm for NormFromMesh<'_> {
     fn get_norm(&self, barycentric: &(f32, f32)) -> Vector3<f32> {
-        use NormType::*;
-        match self.norm_type {
-            Mapped{tang_to_mod} => {
-                let (prim_idx, _inner_idx) = self.index;
-                let n_info = self.mesh.norm_info[prim_idx].as_ref().unwrap();
+        let (prim_idx, inner_idx) = self.index;
+        // use NormType::*;
+        match &self.mesh.norm_info[prim_idx] {
+            Some(n_info) => {
+                // let n_info = self.mesh.norm_info[prim_idx].as_ref().unwrap();
                 let norm_coord = tex_coord_from_bary(self.mesh, &n_info.coords, barycentric, self.index);
 
-                let norm = n_info.scale * tang_to_mod * self.mesh.normal_maps[prim_idx].as_ref().expect("no normal map???").get_pixel(norm_coord.x, norm_coord.y);
+                let norm = n_info.scale * self.normal_transform * self.mesh.normal_maps[prim_idx].as_ref().expect("no normal map???").get_pixel(norm_coord.x, norm_coord.y);
                 norm.normalize()
             },
-            Uniform(norm) => norm,
+            None => { // just interpolate the normal vector from given
+                let cum: Vector3<f32> = self.mesh.indices[prim_idx][inner_idx].iter()
+                    .map(|i| self.normal_transform * self.mesh.norms[prim_idx][*i])
+                    .sum();
+                cum.normalize()
+            }
         }
     }
 }

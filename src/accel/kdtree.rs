@@ -16,11 +16,7 @@ pub enum Node<'n> {
 
 impl<'k> KdTree<'k> {
     pub fn build(elems_and_aabbs: &Vec<(usize, Renderable<'k>, Aabb)>, unconditional: &'k Vec<(usize, Renderable<'k>)>) -> Self {
-        // test one split along x for now
-        let count = elems_and_aabbs.len();
         let aabbs: Vec<&Aabb> = elems_and_aabbs.iter().map(|(_,_,aabb)| aabb).collect();
-        // split by avg
-        let split = (&aabbs).into_iter().map(|aabb| aabb.centroid()).sum::<Vector3<f32>>() / (count as f32);
 
         let aabb = {
             let min_axes: Vec<f32> = (0..3).map(
@@ -44,27 +40,10 @@ impl<'k> KdTree<'k> {
             }
         };
 
-        let (low, high): (Vec<(usize, Renderable)>, Vec<(usize, Renderable)>) = {
-            let mut low: Vec<(usize, Renderable)> = vec![];
-            let mut high: Vec<(usize, Renderable)> = vec![];
-
-            elems_and_aabbs.iter().for_each(|(i, e, aabb)| {
-                // this can handle case of element in both nodes
-                if aabb.bounds[0].high > split.x {
-                    high.push((*i, *e));
-                }
-                if aabb.bounds[0].low < split.x {
-                    low.push((*i, *e));
-                }
-            });
-
-            (low, high)
-        };
-
         KdTree {
             aabb,
             unconditional,
-            node: Node::Branch { axis: 0, split: split.x, low: Box::new(Node::Leaf(low)), high: Box::new(Node::Leaf(high))},
+            node: node_from_elems(&elems_and_aabbs.iter().map(|(i, e, aabb)| (*i, *e, aabb)).collect(), 0),
         }
     }
 
@@ -110,5 +89,38 @@ impl<'k> KdTree<'k> {
         }
 
         closest_ray_hit(ray, self.unconditional.iter().map(|e| *e))
+    }
+}
+
+fn node_from_elems<'n>(elems_and_aabbs: &Vec<(usize, Renderable<'n>, &Aabb)>, depth: usize) -> Node<'n> {
+    let axis = depth % 3;
+    if depth > 10 || elems_and_aabbs.len() <= 1 {
+        Node::Leaf(elems_and_aabbs.iter().map(|(i, e, _)| (*i, *e)).collect())
+    } else {
+        let aabbs: Vec<&Aabb> = elems_and_aabbs.iter().map(|(_,_,aabb)| *aabb).collect();
+        let split = (&aabbs).into_iter().map(|aabb| aabb.centroid()).sum::<Vector3<f32>>() / (aabbs.len() as f32);
+
+        let (low, high): (Vec<(usize, Renderable, &Aabb)>, Vec<(usize, Renderable, &Aabb)>) = {
+            let mut low: Vec<(usize, Renderable, &Aabb)> = vec![];
+            let mut high: Vec<(usize, Renderable, &Aabb)> = vec![];
+    
+            elems_and_aabbs.iter().for_each(|(i, e, aabb)| {
+                // this can handle case of element in both nodes
+                if aabb.bounds[axis].high > split[axis] {
+                    high.push((*i, *e, aabb));
+                }
+                if aabb.bounds[axis].low < split[axis] {
+                    low.push((*i, *e, aabb));
+                }
+            });
+            (low, high)
+        };
+
+        Node::Branch { 
+            axis, 
+            split: split[axis], 
+            low: Box::new(node_from_elems(&low, depth + 1)), 
+            high: Box::new(node_from_elems(&high, depth + 1))
+        }
     }
 }

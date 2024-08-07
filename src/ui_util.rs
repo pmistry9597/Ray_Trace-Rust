@@ -60,7 +60,7 @@ impl eframe::App for MyApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         egui::CentralPanel::default().show(ctx, |ui| {
             egui::ScrollArea::both().show(ui, |ui| {
-                ui.heading("Demo!!!");
+                // ui.heading("Demo!!!");
                 self.gl_paint(ui, ctx);
             });
         });

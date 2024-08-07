@@ -11,16 +11,16 @@ render_info:
       max_thres: 0.5
   
 cam:
-  d: [0, 0, -4]
+  d: [0, 0, -6]
   up: [0, 1, 0]
-  view_eulers: [0.6, -1, 0]
-  o: [-10, 3, 10]
+  view_eulers: [0.9, -0.5, 0]
+  o: [-5, -3, 12]
   # d: [0, -5, 0]
   # up: [0, 0, 1]
   # view_eulers: [0, 0, 0]
   # o: [-5, 90, 5]
 
-  # lens_r: 0.03
+  lens_r: 0.03
 
   screen_width: 10.0
   screen_height: 5.0
@@ -56,10 +56,10 @@ scene_members:
     mat:
       divert_ray: Diff
       emissive: [5.0, 5.0, 5.0]
-  - !Sphere
-    c: [-5.0, 0.0, 0.0]
-    r: 0.4
-    coloring: !Solid [1.0, 1.0, 1.0]
-    mat:
-      divert_ray: Spec
-      emissive: [15.0, 15.0, 15.0]
+  # - !Sphere
+  #   c: [-5.0, 0.0, 0.0]
+  #   r: 0.4
+  #   coloring: !Solid [1.0, 1.0, 1.0]
+  #   mat:
+  #     divert_ray: Spec
+  #     emissive: [15.0, 15.0, 15.0]

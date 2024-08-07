@@ -1,5 +1,8 @@
 render_info:
+  width: 1200
+  height: 600
   samps_per_pix: 100000
+  kd_tree_depth: 1
   rad_info:  
     debug_single_ray: false
     dir_light_samp: false
@@ -11,6 +14,7 @@ cam:
   d: [3, -1, -5]
   o: [-9, 0, 3]
   up: [0, 1, 0]
+  view_eulers: [0,0,0]
 
   lens_r: 0.03
 

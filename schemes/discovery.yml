@@ -2,6 +2,7 @@ render_info:
   width: 1200
   height: 600
   samps_per_pix: 100000
+  kd_tree_depth: 15
   rad_info:  
     debug_single_ray: false
     dir_light_samp: false
@@ -26,12 +27,6 @@ scene_members:
     euler_angles: [0, 0, 0]
     uniform_scale: 1
     translation: [0, 1, 0]
-    
-  # - !Model
-  #   path: "../../../assets/basic_car/scene.gltf"
-  #   euler_angles: [0, -0.75, 0]
-  #   uniform_scale: 10
-  #   translation: [0, -0.5, 0.4]
 
   #### skybox
   - !DistantCubeMap

@@ -50,12 +50,12 @@ scene_members:
   #     divert_ray: Diff
   #     emissive: [10.0, 10.0, 10.0]
   - !Sphere
-    c: [20, 0, 40]
+    c: [-20, 5, 40]
     r: 20.0
     coloring: !Solid [0.0,0.0,0.0]
     mat:
       divert_ray: Diff
-      emissive: [5.0, 5.0, 5.0]
+      emissive: [3.0, 3.0, 3.0]
   # - !Sphere
   #   c: [-5.0, 0.0, 0.0]
   #   r: 0.4

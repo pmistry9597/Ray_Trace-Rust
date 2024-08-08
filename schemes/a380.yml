@@ -2,7 +2,7 @@ render_info:
   width: 1200
   height: 600
   samps_per_pix: 100000
-  kd_tree_depth: 15
+  kd_tree_depth: 17
   rad_info:  
     debug_single_ray: false
     dir_light_samp: false
@@ -11,11 +11,10 @@ render_info:
       max_thres: 0.5
   
 cam:
-  d: [0, 0, -6]
+  d: [0, 0, 6]
   up: [0, 1, 0]
-  view_eulers: [-0.1, 0, 0]
-  o: [0, 0, 35]
-  # view_eulers: [-0.3, -1, 0]
+  view_eulers: [-0.6, 0.1, 0]
+  o: [0, -15, -30]
   # d: [0, -5, 0]
   # up: [0, 0, 1]
   # view_eulers: [0, 0, 0]
@@ -28,19 +27,24 @@ cam:
 
 scene_members:
   - !Model
-    path: "../../../assets/voyager_space_satellite__draft/scene.gltf"
-    euler_angles: [1.7, 0, 3.14]
-    uniform_scale: 1.6
-    translation: [0, 0, 0]
+    path: "../../../assets/a380/scene.gltf"
+    euler_angles: [0, 0.74, 0]
+    uniform_scale: 1.5
+    translation: [0, 5, 0]
+  - !Model
+    path: "../../../assets/snowy_mountain_-_terrain/scene.gltf"
+    euler_angles: [0, 0, 0]
+    uniform_scale: 2000
+    translation: [0, 80, 30]
 
   #### skybox
   - !DistantCubeMap
-    neg_x: ["../../../assets/milky/_nx.png", -1.0, 1.0]
-    pos_x: ["../../../assets/milky/_px.png", 1.0, -1.0]
-    neg_y: ["../../../assets/milky/_ny.png", -1.0, 1.0]
-    pos_y: ["../../../assets/milky/_py.png", -1.0, 1.0]
-    neg_z: ["../../../assets/milky/_ny.png", 1.0, -1.0]
-    pos_z: ["../../../assets/milky/_pz.png", 1.0, -1.0]
+    neg_x: ["../../../assets/skybox/right.jpg", 1.0, 1.0]
+    pos_x: ["../../../assets/skybox/left.jpg", 1.0, -1.0]
+    neg_y: ["../../../assets/skybox/bottom.jpg", 1.0, 1.0]
+    pos_y: ["../../../assets/skybox/top.jpg", -1.0, 1.0]
+    neg_z: ["../../../assets/skybox/back.jpg", -1.0, 1.0]
+    pos_z: ["../../../assets/skybox/front.jpg", -1.0, -1.0]
 
   #### lights
   # - !Sphere
@@ -51,19 +55,12 @@ scene_members:
   #     divert_ray: Diff
   #     emissive: [10.0, 10.0, 10.0]
   - !Sphere
-    c: [20, 0, 140]
-    r: 100.0
+    c: [2500, 2200, -200]
+    r: 1200
     coloring: !Solid [0.0,0.0,0.0]
     mat:
       divert_ray: Diff
-      emissive: [20.0, 20.0, 20.0]
-  - !Sphere
-    c: [0, 80, 0]
-    r: 30.0
-    coloring: !Solid [0.0,0.0,0.0]
-    mat:
-      divert_ray: Diff
-      emissive: [20.0, 20.0, 20.0]
+      emissive: [1.0, 1.0, 1.0]
   # - !Sphere
   #   c: [-5.0, 0.0, 0.0]
   #   r: 0.4

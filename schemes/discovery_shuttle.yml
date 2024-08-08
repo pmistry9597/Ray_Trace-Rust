@@ -30,12 +30,12 @@ scene_members:
 
   #### skybox
   - !DistantCubeMap
-    neg_x: ["../../../assets/other/_nx.png", 1.0, 1.0]
+    neg_x: ["../../../assets/other/_nx.png", -1.0, 1.0]
     pos_x: ["../../../assets/other/_px.png", 1.0, -1.0]
-    neg_y: ["../../../assets/other/_ny.png", 1.0, 1.0]
+    neg_y: ["../../../assets/other/_ny.png", -1.0, 1.0]
     pos_y: ["../../../assets/other/_py.png", -1.0, 1.0]
     neg_z: ["../../../assets/other/_nz.png", -1.0, 1.0]
-    pos_z: ["../../../assets/other/_pz.png", -1.0, -1.0]
+    pos_z: ["../../../assets/other/_pz.png", 1.0, -1.0]
 
   #### lights
   - !Sphere

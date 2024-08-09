@@ -37,16 +37,16 @@ Ray traced rendering for realistic-looking images, all written in the Rust langu
 1. *Optionally,* find any `.gltf` models, note location of the `.gltf` file in the folder.
 2. Create/modify a yaml file to describe a scheme to render (check out schemes folder for examples)
     - Basic settings
-    ```yaml
-    render_info:
-        width: 1200
-        height: 600
-        samps_per_pix: 100000
-        kd_tree_depth: 15 # adjust this depending on your scene/primitive count to maximize speed of rendering
-        rad_info:  
-            debug_single_ray: false
-            dir_light_samp: false
-            russ_roull_info:
-                assured_depth: 5
-                max_thres: 0.5
-    ```
+        ```yaml
+        render_info:
+            width: 1200
+            height: 600
+            samps_per_pix: 100000
+            kd_tree_depth: 15 # adjust this depending on your scene/primitive count to maximize speed of rendering
+            rad_info:  
+                debug_single_ray: false
+                dir_light_samp: false
+                russ_roull_info:
+                    assured_depth: 5
+                    max_thres: 0.5
+        ```

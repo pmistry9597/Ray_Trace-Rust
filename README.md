@@ -110,19 +110,22 @@ Ray traced rendering for realistic-looking images, all written in the Rust langu
     ```bash
     ./ray_trace_rust ../../schemes/james_webb.yml 
     ```
-    You'll see a ui with the currently rendered image and text output showing rendering times. Can also disable ui with:
+    You'll see a UI with the currently rendered image and text output showing rendering times. Can also disable UI with:
     ```bash
     ./ray_trace_rust ../../schemes/james_webb.yml no_ui
     ```
-    Its better to compile this repo with:
+    It is better to compile this repo with:
     ```bash
     cargo build --release
     ```
     as render times are very slow with `cargo run`
+
+## Why did I make this?
+I wanted to combine my eagerness to learn Rust, my interest in simulations, and my love of airplanes and space into one project!
 
 ## Reference Material
 While I used scraps of info from all over the internet on these algorithms, a few sources were used quite repeatedly:
 
 - [smallpt](https://www.kevinbeason.com/smallpt/) - a tiny C++ renderer, basic template for me to get started
 - [scrathapixel](https://www.scratchapixel.com/) - some of the math I used came from here
-- [Review: Kd-tree Traversal Algorithms for Ray Tracing](https://onlinelibrary.wiley.com/doi/10.1111/j.1467-8659.2010.01844.x) - very helpful paper for k-d trees; turns out more casual sources seem to lack this info!
+- [Review: Kd-tree Traversal Algorithms for Ray Tracing](https://onlinelibrary.wiley.com/doi/10.1111/j.1467-8659.2010.01844.x) - very helpful paper for k-d trees in ray tracing; turns out more casual sources seem to lack this info!

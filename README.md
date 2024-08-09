@@ -11,7 +11,7 @@ Ray traced rendering for realistic-looking images, all written in the Rust langu
     <img src="./info/images/a380.png" width="400" />
 </p>
 
-*Licenses and links for these rendered models can be found in the info/attribs folder.*
+*Licenses and sources for these rendered models can be found in the info/attribs folder.*
 
 ## 🚀🚀🚀 Features 🚀🚀🚀
 

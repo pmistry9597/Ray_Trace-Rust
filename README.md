@@ -42,7 +42,7 @@ Ray traced rendering for realistic-looking images, all written in the Rust langu
             width: 1200
             height: 600
             samps_per_pix: 100000
-            kd_tree_depth: 15 # adjust this depending on your scene/primitive count to maximize speed of rendering
+            kd_tree_depth: 15 # play with this to minimize render time, more primitives means greater depth needed
             rad_info:  
                 debug_single_ray: false
                 dir_light_samp: false
@@ -50,3 +50,15 @@ Ray traced rendering for realistic-looking images, all written in the Rust langu
                     assured_depth: 5
                     max_thres: 0.5
         ```
+    - Camera
+        ```yaml
+        cam:
+            o: [0, -15, -30] # position of camera
+            view_eulers: [-0.6, 0.1, 0] # adjust where camera will look, rotates below settings
+            d: [0, 0, 6] # render screen relative to position
+            up: [0, 1, 0] # how will image be oriented? - should be unit vector !!!
+            # following are in-scene screen dimensions - separate from width and height above!
+            screen_width: 10.0
+            screen_height: 5.0
+        ```
+    

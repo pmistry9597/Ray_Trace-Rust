@@ -4,4 +4,9 @@ Ray traced rendering for realistic-looking images, all written in the Rust langu
 
 **Comes with mesh rendering!**
 
-<img src="./info/images/stack.png" width="800" />
+## Some Render Demos
+
+<img src="./info/images/stack.png" width="400" />
+<img src="./info/images/james_webb.png" width="400" />
+<img src="./info/images/a380.png" width="400" />
+<img src="./info/images/wada.png" width="400" />

@@ -1,0 +1,11 @@
+Model Information:
+* title:	Airbus A380(full interior hd)
+* source:	https://sketchfab.com/3d-models/airbus-a380full-interior-hd-3155062bc0e545f897e8d766dbe7299e
+* author:	Raakesh.Madan (https://sketchfab.com/Raakesh.Madan)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Airbus A380(full interior hd)" (https://sketchfab.com/3d-models/airbus-a380full-interior-hd-3155062bc0e545f897e8d766dbe7299e) by Raakesh.Madan (https://sketchfab.com/Raakesh.Madan) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

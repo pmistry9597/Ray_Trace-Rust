@@ -1,0 +1,11 @@
+Model Information:
+* title:	Space Shuttle
+* source:	https://sketchfab.com/3d-models/space-shuttle-69cba9fe15ff428eaaba57bf61941109
+* author:	Michél (https://sketchfab.com/Michel.Laborda.Gonzalez)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Space Shuttle" (https://sketchfab.com/3d-models/space-shuttle-69cba9fe15ff428eaaba57bf61941109) by Michél (https://sketchfab.com/Michel.Laborda.Gonzalez) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

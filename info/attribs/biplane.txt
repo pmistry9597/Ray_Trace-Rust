@@ -1,0 +1,11 @@
+Model Information:
+* title:	Airplane biplane
+* source:	https://sketchfab.com/3d-models/airplane-biplane-be48f3f906ed431b98b1bf03ab7aadd6
+* author:	KaramellGlass (https://sketchfab.com/KaramellGlass)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Airplane biplane" (https://sketchfab.com/3d-models/airplane-biplane-be48f3f906ed431b98b1bf03ab7aadd6) by KaramellGlass (https://sketchfab.com/KaramellGlass) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

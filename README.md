@@ -29,6 +29,7 @@ Ray traced rendering for realistic-looking images, all written in the Rust langu
     <img src="./info/images/biplane.png" width="400" />
     <img src="./info/images/spheres.png" width="400" />
     <img src="./info/images/voyager.png" width="400" />
+    <img src="./info/images/spaceship_r1.png" width="400" />
     <img src="./info/images/wada_w_front.png" width="400" />
 </p>
 

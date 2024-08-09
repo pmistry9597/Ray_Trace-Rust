@@ -1,4 +1,4 @@
-# 🎇 Ray Tracing in Rust! 🎇
+# Ray Tracing in Rust!
 
 Ray traced rendering for realistic-looking images, all written in the Rust language!
 
@@ -16,8 +16,8 @@ Ray traced rendering for realistic-looking images, all written in the Rust langu
 ## 🚀🚀🚀 Features 🚀🚀🚀
 
 - 🎇 Monte Carlo unidirectional path tracing
-- Mesh loading via .gltf files! 💥💥💥
-    - *some features in the .gltf format aren't properly implemented, however the models you see in the images worked fine for me*
+- Mesh loading via `.gltf` format! 💥💥💥
+    - *some features in the `.gltf` format aren't properly implemented, however the models you see in the images worked fine for me*
 - :fire: Accelerated ray tracing via k-d trees - *over 60x speedup for rendering complicated meshes!*
 - Parallelized ray generation - via Rayon crate
 - Dynamic scene building via yaml files
@@ -32,3 +32,21 @@ Ray traced rendering for realistic-looking images, all written in the Rust langu
     <img src="./info/images/wada_w_front.png" width="400" />
 </p>
 
+## How to Use
+
+1. *Optionally,* find any `.gltf` models, note location of the `.gltf` file in the folder.
+2. Create/modify a yaml file to describe a scheme to render (check out schemes folder for examples)
+    - Basic settings
+    ```yaml
+    render_info:
+        width: 1200
+        height: 600
+        samps_per_pix: 100000
+        kd_tree_depth: 15 # adjust this depending on your scene/primitive count to maximize speed of rendering
+        rad_info:  
+            debug_single_ray: false
+            dir_light_samp: false
+            russ_roull_info:
+                assured_depth: 5
+                max_thres: 0.5
+    ```

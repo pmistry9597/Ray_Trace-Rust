@@ -41,14 +41,14 @@ Ray traced rendering for realistic-looking images, all written in the Rust langu
         render_info:
             width: 1200
             height: 600
-            samps_per_pix: 100000
+            samps_per_pix: 100000 # just set it to something high and end the program when you are satisfied
             kd_tree_depth: 15 # play with this to minimize render time, more primitives means greater depth needed
             rad_info:  
                 debug_single_ray: false
                 dir_light_samp: false
                 russ_roull_info:
-                    assured_depth: 5
-                    max_thres: 0.5
+                    assured_depth: 5 # minimum number of path bounces
+                    max_thres: 0.5 # likelihood of
         ```
     - Camera
         ```yaml
@@ -61,4 +61,36 @@ Ray traced rendering for realistic-looking images, all written in the Rust langu
             screen_width: 10.0
             screen_height: 5.0
         ```
-    
+    - Scene members - all placed under this tag
+        ```yaml
+        scene_members:
+        - !Model
+        ```
+        - Spheres
+            ```yaml
+            - !Sphere
+                c: [4, 2, -2]
+                r: 4
+                coloring: !Solid [.999,0.5,0.2]
+                mat:
+                    divert_ray: Diff # diffuse, specular, or glass
+                    emissive: [1.0, 1.0, 1.0] # optional emissive, use this to make light sources
+            ```
+        - Triangles
+            ```yaml
+                - !FreeTriangle
+                    verts: [[-5, -2, -20], [5, -2, -20], [0, 5, -20]]
+                    norm: [0, 0, 1]
+                    rgb: [.999, .5, .5]
+                    mat:
+                        divert_ray: Spec
+            ```
+        - MESHES! 💥💥💥 - did you remember where your `.gltf` file is?
+            ```yaml
+                - !Model
+                    path: "../../../assets/discovery_space_shuttle/scene.gltf"
+                    # transforms to apply to model in the scene
+                    euler_angles: [0, 0, 0]
+                    uniform_scale: 1
+                    translation: [0, 1, 0]
+            ```

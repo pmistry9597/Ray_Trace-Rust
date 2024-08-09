@@ -34,7 +34,7 @@ Ray traced rendering for realistic-looking images, all written in the Rust langu
 
 ## How to Use
 
-1. *Optionally,* find any `.gltf` models, note location of the `.gltf` file in the folder.
+1. *Optionally,* find any `.gltf` models - note location of the `.gltf` file in the folder
 2. Create/modify a yaml file to describe a scheme to render (check out schemes folder for examples)
     - Basic settings
         ```yaml
@@ -57,14 +57,15 @@ Ray traced rendering for realistic-looking images, all written in the Rust langu
             view_eulers: [-0.6, 0.1, 0] # adjust where camera will look, rotates below settings
             d: [0, 0, 6] # render screen relative to position
             up: [0, 1, 0] # how will image be oriented? - should be unit vector !!!
-            # following are in-scene screen dimensions - separate from width and height above!
-            screen_width: 10.0
-            screen_height: 5.0
+            screen_width: 10.0 # in-scene width
+            screen_height: 5.0 # in-scene height
+            # screen_height and screen_width are not the same as width and height above
+            # however the ratio should be the same for both
         ```
     - Scene members - all placed under this tag
         ```yaml
         scene_members:
-        - !Model
+            - !Model
         ```
         - Spheres
             ```yaml
@@ -90,7 +91,38 @@ Ray traced rendering for realistic-looking images, all written in the Rust langu
                 - !Model
                     path: "../../../assets/discovery_space_shuttle/scene.gltf"
                     # transforms to apply to model in the scene
-                    euler_angles: [0, 0, 0]
+                    euler_angles: [0, 1.5, 0]
                     uniform_scale: 1
                     translation: [0, 1, 0]
             ```
+        - Sky box 🌠 - need 6 images for this one
+            ```yaml
+                - !DistantCubeMap
+                    # last two numbers are scalings to texture coordinates
+                    neg_x: ["../../../assets/skybox/right.jpg", 1.0, 1.0]
+                    pos_x: ["../../../assets/skybox/left.jpg", 1.0, -1.0]
+                    neg_y: ["../../../assets/skybox/bottom.jpg", 1.0, 1.0]
+                    pos_y: ["../../../assets/skybox/top.jpg", -1.0, 1.0]
+                    neg_z: ["../../../assets/skybox/back.jpg", -1.0, 1.0]
+                    pos_z: ["../../../assets/skybox/front.jpg", -1.0, -1.0]
+            ```
+3. Run the executable with the yaml path as the first argument:
+    ```bash
+    ./ray_trace_rust ../../schemes/james_webb.yml 
+    ```
+    You'll see a ui with the currently rendered image and text output showing rendering times. Can also disable ui with:
+    ```bash
+    ./ray_trace_rust ../../schemes/james_webb.yml no_ui
+    ```
+    Its better to compile this repo with:
+    ```bash
+    cargo build --release
+    ```
+    as render times are very slow with `cargo run`
+
+## Reference Material
+While I used scraps of info from all over the internet on these algorithms, a few sources were used quite repeatedly:
+
+- [smallpt](https://www.kevinbeason.com/smallpt/) - a tiny C++ renderer, basic template for me to get started
+- [scrathapixel](https://www.scratchapixel.com/) - some of the math I used came from here
+- [Review: Kd-tree Traversal Algorithms for Ray Tracing](https://onlinelibrary.wiley.com/doi/10.1111/j.1467-8659.2010.01844.x) - very helpful paper for k-d trees; turns out more casual sources seem to lack this info!

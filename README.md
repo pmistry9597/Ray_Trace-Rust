@@ -34,8 +34,8 @@ Ray traced rendering for realistic-looking images, all written in the Rust langu
 
 ## How to Use
 
-1. *Optionally,* find any `.gltf` models - note location of the `.gltf` file in the folder
-2. Create/modify a yaml file to describe a scheme to render (check out schemes folder for examples)
+1. *Optionally,* find any `.gltf` models - note location of the `.gltf` file in the folder.
+2. Create/modify a yaml file to describe a scheme to render (check out schemes folder for examples).
     - Basic settings
         ```yaml
         render_info:
@@ -48,7 +48,7 @@ Ray traced rendering for realistic-looking images, all written in the Rust langu
                 dir_light_samp: false
                 russ_roull_info:
                     assured_depth: 5 # minimum number of path bounces
-                    max_thres: 0.5 # likelihood of
+                    max_thres: 0.5 # likelihood of path termination after assured_depth bounces
         ```
     - Camera
         ```yaml
@@ -118,7 +118,7 @@ Ray traced rendering for realistic-looking images, all written in the Rust langu
     ```bash
     cargo build --release
     ```
-    as render times are very slow with `cargo run`
+    as render times are very slow with `cargo run`.
 
 ## Why did I make this?
 I wanted to combine my eagerness to learn Rust, my interest in simulations, and my love of airplanes and space into one project!

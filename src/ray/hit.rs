@@ -3,10 +3,12 @@ use nalgebra::Vector3;
 use std::cmp::Ordering;
 use std::any::Any;
 use crate::accel::Aabb;
+use crate::ray::intermed::Intermed;
 
 pub struct HitResult {
     pub l: RayLen, // ray length: ray.d * l + ray.o will give you intersection point 
-    pub intermed: Option<Box<dyn Any>>, // data to be plugged into hit_info should the result be required, can be () if not needed
+    pub intermed: Option<Intermed>, // data to be plugged into hit_info should the result be required, can be () if not needed
+                                        //      the idea is that whatever work is done computing the hitresult can be re-used, no extra effort should be put into this computation
 }
 
 pub struct HitInfo {

@@ -4,6 +4,8 @@ pub use hit::*;
 pub use generate::*;
 pub use closest_hit::*;
 
+pub mod intermed;
+
 mod hit;
 mod generate;
 mod closest_hit;

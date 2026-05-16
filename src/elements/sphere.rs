@@ -1,4 +1,5 @@
 use nalgebra::Vector3;
+use crate::ray::intermed::Intermed;
 use crate::ray::{Ray, Hitable, HitResult, HitInfo, HasHitInfo, InteractsWithRay, DLSEmitter};
 use crate::material::*;
 use serde::Deserialize;
@@ -61,7 +62,13 @@ impl<'a> DLSEmitter for DLSEmitter_<'a> {
 
 impl HasHitInfo for Sphere {
     fn hit_info(&self, info: &HitResult, _ray: &Ray) -> HitInfo {
-        let perfect_pos: &Vector3<f32> = &info.intermed.as_ref().unwrap().downcast_ref().unwrap();
+        // let perfect_pos: &Vector3<f32> = &info.intermed.as_ref().unwrap().downcast_ref().unwrap();
+        
+        // let perfect_pos: &Vector<f32> = &info.intermed
+        let Intermed::Sphere { ref perfect_pos } = 
+            info.intermed.as_ref().unwrap() 
+            else { panic!("Didn't get Sphere Intermed on our own hitresult???") };
+
         let norm = (perfect_pos - self.c).normalize();
 
         let pos = perfect_pos + norm * crate::EPS; // create offset from surface to prevent errors
@@ -92,8 +99,8 @@ impl Hitable for Sphere {
 
             match ls.into_iter().filter(|e| *e > 0.0).reduce(|prev, e| prev.min(e)) {
                 Some(f) => {
-                    let pos = ray.o + ray.d * f;
-                    Some(HitResult{l: f.into(), intermed: Some(Box::new(pos))})
+                    let perfect_pos = ray.o + ray.d * f;
+                    Some(HitResult{l: f.into(), intermed: Some(Intermed::Sphere { perfect_pos })})
                 },
                 None => None,
             }

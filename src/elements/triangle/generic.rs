@@ -1,4 +1,5 @@
 use nalgebra::Vector3;
+use crate::ray::intermed::Intermed;
 use crate::ray::{Ray, Hitable, HitResult, HitInfo, HasHitInfo, InteractsWithRay, DLSEmitter};
 use crate::elements::IsCompleteElement;
 use crate::accel::{Aabb, PlaneBounds};
@@ -29,10 +30,10 @@ pub trait DivertsRay {
 }
 
 type Barycentric = (f32, f32); // u, v barycentric, w calculated as 1 - u - v
-#[derive(Clone)]
-struct Intermed {
-    baryc: Barycentric
-}
+// #[derive(Clone)]
+// struct Intermed {
+//     baryc: Barycentric
+// }
 
 impl<V, N, C, D, S: 'static> IsCompleteElement for Triangle<V, N, C, D> 
 where
@@ -74,10 +75,13 @@ where
     D : DivertsRay<Seeding = S>,
 {
     fn hit_info(&self, info: &HitResult, ray: &Ray) -> HitInfo {
-        let intermed: &Intermed = &info.intermed.as_ref().unwrap().downcast_ref().unwrap();
-        let norm = self.norm.get_norm(&intermed.baryc);
+        // let intermed: &Intermed = &info.intermed.as_ref().unwrap().downcast_ref().unwrap();
+        let Intermed::Triangle { ref baryc } = info.intermed.as_ref().unwrap() else {
+                panic!("Didn't get Triangle Intermed on our own hitresult??");
+            };
+        let norm = self.norm.get_norm(baryc);
 
-        let continue_info = ContinueInfo { seeding: self.diverts_ray.divert_ray_seed(ray, &norm, &intermed.baryc), baryc: intermed.baryc.clone() };
+        let continue_info = ContinueInfo { seeding: self.diverts_ray.divert_ray_seed(ray, &norm, baryc), baryc: baryc.clone() };
         let pos = ray.d * info.l.0 + ray.o + norm * crate::EPS; // create offset from surface to prevent errors
 
         HitInfo {
@@ -127,7 +131,7 @@ where
                     if l < crate::EPS {
                         None
                     } else {
-                        Some(HitResult{l: l.into(), intermed: Some(Box::new(Intermed{baryc: (u, v)}))})
+                        Some(HitResult{l: l.into(), intermed: Some(Intermed::Triangle { baryc: (u, v) })})
                     }
                 }
             }
